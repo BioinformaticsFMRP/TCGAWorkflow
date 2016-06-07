@@ -1661,7 +1661,7 @@ This section shows how to use ELMER to analyze TCGA data using as example LGG an
 
 After downloading the data with TCGAbiolinks package, some steps are still required to use TCGA data with ELMER.
 These steps can be done with the function *TCGAprepare\_elmer*. This function
-for the DNA methylation data will remove probes with NA values in more than 20\% samples and remove the annotation data,
+for the DNA methylation data will remove probes with NA values in more than 20% samples and remove the annotation data,
 for RNA expression data it will take the log2(expression + 1) of the expression matrix in order to linearize the relation between
 DNA methylation and expression. Also, it will prepare the row names of the matrix as required by the package.
 
@@ -1794,7 +1794,7 @@ differentially methylated and linked to putative target gene, it will plot the O
 
 The list of motifs found for the hyper direction (probes hypermethylated in LGG group compared to the GBM group)
 is found in the figure \ref{odds-ration}. To select the motifs we select the motifs that had a minimum incidence
-of 10 in the given probes set and the smallest lower boundary of 95\% confidence interval for Odds Ratio of 1.1.
+of 10 in the given probes set and the smallest lower boundary of 95% confidence interval for Odds Ratio of 1.1.
 These both values are the default from the ELMER package.
 
 The analysis found 14 enriched motifs for the hyper direction and no enriched motifs for the hypo direction.
@@ -1811,8 +1811,8 @@ The output of this step is a data frame with the following columns:
 
 * **motif:**  the names of motif.
 * **top.potential.TF:** the highest ranking upstream TFs which are known recognized the motif.
-* **potential.TFs:**  TFs which are within top 5\% list and are known recognized the motif.
-top5percent:  all TFs which are within top 5\% list considered candidate upstream regulators
+* **potential.TFs:**  TFs which are within top 5% list and are known recognized the motif.
+top5percent:  all TFs which are within top 5% list considered candidate upstream regulators
 
 Also, for each motif we can take a look on the three most relevant transcription factors.
 For example, for the AP1 motif the average DNA methylation level of sites with the AP1 motif
@@ -1825,7 +1825,7 @@ scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
              byTF=list(TF=c("HOXA5","TGIF1","HOXA6","FOSL1"), probe=enriched.motif[["AP1"]]))
 ```
 
- And for each relevant TF we will use the clinical data to analyze the survival curves for the 30\% patients with higher expression of that transcription factor versus the 30\% with lower expression. The code below shows that analysis.
+ And for each relevant TF we will use the clinical data to analyze the survival curves for the 30% patients with higher expression of that transcription factor versus the 30% with lower expression. The code below shows that analysis.
 
 ```{#numCode .R .numberLines}
 TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
