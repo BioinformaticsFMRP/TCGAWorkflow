@@ -862,6 +862,121 @@ dev.off()
 
 ## Transcriptomic analysis
 
+```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
+for(cancer in PanCancer){
+
+    pathCancer <- paste0("../data",cancer)
+    datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
+
+    # get only primary solid Tumor
+    lsSample <- TCGAquery_samplesfilter(query = datQuery)
+    dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2, typesample = "TP")[1:10]
+
+    TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = c(dataSmTP))
+
+    dataAssy <- TCGAprepare(query = datQuery,
+                            dir = pathCancer,
+                            type = dataType,
+                            save = TRUE,
+                            summarizedExperiment = TRUE,
+                            samples = c(dataSmTP),
+                            filename = paste0(cancer,"_",PlatformCancer,".rda"))
+}
+
+# loading LGG and GBM rse data
+load("LGG_IlluminaHiSeq_RNASeqV2.rda")
+cancer <-  "LGG"
+pathCancer <- paste0("../data",cancer)
+PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+
+dataClin_LGG <- TCGAquery_clinic(tumor = "LGG",
+                                 clinical_data_type = "clinical_patient")
+dataPrep_LGG <- TCGAanalyze_Preprocessing(object = rse,
+                                          cor.cut = 0.6,
+                                          filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
+
+load("GBM_IlluminaHiSeq_RNASeqV2.rda")
+cancer <-  "GBM"
+pathCancer <- paste0("../data",cancer)
+PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+
+dataClin_GBM <- TCGAquery_clinic(tumor = "GBM",
+                                 clinical_data_type = "clinical_patient")
+
+dataPrep_GBM <- TCGAanalyze_Preprocessing(object = rse,
+                                          cor.cut = 0.6,
+                                          filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
+
+dataNorm <- TCGAanalyze_Normalization(tabDF = cbind(dataPrep_LGG, dataPrep_GBM),
+                                      geneInfo = geneInfo,
+                                      method = "gcContent") #18323   672
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile",
+                                  qnt.cut =  0.25)  # 13742   672
+
+save(dataFilt, file = paste0("LGG_GBM_Norm_",PlatformCancer,".rda"))
+
+dataFiltLGG <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_LGG$bcr_patient_barcode)
+dataFiltGBM <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_GBM$bcr_patient_barcode)
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFiltLGG, mat2 = dataFiltGBM,
+                            Cond1type = "LGG", Cond2type = "GBM",
+                            fdr.cut = 0.01 , logFC.cut = 1,
+                            method = "glmLRT")
+
+#-------------------  4.2 EA: enrichment analysis             --------------------
+library(SummarizedExperiment)
+ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM",  RegulonList = rownames(dataDEGs))
+
+png("ea.png", width = 800,height = 800)
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        GOBPTab = ansEA$ResBP, GOCCTab = ansEA$ResCC,
+                        GOMFTab = ansEA$ResMF, PathTab = ansEA$ResPat,
+                        nRGTab = rownames(dataDEGs),filename = NULL,
+                        nBar = 20)
+dev.off()
+#-------------------  4.3 PEA:Pathways enrichment analysis      ------------------
+# Loading rse object with rnaSEQ gene expression
+GenelistComplete <- rownames(assay(rse,1))
+
+# DEGs table with expression values in LGG and GBM samples
+dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"LGG","GBM",
+                                          dataFilt[,colnames(dataFiltLGG)],
+                                          dataFilt[,colnames(dataFiltGBM)])
+
+dataDEGsFiltLevel$GeneID <- 0
+
+# Converting Gene symbol to gene ID
+library(clusterProfiler)
+eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
+                        fromType="SYMBOL",
+                        toType="ENTREZID",
+                        OrgDb="org.Hs.eg.db"))
+eg <- eg[!duplicated(eg$SYMBOL),]
+
+dataDEGsFiltLevel <- dataDEGsFiltLevel[dataDEGsFiltLevel$mRNA %in% eg$SYMBOL,]
+
+dataDEGsFiltLevel <- dataDEGsFiltLevel[order(dataDEGsFiltLevel$mRNA,decreasing=FALSE),]
+eg <- eg[order(eg$SYMBOL,decreasing=FALSE),]
+
+# table(eg$SYMBOL == dataDEGsFiltLevel$mRNA) should give all TRUE
+all(eg$SYMBOL == dataDEGsFiltLevel$mRNA)
+dataDEGsFiltLevel$GeneID <- eg$ENTREZID
+
+dataDEGsFiltLevel_sub <- subset(dataDEGsFiltLevel, select = c("GeneID", "logFC"))
+genelistDEGs <- as.numeric(dataDEGsFiltLevel_sub$logFC)
+names(genelistDEGs) <- dataDEGsFiltLevel_sub$GeneID
+
+require("pathview")
+# pathway.id: hsa05214 is the glioma pathway
+# limit: sets the limit for gene expression legend and color
+hsa05214 <- pathview(gene.data  = genelistDEGs,
+                     pathway.id = "hsa05214",
+                     species    = "hsa",
+                     limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
+```
+
 ### Pre-Processing Data
 
 The  data used for following transcriptomic analysis were downloaded using TCGAbiolinks.
@@ -978,9 +1093,12 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
+![](ea.png)
+
  `TCGAanalyze\_EAbarplot` outputs a bar chart as shown in figure \ref{eabarplot}
  with the number of genes for the main categories of three ontologies (GO:biological process,
  GO:cellular component, and GO:molecular function.
+
 
 The figure shows canonical pathways significantly overrepresented (enriched) by the DEGs.
 The most statistically significant canonical pathways identified in DEGs list are listed according
@@ -1037,6 +1155,8 @@ hsa05214 <- pathview(gene.data  = genelistDEGs,
                      limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
 
 ```
+
+![](hsa05214.pathview.png)
 
 The red genes are up-regulated and the
 green genes are down-regulated in the LGG samples compared to GBM.
