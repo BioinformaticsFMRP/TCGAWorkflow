@@ -1230,6 +1230,641 @@ In Figures~\ref{fig::roc_GBM} and~\ref{fig::roc_GBM_sb}, the obtained ROC curve 
 
 
 
+## Epigenetic analysis
+
+The DNA methylation is an important component in numerous cellular processes, such as embryonic development, genomic imprinting, X-chromosome inactivation, and preservation of chromosome stability [@phillips2008role] .
+
+In mammals, DNA methylation is found sparsely but globally, distributed in definite CpG sequences throughout the entire genome. There is however an exception, the CpG islands (CGIs) which are short interspersed DNA sequences with are enriched for GC.
+These CpG islands are normally found in sites of transcription initiation and their methylation can lead to gene silencing [@deaton2011cpg].
+
+Thus, the investigation of the DNA methylation is crucial to understanding regulatory  gene  networks  in  cancer as the DNA methylation represses transcription [@robertson2005dna]. Therefore, the DMR (differentially Methylation Region) detection can help us investigate regulatory  gene  networks.
+
+This section describes the analysis of DNA methylation using the bioconductor package [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) [@TCGAbiolinks]. For this analysis, DNA methylation data from the platform Infinium HumanMethylation450 for GBM and LGG data were obtained (lines 1-7 of the listing \ref{lst:meanmet} describes how to make the data acquisition). We started by checking the mean DNA methylation of different groups of samples, then a DMR (Differentially methylated region) analysis is performed in which we search for regions that have possible biological significance, for example, regions that are methylated in one group and unmethylated in the other. After finding these regions, they can be visualized using heatmaps.
+
+### Visualizing the mean DNA methylation of each patient
+
+It should be highlighted that some pre-processing of the DNA methylation data was done. The DNA methylation data from the 450k platform has three types of probes cg (CpG loci) , ch (non-CpG loci) and rs (SNP assay). The last type of probe can be used for sample identification and tracking and should be excluded for differential methylation analysis according to the [ilumina manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf). Therefore, the rs probes were removed  (see listing \ref{lst:meanmet} lines 22). Also,  probes in chromosomes X, Y were removed to eliminate potential artifacts originating from the presence of a different proportion of males and females [@marabita2013evaluation]. The last pre-processing steps were to selected only primary samples (see listing \ref{lst:meanmet} lines 16) and probes with at least one NA value were removed (see listing \ref{lst:meanmet} lines 19).
+
+After this pre-processing step, using the function TCGAvisualize\_meanMethylation provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing \ref{lst:meanmet} lines 25-29).
+
+```{#numCode .R .numberLines}
+#----------------------------
+# Obtaining DNA methylation
+#----------------------------
+library(TCGAbiolinks)
+query.met <- TCGAquery(tumor = c("LGG","GBM"),"HumanMethylation450", level = 3)
+TCGAdownload(query.met)
+met <- TCGAprepare(query = query.met,dir = ".", save = TRUE, filename = "lgg_gbm_met.rda")
+
+#----------------------------
+# Mean methylation
+#----------------------------
+# Plot a barplot for the groups in the disease column in the
+# summarizedExperiment object
+
+# get only primary tumor
+met <- subset(met,select = (met@colData$shortLetterCode) == "TP")
+
+# remove probes with NA (similar to na.omit)
+met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
+
+# remove probes in chromossomes X, Y and NA
+met <- subset(met,subset = !as.character(seqnames(met)) %in% c("chrNA","chrX","chrY"))
+
+
+TCGAvisualize_meanMethylation(met,
+                              groupCol = "disease",
+                              group.legend  = "Groups",
+                              filename = "mean_lgg_gbm.png",
+                              print.pvalue = TRUE)
+\end{lstlisting}
+
+Figure \ref{mean_met} illustrates a mean DNA methylation plot for each sample in the GBM group (140 samples) and
+a mean DNA methylation for each sample in the LGG group.  Genome-wide view of the data highlights a difference between the groups of tumors (p-value = $2.80x10^{-55}$).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/mean_lgg_gbm.png}
+\caption{\label{mean_met} Boxplot of  mean DNA methylation of each sample (black dots)}
+\end{figure}
+
+\subsubsection*{Searching for differentially methylated CpG sites}
+
+The next step is to define differentially methylated CpG sites between the two groups. This can be done using the TCGAanalyze\_DMR function (see listing \ref{lst:dmrcode}). The DNA methylation data (level 3) is presented in the form of beta-values that uses a scale ranging from 0.0 (probes completely unmethylated ) up to 1.0 (probes completely methylated).
+
+To find these differentially methylated CpG sites, first, it calculates the difference between the mean DNA methylation (mean of the beta-values) of each group for each probe. Second, it test for differential expression between two groups using the wilcoxon test adjusting by the Benjamini-Hochberg method. Arguments of  TCGAanalyze\_DMR was set to require a minimum absolute beta-values difference of 0.25 and an adjusted p-value of less than $10^{-40}$.
+
+After these tests, a volcano plot (x-axis: difference of mean DNA methylation, y-axis: statistical significance) is created to help users identify the differentially
+methylated CpG sites and return the object with the results in the rowRanges.
+Figure \ref{volcano_met} shows the volcano plot produced by listing ~\ref{lst:dmrcode}.
+This plot aids the user in selecting relevant thresholds, as we search for candidate biological DMRs.
+
+\begin{lstlisting}[language=R,caption={Finding differentially
+methylated CpG sites},label=lst:dmrcode]
+# Becareful! Depending on the number of probes and samples this function might take some days.
+met <- TCGAanalyze_DMR(met,
+                       groupCol = "disease", # a column in the colData matrix
+                       group1 = "GBM",       # a type of the the groupCol column
+                       group2="LGG",         # a type of the the groupCol column
+                       p.cut = 10^-40,
+                       diffmean.cut = 0.25,
+                       legend = "State",
+                       plot.filename = "LGG_GBM_metvolcano.pdf",
+                       cores = detectCores() # if set to 1 there will be a progress bar
+                       )
+```
+
+
+To visualize the level of DNA methylation of these probes across all samples, we use heatmaps that can be generate
+by the bioconductor package [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) [@ComplexHeatmap]. 
+To create a heatmap using the [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package,
+the user should provide at least one matrix with the DNA methylation levels.
+Also, annotation layers can be added and placed at the bottom, top, left side and right side of the heatmap
+to provide additional metadata description.
+The listing \ref{lst:metheatmap} shows the code to produce the heatmap of a DNA methylation data (figure \ref{complexheatmap_met}).
+
+```{#numCode .R .numberLines}
+#--------------------------
+# DNA Methylation heatmap
+#-------------------------
+library(ComplexHeatmap)
+
+# get the probes that are Hypermethylated or Hypomethylated
+# met is the same object defined in section 'DNA methylation analysis'
+sig.met <- met[values(met)$status.GBM.LGG %in% c("Hypermethylated","Hypomethylated"),]
+
+# To speed up the example, we will take the first 100 probes
+sig.met.100 <- sig.met[1:100,]
+
+# column/sample annotation defines LGG or GBM
+ta = HeatmapAnnotation(df = colData(sig.met.100)["disease"],
+                        col = list(disease = c("LGG" = "grey", "GBM" = "black")))
+
+# row/probe annotation defines the status for LGG in relation to GBM (hyper- or hypo-methylated)
+ra = rowAnnotation(df = values(sig.met.100)["status.GBM.LGG"],
+                   col = list(status.GBM.LGG = c("Hypomethylated" = "orange",
+                                                 "Hypermethylated" = "darkgreen")),
+                   width = unit(1, "cm"))
+
+heatmap  <- Heatmap(assay(sig.met.100),
+                    name = "DNA methylation",
+                    top_annotation = ta,
+                    col = matlab::jet.colors(200),
+                    show_row_names = F,
+                    cluster_rows = T,
+                    cluster_columns = F,
+                    show_column_names = F,
+                    column_title = "DNA Methylation") + ra
+```
+
+
+### Motif analysis 
+Motif discovery is the attempt to extract small sequence signals hidden within largely non-functional intergenic sequences. These sequence short nucleotide sequences (6-15 bp) might have a biological significance as it can be used to control the expression of genes. These sequences are called Regulatory motifs.
+The bioconductor package \href{http://bioconductor.org/packages/rGADEM/}{rGADEM} \cite{droit2015rgadem,li2009gadem} provides an efficient \textit{de novo} motif discovery algorithm for large-scale genomic sequence data.
+
+The user may be interested in looking for unique signatures in the regions defined by `differentially methylated' to identify candidate transcription factors that could bind to these elements affected by the accumulation or absence of DNA methylation. For this analysis we use a sequence of 100 bases before and after the probe location (See lines 6-8 in the listing \ref{lst:rgadem}).
+An object will be returned which contains all relevant information about your motif analysis
+(sequence consensus, pwm, chromosome, pvalue...).
+
+Using bioconductor package \href{http://bioconductor.org/packages/motifStack/}{motifStack} \cite{ou2013motifstack} it is possible to generate a graphic representation of multiple motifs with different similarity scores (see figure \ref{fig::motif}).
+
+```{#numCode .R .numberLines}
+library(rGADEM)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(motifStack)
+
+probes <- rowRanges(met)[values(met)$status.GBM.LGG %in% c("Hypermethylated" ,"Hypomethylated") ,]
+# Get hypo/hyper methylated probes and make a 200bp window surrounding each probe.
+sequence <- RangedData(space=as.character(probes@seqnames),
+                       IRanges(start=probes@ranges@start - 100,
+                               end=probes@ranges@start + 100), strand="*")
+#look for motifs
+gadem <- GADEM(sequence, verbose=1, genome=Hsapiens)
+
+# How many motifs were found?
+length(gadem@motifList)
+
+# get the number of occurences
+nOccurrences(gadem)
+
+# view all sequences consensus
+consensus(gadem)
+
+# Print the first two motif logos.
+plot(gadem@motifList[[1]])
+pwm <- getPWM(gadem)
+pfm  <- new("pfm",mat=pwm[[1]],name="Novel Site 1")
+plotMotifLogo(pfm)
+
+# Number of instances of motif 1?
+length(gadem@motifList[[1]]@alignList)
+```
+
+
+After \href{http://bioconductor.org/packages/rGADEM/}{rGADEM} returns it's results, the user can use \href{http://bioconductor.org/packages/MotIV/}{MotIV}
+package \cite{mercier2014motiv,mahony2007dna,mahony2007stamp,mercier2011integrated}
+to start the motif matching analysis (line 4 of listing \ref{lst:MotIV}). The result is shown in figure \ref{fig::tfmotif}.
+
+```{#numCode .R .numberLines}
+library(MotIV)
+
+analysis.jaspar <- motifMatch(pwm)
+summary(analysis.jaspar)
+plot(analysis.jaspar, ncol=1, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.3)
+
+#  visualize the quality of the results around the alignments
+# E-value give an estimation of the match.
+alignment <- viewAlignments(analysis.jaspar )
+print(alignment[[1]])
+```
+
+
+## Integrative (Epigenomic \& Transcriptomic) analysis
+
+Recent studies have shown that providing a deep integrative analysis can aid researchers in identifying and extracting biological insight from high through put data \cite{phillips2008role,shi2014integrative,rhodes2005integrative}.
+In this section, we will introduce a bioconductor package called \href{http://bioconductor.org/packages/ELMER/}{ELMER} to identify regulatory enhancers using gene expression + DNA methylation data + motif analysis.  In addition, we show how to integrate the results from the previous sections with important epigenomic data derived from both the \href{http://www.encodeproject.org/}{ENCODE} and \href{http://www.roadmapepigenomics.org/}{Roadmap}.
+
+### Integration of DNA methylation \& gene expression data
+
+After finding  differentially methylated CpG sites, one possible question one might ask is whether nearby genes also undergo a change in its expression, either an increase or a decrease.  DNA methylation at promoters of genes have been shown to be associated with silencing of the respective gene.
+
+The starburst plot is proposed to combine information from two volcano plots, and is applied for a study of DNA methylation and gene expression [@noushmehr2010identification]. Even though, being desirable that both gene expression and DNA methylation data are from the same samples, the starburst plot can be applied as a meta-analysis tool, combining data from different samples [@siegmund2011statistical].
+
+The function TCGAvisualize\_starburst  creates a Starburst plot for comparison of DNA methylation
+and gene expression. The $log_{10}$ (FDR-corrected P value) for DNA methylation is plotted on the x axis,
+and for gene expression on the y axis, for each gene.
+The horizontal black dashed line shows the FDR-adjusted P value of $10^{-100}$
+for the expression data and the vertical ones shows the FDR-adjusted P value of $10^{-40}$ for the DNA methylation data.
+The Starburst plot for the listing \ref{lst:starburst} is shown in figure \ref{starplot}.
+While the argument met.p.cut and exp.p.cut controls the black dashed lines, the arguments
+diffmean.cut and logFC.cut will be used to highlight the genes that respects these parameters
+(circled genes in figure \ref{starplot}). For the example below we set higher p.cuts trying
+to get the most significant list of pair gene/probes. But for the next sections we will
+use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
+
+```{#numCode .R .numberLines}
+#------------------- Starburst plot ------------------------------
+starburst <- TCGAvisualize_starburst(met,         # DNA methylation with results
+                                     dataDEGs,    # DEG results
+                                     "GBM","LGG", # Groups
+                                     filename = "starburst.png",
+                                     met.p.cut = 10^-40,
+                                     exp.p.cut = 10^-100,
+                                     diffmean.cut = 0.25,
+                                     logFC.cut = 3,
+                                     names = TRUE)
+```
+
+### ChIP-seq analysis
+
+ChIP-seq is used primarily to determine how transcription factors and other chromatin-associated
+proteins influence phenotype-affecting mechanisms. Determining how proteins interact with DNA
+ to regulate gene expression is essential for fully understanding many biological processes and disease states.
+The aim is to explore significant overlap datasets for inferring co-regulation or
+transcription factor complex for further investigation. A summary of the association
+ of each histone mark is shown in table \ref{histone-mark}.
+ Besides, ChIP-seq data exists in the ROADMAP database and can be obtained through the
+ [AnnotationHub](http://bioconductor.org/packages/AnnotationHub/) package [@annotationHub]
+ or from [Roadmap web portal](http://egg2.wustl.edu/roadmap/webportal/processed_data.html).
+ The table \ref{roadmapChIP} shows the description for all the roadmap files that are available through AnnotationHub.
+
+```{r table4, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "  
+|                  Histone marks                 |                                                   Role                                                  |
+|:----------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|
+| Histone H3 lysine 4 trimethylation (H3K4me3)   | Promoter regions [@heintzman2007distinct,@bernstein2005genomic]                                      |
+| Histone H3 lysine 4 monomethylation (H3K4me1)  | Enhancer regions [@heintzman2007distinct]                                                           |
+| Histone H3 lysine 36 trimethylation (H3K36me3) | Transcribed regions                                                                                     |
+| Histone H3 lysine 27 trimethylation (H3K27me3) | Polycomb repression [@bonasio2010molecular]                                                         |
+| Histone H3 lysine 9 trimethylation (H3K9me3)   | Heterochromatin regions  [@peters2003partitioning]                                                  |
+| Histone H3 acetylated at lysine 27 (H3K27ac)   | Increase activation of genomic elements [@heintzman2009histone,@rada2011unique,@creyghton2010histone] |
+| Histone H3 lysine 9 acetylation  (H3K9ac)      | Transcriptional activation [@nishida2006histone]                                                    |
+"
+cat(tabl) 
+```
+```{r table5, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "  
+|                File                |                               Description                              |
+|:----------------------------------:|:----------------------------------------------------------------------:|
+| fc.signal.bigwig                   | Bigwig File containing  fold enrichment signal tracks                  |
+| pval.signal.bigwig                 | Bigwig File containing -log10(p-value) signal tracks                   |
+| hotspot.fdr0.01.broad.bed.gz       | Broad domains on enrichment for  DNase-seq for consolidated epigenomes |
+| hotspot.broad.bed.gz               | Broad domains on enrichment for DNase-seq for consolidated epigenomes  |
+| broadPeak.gz                       | Broad ChIP-seq peaks for consolidated  epigenomes                      |
+| gappedPeak.gz                      | Gapped ChIP-seq peaks for consolidated   epigenomes                    |
+| narrowPeak.gz                      | Narrow ChIP-seq peaks for consolidated epigenomes                      |
+| hotspot.fdr0.01.peaks.bed.gz       | Narrow DNasePeaks for   consolidated epigenomes                        |
+| hotspot.all.peaks.bed.gz           | Narrow DNasePeaks for  consolidated epigenomes                         |
+| .macs2.narrowPeak.gz               | Narrow DNasePeaks for consolidated epigenomes                          |
+| coreMarks_mnemonics.bed.gz        | 15 state chromatin segmentations                                       |
+| mCRF_FractionalMethylation.bigwig | MeDIP/MRE(mCRF) fractional methylation calls                           |
+| RRBS_FractionalMethylation.bigwig | RRBS fractional methylation calls                                      |
+| WGBS_FractionalMethylation.bigwig | Whole genome bisulphite fractional methylation calls                   |
+"
+cat(tabl) 
+```
+
+After obtaining the ChIP-seq data, we can then identify overlapping regions
+with the regions identified in the starburst plot. The narrowPeak files are
+the ones selected for this step. % explain the differences? when use one or another
+
+For a complete pipeline with Chip-seq data, bioconductor provides excellent tutorials to
+work with ChIP-seq and we encourage our readers to review the following article [@ChIP-seqbioc].
+
+The first step shown in listing \ref{lst:annotationhub} is to download the chip-seq data.
+The function query received as argument the annotationHub database (ah) and a list of
+keywords to be used for searching the data, *EpigenomeRoadmap* is selecting the
+roadmap database, *consolidated* is selecting only the consolidate epigenomes,
+*brain* is selecting the brain samples, E074 is one of the epigenomes for brain
+(a table for the list is found in this
+[summary table](https://docs.google.com/spreadsheets/d/1yikGx4MsO9Ei36b64yOy9Vb6oPC5IBGlFbYEt-N6gOM/edit#gid=15)
+and narrowPeak is selecting the type of file.
+The data downloaded is a processed data from  an integrative Analysis of 111 reference human epigenomes [@kundaje2015integrative].
+
+```{#numCode .R .numberLines}
+library(AnnotationHub)
+library(pbapply)
+#------------------ Working with ChipSeq data ---------------
+# Step 1: download histone marks for a brain samples.
+#------------------------------------------------------------
+ah = AnnotationHub() # loading annotation hub database
+
+# Searching for brain consolidated epigenomes in the roadmap database
+bpChipEpi_brain <- query(ah, c("EpigenomeRoadMap","narrowPeak","chip","consolidated","brain","E068"))
+u87 <- query(ah, c("encode","u87 cell","narrowPeak"))
+u87 <- u87[grep("u87",u87$title,ignore.case = T)] # Annotation hub mapped wrongly
+
+# Get chip-seq data
+histone.marks <- pblapply(c(names(bpChipEpi_brain),names(u87)), function(x){ah[[x]]})
+names(histone.marks) <- c(names(bpChipEpi_brain),names(u87))
+```
+
+
+The [Chipseeker](http://bioconductor.org/packages/ChIPseeker/) package  [@yu2015chipseeker]
+implements functions that uses Chip-seq data to retrieve the nearest genes around the peak,
+ to annotate genomic region of the peak, among others. Also, it provides several visualization
+ functions to summarize the coverage of the peak, average profile and heatmap of peaks binding
+ to TSS regions, genomic annotation, distance to TSS and overlap of peaks or genes.
+
+
+After downloading the histone marks (see listing \ref{lst:annotationhub},
+it is useful to verify the average profile of peaks binding to hypomethylated and hypermethylated regions,
+which will help the user understand better the regions found.
+Listing \ref{lst:annotationhub_3} shows an example of code to plot the average profile.
+Figure \ref{chip-seq} shows the result.
+
+To help the user understand better the regions found in the DMR analysis, we
+ downloaded histone marks specific for brain tissue, which was done using the
+AnnotationHub package that can access Roadmap datababse (listing \ref{lst:annotationhub}).
+After, the Chipseeker was used to
+visualize  how histone modifications are enriched to to hypomethylated and hypermethylated regions,
+ (listing \ref{lst:annotationhub_3}). The enrichment heatmap  and the average profile of peaks binding to those
+ region is shown in figures \ref{chip-seq-heatmap} and \ref{chip-seq} respectively.
+
+The hypomethylated and hypermethylated regions are enriched for H3K4me3, H3K27ac, H3K9ac, and H3K4me1
+which indicates regions of enhancers, promoters and increased activation of genomic elements.
+However, these regions are not associated neither with transcribed regions nor
+Polycomb repression as the H3K36me3 and H3K27me3 heatmaps does not show an enrichment nearby the position 0,
+and the average profile also does not show a peak at position 0.
+
+\lstinputlisting[language=R,label=lst:annotationhub_3,caption={Average profile plot}]{code/chip-seq.R}
+
+```{#numCode .R .numberLines}
+library(ChIPseeker)
+library(pbapply)
+library(SummarizedExperiment)
+library(GenomeInfoDb)
+library(ggplot2)
+library(AnnotationHub)
+
+#------------------ Working with ChipSeq data ---------------
+# Step 1: download histone marks for a brain and non-brain samples.
+#------------------------------------------------------------
+# loading annotation hub database
+ah = AnnotationHub()
+
+# Searching for brain consolidated epigenomes in the roadmap database
+bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","brain","E068"))
+#bpChipEpi_control <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","liver","E066"))
+#u87 <- query(ah, c("encode","u87 cell","narrowPeak"))
+#u87 <- u87[grep("u87",u87$title,ignore.case = T)] # Annotation hub mapped wrongly
+
+# Get chip-seq data
+histone.marks <-  pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
+names(histone.marks) <- names(bpChipEpi_brain)
+# Create a GR object based on the hypo/hypermethylated probes.
+probes <- keepStandardChromosomes(rowRanges(met)[values(met)$status.GBM.LGG %in% c("Hypermethylated","Hypomethylated"),])
+# Defining a window of 3kbp - 3kbp_probe_3kbp
+probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@ranges@start + 3000))
+
+### Profile of ChIP peaks binding to TSS regions
+# First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
+# prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
+# Then align the peaks that are mapping to these regions, and generate the tagMatrix.
+tagMatrixList <- pblapply(histone.marks, function(x) {
+    getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
+})
+names(tagMatrixList) <- basename(bpChipEpi_brain$title)
+names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
+names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
+
+pdf("chip_heatmap.pdf", height = 5, width = 10)
+tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
+dev.off()
+
+p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
+# We are centreing in the CpG instead of the TSS. So we'll change the labels manually
+p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
+library(ggthemes)
+pdf("chip-seq.pdf", height = 5, width = 7)
+p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_legend(override.aes = list(size=4)))
+dev.off()
+```
+
+To annotate the location of a given peak in terms of genomic features, annotatePeak
+assigns peaks to genomic annotation in “annotation” column of the output, which includes
+whether a peak is in the TSS, Exon, 5’ UTR, 3’ UTR, Intronic or Intergenic.
+
+```{#numCode .R .numberLines}
+require(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db")
+plotAnnoPie(peakAnno)
+```
+
+
+### Identification of Regulatory Enhancers
+
+  Recently, many studies suggest that enhancers play a major role as regulators of
+  cell-specific phenotypes leading to alteration in transcriptomes realated to
+  diseases [@giorgio2015large,@groschel2014single,@sur2012mice,@yao2015demystifying}.
+  In order to investigate regulatory enhancers that can be located at long distances
+  upstream or downstream of target genes
+ biocondcutor offer the [Enhancer Linking by Methylation/Expression Relationship (ELMER)](http://bioconductor.org/packages/ELMER/) package.
+ This package is designed to combine DNA methylation and gene expression data
+ from human tissues to infer multi-level cis-regulatory networks. It uses DNA methylation to identify enhancers
+ and correlates their state with expression of nearby genes to identify one or more transcriptional targets.
+ Transcription factor (TF) binding site analysis of enhancers is coupled with expression analysis of all TFs to infer upstream regulators.
+ This package can be easily applied to TCGA public available cancer data sets
+ and custom DNA methylation and gene expression data sets [@yao2015inferring].
+
+ELMER analysis have 5 main steps:
+
+1. Identify distal enhancer probes on HM450K.
+2. Identify distal enhancer probes with significantly different DNA methyaltion level
+in control group and experiment group.
+3. Identify putative target genes for differentially methylated distal enhancer probes.
+4. Identify enriched motifs for the distal enhancer probes which are significantly
+differentially methylated and linked to putative target gene.
+5. Identify regulatory TFs whose expression associate with DNA methylation at motifs.
+
+This section shows how to use ELMER to analyze TCGA data using as example LGG and GBM samples.
+
+### Preparing the data for ELMER package
+
+After downloading the data with TCGAbiolinks package, some steps are still required to use TCGA data with ELMER.
+These steps can be done with the function *TCGAprepare\_elmer*. This function
+for the DNA methylation data will remove probes with NA values in more than 20\% samples and remove the annotation data,
+for RNA expression data it will take the log2(expression + 1) of the expression matrix in order to linearize the relation between
+DNA methylation and expression. Also, it will prepare the row names of the matrix as required by the package.
+
+The listing \ref{lst:prepareelmer} shows how to use
+(http://bioconductor.org/packages/TCGAbiolinks/)[TCGAbiolinks}] [@TCGAbiolinks]
+to search, download and prepare the data for the [ELMER](http://bioconductor.org/packages/ELMER/) package.
+
+```{#numCode .R .numberLines}
+  library(TCGAbiolinks)
+  library(stringr)
+  #-----------------------------------
+  # 1 - Methylation
+  # ----------------------------------
+  # For methylation it is quicker in this case to download the tar.gz file
+  # and get the samples we want instead of downloading files by files
+  query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3)
+  TCGAdownload(query.met)
+  met <- TCGAprepare(query.met,dir = ".", save = TRUE)
+  # get only primary samples
+  met <- met[, met$shortLetterCode == "TP"]
+  met <- TCGAprepare_elmer(met, platform = "HumanMethylation450")
+
+  #-----------------------------------
+  # 2 - Expression
+  # ----------------------------------
+  query.rna <- TCGAquery(tumor = c("GBM","LGG"), platform = "IlluminaHiSeq_RNASeqV2", level = 3)
+  primary.rna <- TCGAquery_SampleTypes(unlist(str_split(query.rna$barcode, ",")),"TP")
+  TCGAdownload(query.rna, samples = primary.rna, type = "rsem.genes.normalized_results")
+  exp <- TCGAprepare(query.rna,dir = ".", ,type = "rsem.genes.normalized_results",
+  		           samples =  primary.rna, save = TRUE)
+  exp <- TCGAprepare_elmer(exp, platform = "IlluminaHiSeq_RNASeqV2")
+```
+
+
+Finally, the ELMER input is a mee object that contains a DNA methylation matrix, an gene expression matrix,
+a probe information GRanges, the gene information GRanges and a data frame summarizing the data.
+It should be highlighted that samples without both the gene expression and DNA methylation data will be removed from the mee object.
+
+By default the function *fetch.mee* that is used to create the mee will separate the samples into two
+groups, the control group (normal samples) and the experiment group (tumor samples), but the user can relabel the
+samples to compare different groups. For the next sections, we will work with two groups the experiment group (LGG)
+and control samples (GBM).
+
+```{#numCode .R .numberLines}
+library(ELMER)
+geneAnnot <- txs()
+geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
+geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
+probe <- get.feature.probe()
+
+# create mee object, use @ to access the matrices inside the object
+mee <- fetch.mee(meth = met, exp = exp, TCGA = TRUE, probeInfo = probe, geneInfo = geneInfo)
+
+# Get gbm barcodes
+samples <- unlist(str_split(TCGAquery("gbm", "HumanMethylation450", level = 3)$barcode,","))
+
+# Relabel GBM samples in the mee object: GBM is control
+mee@sample$TN[mee@sample$ID %in% substr(samples,1,15)] <- "Control"
+```
+
+
+### ELMER analysis
+After preparing the data into a mee object, we executed the five ELMER steps for both the hypo
+(distal enhancer probes hypomethylated in the LGG group) and hyper (distal enhancer probes hypermethylated in the LGG group) direction.
+The code is shown below. A description of how these distal enhacer probes are identified is found in
+ the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette.
+
+```{#numCode .R .numberLines}
+library(parallel)
+direction <- c("hyper","hypo")
+
+for (j in direction){
+    dir.out <- paste0("elmer/",j)
+    dir.create(dir.out, recursive = TRUE)
+    #--------------------------------------
+    # STEP 3: Analysis                     |
+    # Step 3.1: Get differentially methylated probes |
+    #--------------------------------------
+    Sig.probes <- get.diff.meth(mee, cores=detectCores(), dir.out =dir.out, diff.dir=j, pvalue = 0.01)
+
+    #-------------------------------------------------------------
+    # Step 3.2: Identify significant probe-gene pairs            |
+    # Collect nearby 20 genes for Sig.probes
+    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
+                              cores=detectCores(),
+                              geneAnnot=getGeneInfo(mee))
+
+    Hypo.pair <- get.pair(mee=mee,
+                          probes=Sig.probes$probe,
+                          nearGenes=nearGenes,
+                          permu.dir=paste0(dir.out,"/permu"),
+                          dir.out=dir.out,
+                          cores=detectCores(),
+                          label= j,
+                          permu.size=10000,
+                          Pe = 0.001)
+
+    Sig.probes.paired <- fetch.pair(pair=Hypo.pair, probeInfo = getProbeInfo(mee), geneInfo = getGeneInfo(mee))
+    Sig.probes.paired <-read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
+                                  stringsAsFactors=FALSE)[,1]
+
+
+   #-------------------------------------------------------------
+   # Step 3.3: Motif enrichment analysis of the selected probes |
+   #-------------------------------------------------------------
+   if(length(Sig.probes.paired) > 0 ){
+        #-------------------------------------------------------------
+        # Step 3.3: Motif enrichment analysis of the selected probes |
+        #-------------------------------------------------------------
+        enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
+                                             dir.out=dir.out, label=j,
+                                             background.probes = probe$name)
+        if(length(enriched.motif) > 0){
+            #-------------------------------------------------------------
+            # Step 3.4: Identifying regulatory TFs                        |
+            #-------------------------------------------------------------
+            print("get.TFs")
+
+            TF <- get.TFs(mee = mee,
+                          enriched.motif = enriched.motif,
+                          dir.out = dir.out,
+                          cores = detectCores(), label = j)
+            save(TF, file=paste0(dir.out,"/TF.rda"))
+        }
+    }
+}
+```
+When ELMER Identifies the enriched motifs for the distal enhancer probes which are significantly
+differentially methylated and linked to putative target gene, it will plot the Odds Ratio (x axis) for the each motifs found.
+
+The list of motifs found for the hyper direction (probes hypermethylated in LGG group compared to the GBM group)
+is found in the figure \ref{odds-ration}. To select the motifs we select the motifs that had a minimum incidence
+of 10 in the given probes set and the smallest lower boundary of 95\% confidence interval for Odds Ratio of 1.1.
+These both values are the default from the ELMER package.
+
+The analysis found 14 enriched motifs for the hyper direction and no enriched motifs for the hypo direction.
+
+
+After finding these list of enriched motifs, ELMER Identifies regulatory TFs whose expression
+associate with DNA methylation at motifs and for each enriched motif a TF ranking plot is created
+automatically by ELMER. This plot shows the TF ranking plots based on the score $(-log(P value))$ of association between
+TF expression and DNA methylation of the motif. We can see in figure \ref{tfrank} that the top 3 associated
+TFs that are associated with that AP1 motif are HOXA5, TGIF1 and HOAX6.
+
+
+The output of this step is a data frame with the following columns:
+* motif:  the names of motif.
+* top.potential.TF: the highest ranking upstream TFs which are known recognized the motif.
+* potential.TFs:  TFs which are within top 5\% list and are known recognized the motif.
+top5percent:  all TFs which are within top 5\% list considered candidate upstream regulators
+
+Also, for each motif we can take a look on the three most relevant transcription factors.
+For example, for the AP1 motif the average DNA methylation level of sites with the AP1 motif
+plotted against the expression of the transcription factors HOXA5, TGIF1 and HOAX6 is show in figure \ref{tfvsmet}.
+ We can see that the experiment group (GBM samples) has a lower average methylation level of sites with the AP1 motif
+ plotted and a higher  expression of the transcription factors.
+
+```{#numCode .R .numberLines}
+scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
+             byTF=list(TF=c("HOXA5","TGIF1","HOXA6","FOSL1"), probe=enriched.motif[["AP1"]]))
+```
+
+ And for each relevant TF we will use the clinical data to analyze the survival curves for the 30\% patients with higher expression of that transcription factor versus the 30\% with lower expression. The code below shows that analysis.
+
+```{#numCode .R .numberLines}
+TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
+
+    # For the transcription factor, we need the geneID.  We use getGeneID 
+    gene <- getGeneID(mee,symbol=TF)
+    # Get the expression values for the genes.  
+    # (getExp is a ELMER function)
+    exp <- getExp(mee,geneID=gene)
+
+    # Get the names of the patients with 30% lower expression of the identified TF.
+    g1 <- names(sort(exp)[1:ceiling(length(exp) * percentage)])
+
+    # Get the names of the 30% patients with higher expression
+    g2 <- names(sort(exp,decreasing = T)[1:ceiling(length(exp) * percentage)])
+
+	# get the clinical data of these selected patients
+    clinical <- clinical[clinical$bcr_patient_barcode %in% substr(c(g1, g2),1,12),]
+    
+    # Create the labels for each patient
+    clinical$tf_groups <- "high"
+    clinical[clinical$bcr_patient_barcode  %in% substr(c(g1),1,12),]$tf_groups <- "low"
+    
+    # Use TCGAbiolinks to create the survival curve
+    TCGAanalyze_survival(clinical,"tf_groups",
+                         legend=paste0(TF," Exp level"),
+                         filename = paste0(TF,".png"))
+}
+
+# Call the function we created
+TCGAsurvival_TFplot("TGIF1",mee,clinical)
+TCGAsurvival_TFplot("HOXA5",mee,clinical)
+TCGAsurvival_TFplot("HOXA6",mee,clinical)
+```
+
+The figures \ref{survival_hoxa6}, shows that the samples with lower expression of these TFs have a better survival than those with higher expression.
+
 # Conclusion
 
 This workflow outlines how one can use specific Bioconductor packages for the
