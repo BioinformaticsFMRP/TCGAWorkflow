@@ -863,9 +863,13 @@ dev.off()
 ## Transcriptomic analysis
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
+# defining common parameters
+PanCancer <- c("LGG","GBM")
+PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+dataType <- "rsem.genes.results"
 for(cancer in PanCancer){
 
-    pathCancer <- paste0("../data",cancer)
+    pathCancer <- paste0("data",cancer)
     datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
 
     # get only primary solid Tumor
@@ -886,7 +890,7 @@ for(cancer in PanCancer){
 # loading LGG and GBM rse data
 load("LGG_IlluminaHiSeq_RNASeqV2.rda")
 cancer <-  "LGG"
-pathCancer <- paste0("../data",cancer)
+pathCancer <- paste0("data",cancer)
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 
 dataClin_LGG <- TCGAquery_clinic(tumor = "LGG",
@@ -897,7 +901,7 @@ dataPrep_LGG <- TCGAanalyze_Preprocessing(object = rse,
 
 load("GBM_IlluminaHiSeq_RNASeqV2.rda")
 cancer <-  "GBM"
-pathCancer <- paste0("../data",cancer)
+pathCancer <- paste0("data",cancer)
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 
 dataClin_GBM <- TCGAquery_clinic(tumor = "GBM",
