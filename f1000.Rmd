@@ -7,6 +7,7 @@ date: "`r Sys.Date()`"
 output: 
     html_document:
         toc: true
+        theme: paper
         number_sections: false
         toc_depth: 2
         highlight: haddock
@@ -97,11 +98,11 @@ Just to reiterate, the data used in this workflow are published data and freely 
 ### Downloading data from TCGA data portal
 
 The Bioconductor package  [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) [@TCGAbiolinks]
-has three main  functions **TGCAquery**, **TCGAdownload** and **TCGAprepare** that should sequentially be used
+has three main  functions `TCGAquery`, `TCGAdownload` and `TCGAprepare` that should sequentially be used
 to respectively  search,   download and  load  the data as an R object.
 
-*TGCAquery* searches in a pre-processed TCGA database and returns a summary table with the found files,
-samples, version and other useful information. The most important *TGCAquery* arguments are
+`TCGAquery` searches in a pre-processed TCGA database and returns a summary table with the found files,
+samples, version and other useful information. The most important `TCGAquery` arguments are
 *tumor* which receives one or multiple tumor types (USC, LGG, SKCM, KICH, CHO, etc),
 *platform* which receives the platform (HumanMethylation27, Genome\_Wide\_SNP\_6, IlluminaHiSeq\_RNASeqV2, etc),
 *version* which receives the version of the data to be downloaded if the user wants an older version and
@@ -109,7 +110,7 @@ samples, version and other useful information. The most important *TGCAquery* ar
 A complete list of possible entries for arguments can be found in the
  [TCGAbiolinks vignette](https://www.bioconductor.org/packages/3.3/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html#tcgaquery-searching-tcga-open-access-data-for-download).
 
-After searching, the user will be able to download the data with *TCGAdownload*.
+After searching, the user will be able to download the data with `TCGAdownload`.
 An important feature of this function is the ability to filter the data using the
 arguments *type* if the user wants to specify file tumor type and *samples* if
 user wants to specify samples (list of TCGA barcodes).
@@ -176,7 +177,7 @@ sample.info <- colData(exp)
 genes.info <- rowRanges(exp)
 ```
 
-Clinical data can be obtained using the function *TCGAquery\_clinical* which can be used as
+Clinical data can be obtained using the function `TCGAquery\_clinical` which can be used as
 described in listing below. This function has three arguments *tumor*, *clinical\_data\_type* and *samples*.
 The *clinical\_data\_type* argument is always required and should be accompanied by at least one of the other two parameters.
 Examples for the argument clinical\_data\_type are: "clinical\_drug", "clinical\_patient",and "clinical\_radiation"
@@ -209,7 +210,7 @@ Mutation information is stored in Mutation Annotation Format (MAF) files which c
 and states (validated or putative). A summary of all the Mutation Annotation Format (MAF) can be accessed at
 [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files).
 To download this data using  [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/),
-*TCGAquery\_maf* function is provided. It will download the non-obsolete tables from TCGA wiki,
+`TCGAquery\_maf` function is provided. It will download the non-obsolete tables from TCGA wiki,
 remove the protected entries and ask the user which file s/he wants to download (see listing below).
 It will then download and return a data frame with the data.
 
@@ -244,13 +245,13 @@ brca.subtypes <- TCGAquery_subtype(tumor = "brca")
 ### Downloading data from Broad TCGA GDAC
 
 The Bioconductor package [RTCGAtoolbox](http://bioconductor.org/packages/RTCGAtoolbox/) [@samur2014rtcgatoolbox]
-provides access to Firehose Level 3 and 4 data through the function *getFirehoseData*.
+provides access to Firehose Level 3 and 4 data through the function `getFirehoseData`.
 The following arguments allows users to select the version and tumor type of interest:
 
 
-* dataset - Tumor to download. A complete list of possibilities are listed in *getFirehoseDatasets* function.
-* runDate - Stddata run dates. Dates can be viewed with *getFirehoseRunningDates* function.
-* gistic2\_Date - Analyze run dates. Dates can viewed with *getFirehoseAnalyzeDates* function.
+* dataset - Tumor to download. A complete list of possibilities are listed in `getFirehoseDatasets` function.
+* runDate - Stddata run dates. Dates can be viewed with `getFirehoseRunningDates` function.
+* gistic2\_Date - Analyze run dates. Dates can viewed with`getFirehoseAnalyzeDates` function.
 
 These arguments can be used to select the data type to download: RNAseq\_Gene, Clinic, miRNASeq\_Gene,
 ccRNAseq2\_Gene\_Norm, CNA\_SNP, CNV\_SNP, CNA\_Seq, CNA\_CGH, Methylation, Mutation, mRNA\_Array ,
@@ -314,7 +315,7 @@ and they are available for all copy number technologies.
 In this section, we will show how to analyze CNV level 3 data from TCGA to identify recurrent alterations in cancer genome.
 We analyzed GBM and LGG segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array 6.0).
 
-## Pre-Processing Data
+### Pre-Processing Data
 The only CNV platform available for both LGG and GBM in TCGA is "Affymetrix Genome-Wide Human SNP Array 6.0". Using TCGAbiolinks, we queried for CNV SNP6 level 3 data for primary solid tumor samples. Data for selected samples were downloaded and prepared in two separate rse objects (RangedSummarizedExperiment).
 
 ```{#numCode .R .numberLines}
@@ -348,7 +349,7 @@ for(tumor in PanCancer){
 ```
 
 
-## Identification of recurrent CNV in cancer
+### Identification of recurrent CNV in cancer
 Cancer related CNV have to be present in many of the analyzed genomes. The most significant recurrent CNV were identified using [GAIA](http://bioconductor.org/packages/gaia/) [@morganellagaia], an iterative procedure where a statistical hypothesis framework is extended to take into account within-sample homogeneity. GAIA is based on a conservative permutation test allowing the estimation of the probability distribution of the contemporary mutations expected for non-driver markers.
 
 Segmented data retrieved from TCGA were used to generate a matrix including all needed information about the observed aberrant regions. Furthermore, GAIA requires genomic probes metadata (specific for each CNV technology), that can be downloaded from broadinstitute website.
@@ -444,7 +445,7 @@ for(cancer in c("LGG","GBM"){
 Recurrent amplifications and deletions were identified for both LGG and GBM, and represented in chromosomal overview plots by a statistical score (*$-log_{10}$ corrected p-value* for amplifications and *$log_{10}$ corrected p-value* for deletions). Genomic regions identified as significantly altered in copy number (*corrected p-value* < $10^{-4}$) were then annotated to report amplified and deleted genes potentially related with cancer.
 
 
-## Gene annotation of recurrent CNV
+### Gene annotation of recurrent CNV
 The aberrant recurrent genomic regions in cancer, as identified by GAIA,
 have to be annotated to verify which genes are significantly amplified or deleted.
 Using biomaRt we retrieved the genomic ranges of all human genes and we compared
@@ -490,11 +491,11 @@ for(cancer in c("LGG","GBM"){
 ```
 
 
-## Visualizing multiple genomic alteration events
+### Visualizing multiple genomic alteration events
 In order to visualize multiple genomic alteration events we recommend using OncoPrint plot which is provided by bioconductor package  [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)  [@ComplexHeatmap]. The listing \ref{lst:mut} shows how to download mutation data using
- *TCGAquery\_maf* (line 4), then we filtered the genes to obtain genes with mutations found among glioma
+ `TCGAquery\_maf` (line 4), then we filtered the genes to obtain genes with mutations found among glioma
 specific pathways (lines 6 - 12).  The following steps prepared the data into a matrix to fit
- *oncoPrint* function.
+ `oncoPrint` function.
 We defined SNPs as blue, insertions as green and deletions as red.
 The upper barplot indicates the number of genetic mutation per patient,
 while the right barplot shows the number of genetic mutations per gene.
@@ -987,7 +988,7 @@ to their p-value corrected FDR (-Log10) (colored bars) and the ratio of list gen
 pathway over the total number of genes in that pathway (ratio, red line).
 
 
-## PEA: Pathways enrichment analysis
+### PEA: Pathways enrichment analysis
 
 To verify if the genes found have a specific role in a pathway, the bioconducotor package
 [pathview](http://bioconductor.org/packages/pathview/) [@luo2013pathview] can be used.
@@ -1040,7 +1041,7 @@ hsa05214 <- pathview(gene.data  = genelistDEGs,
 The red genes are up-regulated and the
 green genes are down-regulated in the LGG samples compared to GBM.
 
-## Inference of gene regulatory networks
+### Inference of gene regulatory networks
 
 Starting with the set of differentially expressed genes, we infer gene regulatory networks using the following state-of-the art inference algorithms: ARACNE [@margolin2006aracne], CLR [@faith2007large], MRNET [@meyer2007information] and C3NET [@altay2010inferring]. These methods are based on mutual inference and use different heuristics to infer the edges in the network. These methods have been made available via Bioconductor/CRAN packages [MINET](http://bioconductor.org/packages/minet/)[@Meyer2008] and 
 [c3net](https://cran.r-project.org/web/packages/c3net/index.html), [@altay2010inferring] respectively).
@@ -1245,7 +1246,7 @@ This section describes the analysis of DNA methylation using the bioconductor pa
 
 It should be highlighted that some pre-processing of the DNA methylation data was done. The DNA methylation data from the 450k platform has three types of probes cg (CpG loci) , ch (non-CpG loci) and rs (SNP assay). The last type of probe can be used for sample identification and tracking and should be excluded for differential methylation analysis according to the [ilumina manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf). Therefore, the rs probes were removed  (see listing \ref{lst:meanmet} lines 22). Also,  probes in chromosomes X, Y were removed to eliminate potential artifacts originating from the presence of a different proportion of males and females [@marabita2013evaluation]. The last pre-processing steps were to selected only primary samples (see listing \ref{lst:meanmet} lines 16) and probes with at least one NA value were removed (see listing \ref{lst:meanmet} lines 19).
 
-After this pre-processing step, using the function TCGAvisualize\_meanMethylation provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing \ref{lst:meanmet} lines 25-29).
+After this pre-processing step, using the function `TCGAvisualize\_meanMethylation` provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing \ref{lst:meanmet} lines 25-29).
 
 ```{#numCode .R .numberLines}
 #----------------------------
@@ -1360,13 +1361,13 @@ heatmap  <- Heatmap(assay(sig.met.100),
 
 ### Motif analysis 
 Motif discovery is the attempt to extract small sequence signals hidden within largely non-functional intergenic sequences. These sequence short nucleotide sequences (6-15 bp) might have a biological significance as it can be used to control the expression of genes. These sequences are called Regulatory motifs.
-The bioconductor package \href{http://bioconductor.org/packages/rGADEM/}{rGADEM} \cite{droit2015rgadem,li2009gadem} provides an efficient \textit{de novo} motif discovery algorithm for large-scale genomic sequence data.
+The bioconductor package [rGADEM](http://bioconductor.org/packages/rGADEM/) [@droit2015rgadem,@li2009gadem] provides an efficient *de novo* motif discovery algorithm for large-scale genomic sequence data.
 
 The user may be interested in looking for unique signatures in the regions defined by `differentially methylated' to identify candidate transcription factors that could bind to these elements affected by the accumulation or absence of DNA methylation. For this analysis we use a sequence of 100 bases before and after the probe location (See lines 6-8 in the listing \ref{lst:rgadem}).
 An object will be returned which contains all relevant information about your motif analysis
 (sequence consensus, pwm, chromosome, pvalue...).
 
-Using bioconductor package \href{http://bioconductor.org/packages/motifStack/}{motifStack} \cite{ou2013motifstack} it is possible to generate a graphic representation of multiple motifs with different similarity scores (see figure \ref{fig::motif}).
+Using bioconductor package [motifStack](http://bioconductor.org/packages/motifStack/) [@ou2013motifstack] it is possible to generate a graphic representation of multiple motifs with different similarity scores (see figure \ref{fig::motif}).
 
 ```{#numCode .R .numberLines}
 library(rGADEM)
@@ -1401,8 +1402,8 @@ length(gadem@motifList[[1]]@alignList)
 ```
 
 
-After \href{http://bioconductor.org/packages/rGADEM/}{rGADEM} returns it's results, the user can use \href{http://bioconductor.org/packages/MotIV/}{MotIV}
-package \cite{mercier2014motiv,mahony2007dna,mahony2007stamp,mercier2011integrated}
+After [rGADEM](http://bioconductor.org/packages/rGADEM/) returns it's results, the user can use [MotIV](http://bioconductor.org/packages/MotIV/)
+package [@mercier2014motiv,@mahony2007dna,@mahony2007stamp,@mercier2011integrated]
 to start the motif matching analysis (line 4 of listing \ref{lst:MotIV}). The result is shown in figure \ref{fig::tfmotif}.
 
 ```{#numCode .R .numberLines}
@@ -1421,8 +1422,8 @@ print(alignment[[1]])
 
 ## Integrative (Epigenomic \& Transcriptomic) analysis
 
-Recent studies have shown that providing a deep integrative analysis can aid researchers in identifying and extracting biological insight from high through put data \cite{phillips2008role,shi2014integrative,rhodes2005integrative}.
-In this section, we will introduce a bioconductor package called \href{http://bioconductor.org/packages/ELMER/}{ELMER} to identify regulatory enhancers using gene expression + DNA methylation data + motif analysis.  In addition, we show how to integrate the results from the previous sections with important epigenomic data derived from both the \href{http://www.encodeproject.org/}{ENCODE} and \href{http://www.roadmapepigenomics.org/}{Roadmap}.
+Recent studies have shown that providing a deep integrative analysis can aid researchers in identifying and extracting biological insight from high through put data [@phillips2008role,@shi2014integrative,@rhodes2005integrative].
+In this section, we will introduce a bioconductor package called [ELMER](http://bioconductor.org/packages/ELMER/) to identify regulatory enhancers using gene expression + DNA methylation data + motif analysis.  In addition, we show how to integrate the results from the previous sections with important epigenomic data derived from both the [ENCODE](http://www.encodeproject.org/) and [Roadmap](http://www.roadmapepigenomics.org/).
 
 ### Integration of DNA methylation \& gene expression data
 
@@ -1430,7 +1431,7 @@ After finding  differentially methylated CpG sites, one possible question one mi
 
 The starburst plot is proposed to combine information from two volcano plots, and is applied for a study of DNA methylation and gene expression [@noushmehr2010identification]. Even though, being desirable that both gene expression and DNA methylation data are from the same samples, the starburst plot can be applied as a meta-analysis tool, combining data from different samples [@siegmund2011statistical].
 
-The function TCGAvisualize\_starburst  creates a Starburst plot for comparison of DNA methylation
+The function `TCGAvisualize\_starburst`  creates a Starburst plot for comparison of DNA methylation
 and gene expression. The $log_{10}$ (FDR-corrected P value) for DNA methylation is plotted on the x axis,
 and for gene expression on the y axis, for each gene.
 The horizontal black dashed line shows the FDR-adjusted P value of $10^{-100}$
