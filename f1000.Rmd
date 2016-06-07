@@ -999,7 +999,8 @@ for(tumor in PanCancer){
 
 	# get only primary solid Tumor
 	lsSample <- TCGAquery_samplesfilter(query = datQuery)
-	dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2, typesample = "TP")
+	# For speed process we will use only 10 samples from LGG and 10 for GBM
+	dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2, typesample = "TP")[1:10]
 
   TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = c(dataSmTP))
   dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType,
