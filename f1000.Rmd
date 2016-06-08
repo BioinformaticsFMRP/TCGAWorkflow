@@ -26,7 +26,7 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(dpi = 300)
-knitr::opts_chunk$set(cache=FALSE)
+knitr::opts_chunk$set(cache=TRUE)
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE}
@@ -339,11 +339,9 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 ### plot details (colors & symbols)
 mycols<-c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628')
 
-
 # cancertype <- "LGG"
 ### differentially identified genes TCGAbiolinks
 names.genes.de <- rownames(dataDEGs)
-
 ### read biogrid info
 file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.137/BIOGRID-ALL-3.4.137.tab2.zip"
 if(!file.exists(basename(file))) download(file,basename(file))
@@ -352,7 +350,7 @@ tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t",
 net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 
 for (cancertype in c("LGG", "GBM")) {
-
+    message(cancertype)
     if(cancertype == "GBM"){
         mydata <- dataFiltGBM[names.genes.de, ]
 
@@ -368,8 +366,7 @@ for (cancertype in c("LGG", "GBM")) {
     ### validate compared to biogrid network
     tmp.val <- list(validate(net.aracne, net.biogrid.de), validate(net.mrnet, net.biogrid.de),
                     validate(net.clr, net.biogrid.de), validate(net.c3net, net.biogrid.de))
-
-       png(paste0("roc_biogrid_",cancertype,".png"),width = 600, height = 600)
+    
     dev1 <- show.roc(tmp.val[[1]],cex=0.3,col=mycols[1],type="l")
     res.auc <- auc.roc(tmp.val[[1]])
     for(count in 2:length(tmp.val)){
@@ -379,6 +376,7 @@ for (cancertype in c("LGG", "GBM")) {
 
     legend("bottomright", legend=paste(c("aracne","mrnet","clr","c3net"), signif(res.auc,4), sep=": "),
            col=mycols[1:length(tmp.val)],lty=1, bty="n" )
+    dev.copy(png,paste0("roc_biogrid_",cancertype,".png"))
     dev.off()
     save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_",cancertype,".RData"))
 }
@@ -2431,6 +2429,11 @@ if(!require("VennDiagram")) install.packages("VennDiagram")
 if(!require("c3net")) install.packages("c3net")
 if(!require("pbapply")) install.packages("pbapply")
 if(!require("gplots")) install.packages("gplots")
+```
+
+
+```{r}
+sessionInfo()
 ```
 
 # References
