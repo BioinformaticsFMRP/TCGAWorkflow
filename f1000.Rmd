@@ -27,6 +27,7 @@ knitr::opts_chunk$set(cache=FALSE)
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(TCGAbiolinks)
+library(stringr)
 matched_met_exp <- function(tumor, n = NULL){
     # get primary solid tumor samples: DNA methylation
     met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
