@@ -26,8 +26,45 @@ knitr::opts_chunk$set(cache=FALSE)
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
-library(ComplexHeatmap) # Version 1.10.2
 library(TCGAbiolinks)
+matched_met_exp <- function(tumor, n = NULL){
+    # get primary solid tumor samples: DNA methylation
+    met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
+    met450k.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(met450k$barcode,","))),c("TP"))
+
+    # get primary solid tumor samples: RNAseq
+    rnaseq <- TCGAquery(tumor = tumor,c("IlluminaHiSeq_RNASeqV2"),level = 3)
+    rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
+
+    # Get patients with samples in both platforms
+    patients <- unique(substr(rnaseq.tp,1,12)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) patients <- patients[1:n] # get only n samples
+    return(patients)
+}
+lgg.patients <- matched_met_exp("LGG", n = 10)
+gbm.patients <- matched_met_exp("GBM", n = 10)
+patients <- c(lgg.patients,gbm.patients)
+#-----------------------------------
+# 1 - Methylation
+# ----------------------------------
+# For methylation it is quicker in this case to download the tar.gz file
+# and get the samples we want instead of downloading files by files
+query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = patients)
+TCGAdownload(query.met, samples = patients)
+met <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = patients)
+met.elmer <- TCGAprepare_elmer(met, platform = "HumanMethylation450")
+
+#-----------------------------------
+# 2 - Expression
+# ----------------------------------
+query.rna <- TCGAquery(tumor = c("GBM","LGG"), platform = "IlluminaHiSeq_RNASeqV2", level = 3)
+TCGAdownload(query.rna, samples = patients, type = "rsem.genes.normalized_results")
+exp <- TCGAprepare(query.rna,dir = ".", type = "rsem.genes.normalized_results",
+                         samples =  patients, save = FALSE)
+exp.elmer <- TCGAprepare_elmer(exp, platform = "IlluminaHiSeq_RNASeqV2")
+
+library(ComplexHeatmap) # Version 1.10.2
+
 
 LGGmut <- TCGAquery_maf(tumor = "LGG",archive.name="LGG.IlluminaGA_DNASeq_curated.Level_2.1.4.0")
 GBMmut <- TCGAquery_maf(tumor = "GBM", archive.name = "ucsc.edu_GBM.IlluminaGA_DNASeq_automated.Level_2.1.1.0")
@@ -125,25 +162,6 @@ p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
 )
 draw(p, annotation_legend_side =  "bottom")
 dev.off()
-
-matched_met_exp <- function(tumor, n = NULL){
-    # get primary solid tumor samples: DNA methylation
-    met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
-    met450k.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(met450k$barcode,","))),c("TP"))
-
-    # get primary solid tumor samples: RNAseq
-    rnaseq <- TCGAquery(tumor = tumor,c("IlluminaHiSeq_RNASeqV2"),level = 3)
-    rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
-
-    # Get patients with samples in both platforms
-    patients <- unique(substr(rnaseq.tp,1,12)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
-    if(!is.null(n)) patients <- patients[1:n] # get only n samples
-    return(patients)
-}
-lgg.patients <- matched_met_exp("LGG", n = 10)
-gbm.patients <- matched_met_exp("GBM", n = 10)
-patients <- c(lgg.patients,gbm.patients)
-
 
 # defining common parameters
 PanCancer <- c("LGG","GBM")
