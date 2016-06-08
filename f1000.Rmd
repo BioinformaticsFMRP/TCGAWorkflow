@@ -37,30 +37,30 @@ matched_met_exp <- function(tumor, n = NULL){
     rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
 
     # Get patients with samples in both platforms
-    patients <- unique(substr(rnaseq.tp,1,12)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
-    if(!is.null(n)) patients <- patients[1:n] # get only n samples
-    return(patients)
+    samples <- unique(substr(rnaseq.tp,1,15)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) samples <- samples[1:n] # get only n samples
+    return(samples)
 }
-lgg.patients <- matched_met_exp("LGG", n = 10)
-gbm.patients <- matched_met_exp("GBM", n = 10)
-patients <- c(lgg.patients,gbm.patients)
+lgg.samples <- matched_met_exp("LGG", n = 10)
+gbm.samples <- matched_met_exp("GBM", n = 10)
+samples <- c(lgg.samples,gbm.samples)
 #-----------------------------------
 # 1 - Methylation
 # ----------------------------------
 # For methylation it is quicker in this case to download the tar.gz file
 # and get the samples we want instead of downloading files by files
-query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = patients)
-TCGAdownload(query.met, samples = patients)
-met <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = patients)
+query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = samples)
+TCGAdownload(query.met, samples = samples)
+met <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = samples)
 met.elmer <- TCGAprepare_elmer(met, platform = "HumanMethylation450")
 
 #-----------------------------------
 # 2 - Expression
 # ----------------------------------
 query.rna <- TCGAquery(tumor = c("GBM","LGG"), platform = "IlluminaHiSeq_RNASeqV2", level = 3)
-TCGAdownload(query.rna, samples = patients, type = "rsem.genes.normalized_results")
+TCGAdownload(query.rna, samples = samples, type = "rsem.genes.normalized_results")
 exp <- TCGAprepare(query.rna,dir = ".", type = "rsem.genes.normalized_results",
-                         samples =  patients, save = FALSE)
+                         samples =  samples, save = FALSE)
 exp.elmer <- TCGAprepare_elmer(exp, platform = "IlluminaHiSeq_RNASeqV2")
 
 library(ComplexHeatmap) # Version 1.10.2
@@ -172,7 +172,7 @@ for(cancer in PanCancer){
     pathCancer <- paste0("data",cancer)
     datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
 
-    samples <- get(paste0(tolower(cancer),".patients"))
+    samples <- get(paste0(tolower(cancer),".samples"))
 
     TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = c(samples))
 
@@ -2098,7 +2098,7 @@ this patients should have both DNA methylation data and gene expression data.
 #--------------------- 8.3 Identification of Regulatory Enhancers   ----------------------------
 library(TCGAbiolinks)
 library(stringr)
-# Samples
+# Samples: primary solid tumor with both DNA methylation and gene expression
 matched_met_exp <- function(tumor, n = NULL){
     # get primary solid tumor samples: DNA methylation
     met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
@@ -2108,32 +2108,32 @@ matched_met_exp <- function(tumor, n = NULL){
     rnaseq <- TCGAquery(tumor = tumor,c("IlluminaHiSeq_RNASeqV2"),level = 3)
     rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
 
-    # Get patients with samples in both platforms
-    patients <- unique(substr(rnaseq.tp,1,12)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
-    if(!is.null(n)) patients <- patients[1:n] # get only n samples
-    return(patients)
+    # Get samples with samples in both platforms
+    samples <- unique(substr(rnaseq.tp,1,15)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) samples <- samples[1:n] # get only n samples
+    return(samples)
 }
-lgg.patients <- matched_met_exp("LGG", n = 10)
-gbm.patients <- matched_met_exp("GBM", n = 10)
-patients <- c(lgg.patients,gbm.patients)
+lgg.samples <- matched_met_exp("LGG", n = 10)
+gbm.samples <- matched_met_exp("GBM", n = 10)
+samples <- c(lgg.samples,gbm.samples)
 
 #-----------------------------------
 # 1 - Methylation
 # ----------------------------------
 # For methylation it is quicker in this case to download the tar.gz file
 # and get the samples we want instead of downloading files by files
-query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = patients)
-TCGAdownload(query.met, samples = patients)
-met.elmer <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = patients)
+query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = samples)
+TCGAdownload(query.met, samples = samples)
+met.elmer <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = samples)
 met.elmer <- TCGAprepare_elmer(met.elmer, platform = "HumanMethylation450")
 
 #-----------------------------------
 # 2 - Expression
 # ----------------------------------
 query.rna <- TCGAquery(tumor = c("GBM","LGG"), platform = "IlluminaHiSeq_RNASeqV2", level = 3)
-TCGAdownload(query.rna, samples = patients, type = "rsem.genes.normalized_results")
+TCGAdownload(query.rna, samples = samples, type = "rsem.genes.normalized_results")
 exp.elmer <- TCGAprepare(query.rna,dir = ".", ,type = "rsem.genes.normalized_results",
-                         samples =  patients, save = FALSE)
+                         samples =  samples, save = FALSE)
 exp.elmer <- TCGAprepare_elmer(exp.elmer, platform = "IlluminaHiSeq_RNASeqV2")
 ```
 
@@ -2161,7 +2161,7 @@ mee <- fetch.mee(meth = met.elmer, exp = exp.elmer, TCGA = TRUE, probeInfo = pro
 samples <- unlist(str_split(TCGAquery("gbm", "HumanMethylation450", level = 3)$barcode,","))
 
 # Relabel LGG samples in the mee object: LGG is control
-mee@sample$TN[substr(mee@sample$ID,1,12) %in% lgg.patients] <- "Control"
+mee@sample$TN[mee@sample$ID %in% lgg.samples] <- "Control"
 save(mee,file = "mee.rda")
 ```
 
