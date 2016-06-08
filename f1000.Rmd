@@ -426,8 +426,21 @@ heatmap  <- Heatmap(assay(sig.met.100),
                     column_title = "DNA Methylation") + ra
 png("heatmap.png",width = 600, height = 400); draw(heatmap); dev.off()
 
+library(ELMER)
+geneAnnot <- txs()
+geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
+geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
+probe <- get.feature.probe()
 
-load("mee.rda")
+# create mee object, use @ to access the matrices inside the object
+mee <- fetch.mee(meth = met.elmer, exp = exp.elmer, TCGA = TRUE, probeInfo = probe, geneInfo = geneInfo)
+
+# Get lgg barcodes
+samples <- unlist(str_split(TCGAquery("gbm", "HumanMethylation450", level = 3)$barcode,","))
+
+# Relabel LGG samples in the mee object: GBM is control
+mee@sample$TN[mee@sample$ID %in% lgg.samples] <- "Control"
+save(mee,file = "mee.rda")
 
 library(ELMER)
 library(parallel)
