@@ -14,22 +14,18 @@ output:
 bibliography: bibliography.bib
 
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{ Analyze cancer genomics and epigenomics data using Bioconductor
+  packages}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
+  %\VignetteDepends{AnnotationHub}
 ---
 
-<script type="text/javascript"
-  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(dpi = 300)
-knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = TRUE)
 ```
 
-```{r, echo=FALSE, results="hide", warning=FALSE}
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 suppressPackageStartupMessages({
     library(TCGAbiolinks)
     library(stringr)
@@ -38,7 +34,6 @@ suppressPackageStartupMessages({
     library(gaia)
     library(parallel)
     library(ChIPseeker)
-    library(AnnotationHub)
     library(ComplexHeatmap)
     library(clusterProfiler)
     library(minet)
@@ -56,6 +51,11 @@ suppressPackageStartupMessages({
     library(c3net)
     library(pbapply)
     library(gplots)
+    library(ChIPseeker)
+    library(pbapply)
+    library(GenomeInfoDb)
+    library(ggplot2)
+    library(AnnotationHub)
 })
 ```
 
@@ -316,7 +316,7 @@ met <- subset(met,subset = !as.character(seqnames(met)) %in% c("chrNA","chrX","c
 
 
 TCGAvisualize_meanMethylation(met,
-                              groupCol = "disease",
+                              groupCol = "disease", width = 6, height = 6,
                               group.legend  = "Groups",
                               filename = "mean_lgg_gbm.png",
                               print.pvalue = TRUE)
@@ -462,7 +462,7 @@ for (j in direction){
         }
     }
 }
-png("TF.png",width = 800, height = 200)
+png("TF.png",width = 800, height = 400)
 scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
              byTF=list(TF=c("WT1","ZNF208","ATF4","DDX5"), probe=enriched.motif[["AP1"]]))
 dev.off()
@@ -1730,7 +1730,7 @@ An object will be returned which contains all relevant information about your mo
 
 Using bioconductor package [motifStack](http://bioconductor.org/packages/motifStack/) [@ou2013motifstack] it is possible to generate a graphic representation of multiple motifs with different similarity scores (see figure \ref{fig::motif}).
 
-```{r results='asis', echo=TRUE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(rGADEM)
 library(BSgenome.Hsapiens.UCSC.hg19)
 library(motifStack)
@@ -1745,7 +1745,7 @@ sequence <- RangedData(space=as.character(probes@seqnames),
 #look for motifs
 gadem <- GADEM(sequence, verbose=1, genome=Hsapiens)
 
-# How many motifs were found? 2
+# How many motifs were found?
 length(gadem@motifList)
 
 # get the number of occurences
@@ -1768,12 +1768,12 @@ After [rGADEM](http://bioconductor.org/packages/rGADEM/) returns it's results, t
 package [@mercier2014motiv,@mahony2007dna,@mahony2007stamp,@mercier2011integrated]
 to start the motif matching analysis. The result is shown in figure \ref{fig::tfmotif}.
 
-```{r results='asis', echo=TRUE}
+```{r results='asis', echo=TRUE,message=FALSE,warning=FALSE}
 library(MotIV)
 # motif matching analysis
 analysis.jaspar <- motifMatch(pwm)
 summary(analysis.jaspar)
-plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=1.0)
+plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.7)
 
 #  visualize the quality of the results looking into the alignments
 # E-value give an estimation of the match.
@@ -1886,7 +1886,7 @@ roadmap database, *consolidated* is selecting only the consolidate epigenomes,
 and narrowPeak is selecting the type of file.
 The data downloaded is a processed data from  an integrative Analysis of 111 reference human epigenomes [@kundaje2015integrative].
 
-```{r results='asis', echo=TRUE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(pbapply)
 library(SummarizedExperiment)
@@ -1936,7 +1936,7 @@ However, these regions are not associated neither with transcribed regions nor
 Polycomb repression as the H3K36me3 and H3K27me3 heatmaps does not show an enrichment nearby the position 0,
 and the average profile also does not show a peak at position 0.
 
-```{r results='asis', echo=TRUE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(pbapply)
 library(SummarizedExperiment)
@@ -1982,7 +1982,7 @@ To annotate the location of a given peak in terms of genomic features, annotateP
 assigns peaks to genomic annotation in “annotation” column of the output, which includes
 whether a peak is in the TSS, Exon, 5’ UTR, 3’ UTR, Intronic or Intergenic.
 
-```{#numCode .R .numberLines}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 require(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db")
@@ -2195,12 +2195,18 @@ of 10 in the given probes set and the smallest lower boundary of 95% confidence 
 These both values are the default from the ELMER package.
 
 The analysis found 10 enriched motifs for the hypo direction.
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis'}
+length(TF$motif)
+```
 
+The make a motif enrichment plot you can sue the function motif.enrichment.plot
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis'}
+ motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
+```
 
 ```{r tableTF, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 library(knitr)
-tabl <- kable(TF,format = "markdown")
-cat(tabl) 
+kable(TF)
 ```
 
 After finding these list of enriched motifs, ELMER Identifies regulatory TFs whose expression
