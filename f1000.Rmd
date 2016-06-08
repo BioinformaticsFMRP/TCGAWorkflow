@@ -321,7 +321,7 @@ names.genes.de <- rownames(dataDEGs)
 ### read biogrid info
 library(downloader)
 file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.137/BIOGRID-ALL-3.4.137.tab2.zip"
-download(file,basename(file))
+if(!file.exists(basename(file))) download(file,basename(file))
 unzip(basename(file),junkpaths =T)
 tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
 net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
