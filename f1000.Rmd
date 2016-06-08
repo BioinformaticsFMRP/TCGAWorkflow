@@ -1757,6 +1757,128 @@ plotAnnoPie(peakAnno)
 
 ### Identification of Regulatory Enhancers
 
+```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
+library(parallel)
+# Available directions are hypo and hyper, we will use only hypo
+# due to speed constraint
+direction <- c("hypo")
+
+for (j in direction){
+    print(j)
+    dir.out <- paste0("elmer/",j)
+    dir.create(dir.out, recursive = TRUE)
+    #--------------------------------------
+    # STEP 3: Analysis                     |
+    #--------------------------------------
+    # Step 3.1: Get diff methylated probes |
+    #--------------------------------------
+    Sig.probes <- get.diff.meth(mee, cores=detectCores(),
+                                dir.out =dir.out,
+                                diff.dir=j,
+                                pvalue = 0.01)
+
+    #-------------------------------------------------------------
+    # Step 3.2: Identify significant probe-gene pairs            |
+    #-------------------------------------------------------------
+    # Collect nearby 20 genes for Sig.probes
+    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
+                              cores=detectCores(),
+                              geneAnnot=getGeneInfo(mee))
+
+    pair <- get.pair(mee=mee,
+                     probes=Sig.probes$probe,
+                     nearGenes=nearGenes,
+                     permu.dir=paste0(dir.out,"/permu"),
+                     dir.out=dir.out,
+                     cores=detectCores(),
+                     label= j,
+                     permu.size=100, # For significant results use 10000
+                     Pe = 0.01) # For significant results use 0.001
+
+    Sig.probes.paired <- fetch.pair(pair=pair,
+                                    probeInfo = getProbeInfo(mee),
+                                    geneInfo = getGeneInfo(mee))
+    Sig.probes.paired <-read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
+                                 stringsAsFactors=FALSE)[,1]
+
+
+    #-------------------------------------------------------------
+    # Step 3.3: Motif enrichment analysis on the selected probes |
+    #-------------------------------------------------------------
+    if(length(Sig.probes.paired) > 0 ){
+        #-------------------------------------------------------------
+        # Step 3.3: Motif enrichment analysis on the selected probes |
+        #-------------------------------------------------------------
+        enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
+                                             dir.out=dir.out, label=j,
+                                             background.probes = probe$name)
+        motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",j,".motif.enrichment.csv"),
+                                     stringsAsFactors=FALSE)
+        if(length(enriched.motif) > 0){
+            #-------------------------------------------------------------
+            # Step 3.4: Identifying regulatory TFs                        |
+            #-------------------------------------------------------------
+            print("get.TFs")
+
+            TF <- get.TFs(mee = mee,
+                          enriched.motif = enriched.motif,
+                          dir.out = dir.out,
+                          cores = detectCores(), label = j)
+            TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",j,".TFs.with.motif.pvalue.rda")))
+            save(TF, enriched.motif, Sig.probes.paired,
+                 pair, nearGenes, Sig.probes, motif.enrichment, TF.meth.cor,
+                 file=paste0(dir.out,"/ELMER_results_",j,".rda"))
+        }
+    }
+}
+png("TF.png",width = 800, height = 200)
+scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
+             byTF=list(TF=c("WT1","ZNF208","ATF4","DDX5"), probe=enriched.motif[["AP1"]]))
+dev.off()
+
+TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
+
+    # For the transcription factor, gets it getGeneID
+    gene <- getGeneID(mee,symbol=TF)
+    # Get the expression values for the genes.
+    # (getExp is a ELMER function)
+    exp <- getExp(mee,geneID=gene)
+
+    # Get the names of the 30% patients with lower expression
+    g1 <- names(sort(exp)[1:ceiling(length(exp) * percentage)])
+
+    # Get the names of the 30% patients with higher expression
+    g2 <- names(sort(exp,decreasing = T)[1:ceiling(length(exp) * percentage)])
+
+    # get the data of only these patients
+    clinical <- clinical[clinical$bcr_patient_barcode %in% substr(c(g1, g2),1,12),]
+
+    # Create the labels for each sample
+    clinical$tf_groups <- "high"
+    clinical[clinical$bcr_patient_barcode  %in% substr(c(g1),1,12),]$tf_groups <- "low"
+
+    # Use TCGAbiolinks to create the survival curve
+    TCGAanalyze_survival(clinical,"tf_groups",
+                         legend=paste0(TF," Exp level"),
+                         filename = paste0(TF,".png"))
+}
+
+# get clinical patient data for GBM samples
+gbm_clin <- TCGAquery_clinic("gbm","clinical_patient")
+
+# get clinical patient data for LGG samples
+lgg_clin <- TCGAquery_clinic("lgg","clinical_patient")
+
+# Bind the results, as the columns might not be the same,
+# we will will plyr rbind.fill, to have all columns from both files
+clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
+# Call the function we created
+TCGAsurvival_TFplot("TP53",mee,clinical)
+TCGAsurvival_TFplot("FOXP4",mee,clinical)
+TCGAsurvival_TFplot("FOXE3",mee,clinical)
+```
+
+
   Recently, many studies suggest that enhancers play a major role as regulators of
   cell-specific phenotypes leading to alteration in transcriptomes realated to
   diseases [@giorgio2015large,@groschel2014single,@sur2012mice,@yao2015demystifying}.
@@ -1793,31 +1915,50 @@ DNA methylation and expression. Also, it will prepare the row names of the matri
 The listing \ref{lst:prepareelmer} shows how to use
 (http://bioconductor.org/packages/TCGAbiolinks/)[TCGAbiolinks}] [@TCGAbiolinks]
 to search, download and prepare the data for the [ELMER](http://bioconductor.org/packages/ELMER/) package.
+Due to time and memory constraints, we will use in this example only data from 11 LGG patients  and 11 GBM patients,
+this patients should have both DNA methylation data and gene expression data.
 
 ```{#numCode .R .numberLines}
-  library(TCGAbiolinks)
-  library(stringr)
-  #-----------------------------------
-  # 1 - Methylation
-  # ----------------------------------
-  # For methylation it is quicker in this case to download the tar.gz file
-  # and get the samples we want instead of downloading files by files
-  query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3)
-  TCGAdownload(query.met)
-  met <- TCGAprepare(query.met,dir = ".", save = TRUE)
-  # get only primary samples
-  met <- met[, met$shortLetterCode == "TP"]
-  met <- TCGAprepare_elmer(met, platform = "HumanMethylation450")
+#--------------------- 8.3 Identification of Regulatory Enhancers   ----------------------------
+library(TCGAbiolinks)
+library(stringr)
+# Samples
+matched_met_exp <- function(tumor, n = NULL){
+    # get primary solid tumor samples: DNA methylation
+    met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
+    met450k.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(met450k$barcode,","))),c("TP"))
 
-  #-----------------------------------
-  # 2 - Expression
-  # ----------------------------------
-  query.rna <- TCGAquery(tumor = c("GBM","LGG"), platform = "IlluminaHiSeq_RNASeqV2", level = 3)
-  primary.rna <- TCGAquery_SampleTypes(unlist(str_split(query.rna$barcode, ",")),"TP")
-  TCGAdownload(query.rna, samples = primary.rna, type = "rsem.genes.normalized_results")
-  exp <- TCGAprepare(query.rna,dir = ".", ,type = "rsem.genes.normalized_results",
-  		           samples =  primary.rna, save = TRUE)
-  exp <- TCGAprepare_elmer(exp, platform = "IlluminaHiSeq_RNASeqV2")
+    # get primary solid tumor samples: RNAseq
+    rnaseq <- TCGAquery(tumor = tumor,c("IlluminaHiSeq_RNASeqV2"),level = 3)
+    rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
+
+    # Get patients with samples in both platforms
+    patients <- unique(substr(rnaseq.tp,1,12)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) patients <- patients[1:n] # get only n samples
+    return(patients)
+}
+lgg.patients <- matched_met_exp("LGG", n = 10)
+gbm.patients <- matched_met_exp("GBM", n = 10)
+patients <- c(lgg.patients,gbm.patients)
+
+#-----------------------------------
+# 1 - Methylation
+# ----------------------------------
+# For methylation it is quicker in this case to download the tar.gz file
+# and get the samples we want instead of downloading files by files
+query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = patients)
+TCGAdownload(query.met, samples = patients)
+met.elmer <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = patients)
+met.elmer <- TCGAprepare_elmer(met.elmer, platform = "HumanMethylation450")
+
+#-----------------------------------
+# 2 - Expression
+# ----------------------------------
+query.rna <- TCGAquery(tumor = c("GBM","LGG"), platform = "IlluminaHiSeq_RNASeqV2", level = 3)
+TCGAdownload(query.rna, samples = patients, type = "rsem.genes.normalized_results")
+exp.elmer <- TCGAprepare(query.rna,dir = ".", ,type = "rsem.genes.normalized_results",
+                         samples =  patients, save = FALSE)
+exp.elmer <- TCGAprepare_elmer(exp.elmer, platform = "IlluminaHiSeq_RNASeqV2")
 ```
 
 
@@ -1838,15 +1979,17 @@ geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
 probe <- get.feature.probe()
 
 # create mee object, use @ to access the matrices inside the object
-mee <- fetch.mee(meth = met, exp = exp, TCGA = TRUE, probeInfo = probe, geneInfo = geneInfo)
+mee <- fetch.mee(meth = met.elmer, exp = exp.elmer, TCGA = TRUE, probeInfo = probe, geneInfo = geneInfo)
 
-# Get gbm barcodes
+# Get lgg barcodes
 samples <- unlist(str_split(TCGAquery("gbm", "HumanMethylation450", level = 3)$barcode,","))
 
-# Relabel GBM samples in the mee object: GBM is control
-mee@sample$TN[mee@sample$ID %in% substr(samples,1,15)] <- "Control"
+# Relabel LGG samples in the mee object: LGG is control
+mee@sample$TN[substr(mee@sample$ID,1,12) %in% lgg.patients] <- "Control"
+save(mee,file = "mee.rda")
 ```
 
+To make this example faster, you can download the mee object from here.
 
 ### ELMER analysis
 After preparing the data into a mee object, we executed the five ELMER steps for both the hypo
@@ -1856,49 +1999,61 @@ The code is shown below. A description of how these distal enhacer probes are id
 
 ```{#numCode .R .numberLines}
 library(parallel)
-direction <- c("hyper","hypo")
+# Available directions are hypo and hyper, we will use only hypo
+# due to speed constraint
+direction <- c("hypo")
 
 for (j in direction){
+    print(j)
     dir.out <- paste0("elmer/",j)
     dir.create(dir.out, recursive = TRUE)
     #--------------------------------------
     # STEP 3: Analysis                     |
-    # Step 3.1: Get differentially methylated probes |
     #--------------------------------------
-    Sig.probes <- get.diff.meth(mee, cores=detectCores(), dir.out =dir.out, diff.dir=j, pvalue = 0.01)
+    # Step 3.1: Get diff methylated probes |
+    #--------------------------------------
+    Sig.probes <- get.diff.meth(mee, cores=detectCores(),
+                                dir.out =dir.out,
+                                diff.dir=j,
+                                pvalue = 0.01)
 
     #-------------------------------------------------------------
     # Step 3.2: Identify significant probe-gene pairs            |
+    #-------------------------------------------------------------
     # Collect nearby 20 genes for Sig.probes
     nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
                               cores=detectCores(),
                               geneAnnot=getGeneInfo(mee))
 
-    Hypo.pair <- get.pair(mee=mee,
-                          probes=Sig.probes$probe,
-                          nearGenes=nearGenes,
-                          permu.dir=paste0(dir.out,"/permu"),
-                          dir.out=dir.out,
-                          cores=detectCores(),
-                          label= j,
-                          permu.size=10000,
-                          Pe = 0.001)
+    pair <- get.pair(mee=mee,
+                     probes=Sig.probes$probe,
+                     nearGenes=nearGenes,
+                     permu.dir=paste0(dir.out,"/permu"),
+                     dir.out=dir.out,
+                     cores=detectCores(),
+                     label= j,
+                     permu.size=100, # For significant results use 10000
+                     Pe = 0.01) # For significant results use 0.001
 
-    Sig.probes.paired <- fetch.pair(pair=Hypo.pair, probeInfo = getProbeInfo(mee), geneInfo = getGeneInfo(mee))
+    Sig.probes.paired <- fetch.pair(pair=pair,
+                                    probeInfo = getProbeInfo(mee),
+                                    geneInfo = getGeneInfo(mee))
     Sig.probes.paired <-read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
-                                  stringsAsFactors=FALSE)[,1]
+                                 stringsAsFactors=FALSE)[,1]
 
 
-   #-------------------------------------------------------------
-   # Step 3.3: Motif enrichment analysis of the selected probes |
-   #-------------------------------------------------------------
-   if(length(Sig.probes.paired) > 0 ){
+    #-------------------------------------------------------------
+    # Step 3.3: Motif enrichment analysis on the selected probes |
+    #-------------------------------------------------------------
+    if(length(Sig.probes.paired) > 0 ){
         #-------------------------------------------------------------
-        # Step 3.3: Motif enrichment analysis of the selected probes |
+        # Step 3.3: Motif enrichment analysis on the selected probes |
         #-------------------------------------------------------------
         enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
                                              dir.out=dir.out, label=j,
                                              background.probes = probe$name)
+        motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",j,".motif.enrichment.csv"),
+                                     stringsAsFactors=FALSE)
         if(length(enriched.motif) > 0){
             #-------------------------------------------------------------
             # Step 3.4: Identifying regulatory TFs                        |
@@ -1909,7 +2064,10 @@ for (j in direction){
                           enriched.motif = enriched.motif,
                           dir.out = dir.out,
                           cores = detectCores(), label = j)
-            save(TF, file=paste0(dir.out,"/TF.rda"))
+            TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",j,".TFs.with.motif.pvalue.rda")))
+            save(TF, enriched.motif, Sig.probes.paired,
+                 pair, nearGenes, Sig.probes, motif.enrichment, TF.meth.cor,
+                 file=paste0(dir.out,"/ELMER_results_",j,".rda"))
         }
     }
 }
@@ -1917,19 +2075,25 @@ for (j in direction){
 When ELMER Identifies the enriched motifs for the distal enhancer probes which are significantly
 differentially methylated and linked to putative target gene, it will plot the Odds Ratio (x axis) for the each motifs found.
 
-The list of motifs found for the hyper direction (probes hypermethylated in LGG group compared to the GBM group)
+The list of motifs found for the hyper direction (probes hypomethylated in LGG group compared to the GBM group)
 is found in the figure \ref{odds-ration}. To select the motifs we select the motifs that had a minimum incidence
 of 10 in the given probes set and the smallest lower boundary of 95% confidence interval for Odds Ratio of 1.1.
 These both values are the default from the ELMER package.
 
-The analysis found 14 enriched motifs for the hyper direction and no enriched motifs for the hypo direction.
+The analysis found 10 enriched motifs for the hypo direction.
 
+
+```{r tableTF, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+library(knitr)
+tabl <- kable(TF,format = "markdown")
+cat(tabl) 
+```
 
 After finding these list of enriched motifs, ELMER Identifies regulatory TFs whose expression
 associate with DNA methylation at motifs and for each enriched motif a TF ranking plot is created
 automatically by ELMER. This plot shows the TF ranking plots based on the score $(-log(P value))$ of association between
 TF expression and DNA methylation of the motif. We can see in figure \ref{tfrank} that the top 3 associated
-TFs that are associated with that AP1 motif are HOXA5, TGIF1 and HOAX6.
+TFs that are associated with that AP1 motif are  WT1, ZNF208, ATF4 and DDX5.
 
 
 The output of this step is a data frame with the following columns:
@@ -1941,52 +2105,68 @@ top5percent:  all TFs which are within top 5% list considered candidate upstream
 
 Also, for each motif we can take a look on the three most relevant transcription factors.
 For example, for the AP1 motif the average DNA methylation level of sites with the AP1 motif
-plotted against the expression of the transcription factors HOXA5, TGIF1 and HOAX6 is show in figure \ref{tfvsmet}.
+plotted against the expression of the transcription factors WT1, ZNF208, ATF4 and DDX5 is show in figure \ref{tfvsmet}.
  We can see that the experiment group (GBM samples) has a lower average methylation level of sites with the AP1 motif
  plotted and a higher  expression of the transcription factors.
 
 ```{#numCode .R .numberLines}
 scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
-             byTF=list(TF=c("HOXA5","TGIF1","HOXA6","FOSL1"), probe=enriched.motif[["AP1"]]))
+             byTF=list(TF=c("WT1","ZNF208","ATF4","DDX5"), probe=enriched.motif[["AP1"]]))
 ```
+
+![](TF.png)
 
  And for each relevant TF we will use the clinical data to analyze the survival curves for the 30% patients with higher expression of that transcription factor versus the 30% with lower expression. The code below shows that analysis.
 
 ```{#numCode .R .numberLines}
+
 TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
 
-    # For the transcription factor, we need the geneID.  We use getGeneID 
+    # For the transcription factor, gets it getGeneID
     gene <- getGeneID(mee,symbol=TF)
-    # Get the expression values for the genes.  
+    # Get the expression values for the genes.
     # (getExp is a ELMER function)
     exp <- getExp(mee,geneID=gene)
 
-    # Get the names of the patients with 30% lower expression of the identified TF.
+    # Get the names of the 30% patients with lower expression
     g1 <- names(sort(exp)[1:ceiling(length(exp) * percentage)])
 
     # Get the names of the 30% patients with higher expression
     g2 <- names(sort(exp,decreasing = T)[1:ceiling(length(exp) * percentage)])
 
-	# get the clinical data of these selected patients
+    # get the data of only these patients
     clinical <- clinical[clinical$bcr_patient_barcode %in% substr(c(g1, g2),1,12),]
-    
-    # Create the labels for each patient
+
+    # Create the labels for each sample
     clinical$tf_groups <- "high"
     clinical[clinical$bcr_patient_barcode  %in% substr(c(g1),1,12),]$tf_groups <- "low"
-    
+
     # Use TCGAbiolinks to create the survival curve
     TCGAanalyze_survival(clinical,"tf_groups",
                          legend=paste0(TF," Exp level"),
                          filename = paste0(TF,".png"))
 }
 
+# get clinical patient data for GBM samples
+gbm_clin <- TCGAquery_clinic("gbm","clinical_patient")
+
+# get clinical patient data for LGG samples
+lgg_clin <- TCGAquery_clinic("lgg","clinical_patient")
+
+# Bind the results, as the columns might not be the same,
+# we will will plyr rbind.fill, to have all columns from both files
+clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 # Call the function we created
-TCGAsurvival_TFplot("TGIF1",mee,clinical)
-TCGAsurvival_TFplot("HOXA5",mee,clinical)
-TCGAsurvival_TFplot("HOXA6",mee,clinical)
+TCGAsurvival_TFplot("FOXP4",mee,clinical)
+TCGAsurvival_TFplot("FOXE3",mee,clinical)
 ```
 
 The figures \ref{survival_hoxa6}, shows that the samples with lower expression of these TFs have a better survival than those with higher expression.
+
+![](FOXE3.png)
+![](FOXP4.png)
+
+
 
 # Conclusion
 
