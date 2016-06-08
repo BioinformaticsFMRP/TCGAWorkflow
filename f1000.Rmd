@@ -21,8 +21,9 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache=FALSE)
 ```
-
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(ComplexHeatmap) # Version 1.10.2
@@ -320,11 +321,6 @@ for (cancertype in c("LGG", "GBM")) {
     net.mrnet <- minet(t(mydata))
     net.clr <- minet(t(mydata), method = "clr")
     net.c3net <- c3net(mydata)
-
-    net.aracne.sb <- minet(t(mydata.sb), method = "aracne")
-    net.mrnet.sb <- minet(t(mydata.sb))
-    net.clr.sb <- minet(t(mydata.sb), method = "clr")
-    net.c3net.sb <- c3net(mydata.sb)
 
     ### validate compared to biogrid network
     tmp.val <- list(validate(net.aracne, net.biogrid.de), validate(net.mrnet, net.biogrid.de),
