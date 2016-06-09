@@ -168,10 +168,11 @@ annotation <- HeatmapAnnotation(annotation_height = rep(unit(0.3, "cm"),ncol(ann
                                 df = annotation,
                                 col = list(disease = c("LGG"="green", "GBM"="orange"),
                                            radiation_therapy = c("YES"="blue","NO"="red",
-                                                                 "[Unknown]"="yellow","[Not Available]"="grey")),
-                                annotation_legend_param = list(title_gp = gpar(fontsize = 16, fontface = "bold"),
-                                                               labels_gp = gpar(fontsize = 16), # size labels
-                                                               grid_height = unit(8, "mm")))
+                                            "[Unknown]"="yellow","[Not Available]"="grey")),
+                                annotation_legend_param = list(
+                                    title_gp = gpar(fontsize = 16, fontface = "bold"),
+                                    labels_gp = gpar(fontsize = 16), # size labels
+                                    grid_height = unit(8, "mm")))
 
 png("LGG_GBM_oncoprint.png",width = 800,height = 400)
 p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
@@ -756,7 +757,7 @@ miRNA\_Array, and RPPA.
 By default, RTCGAtoolbox allows users to download up to 500 MB worth of data.
 To increase the size of the download, users are encouraged to use **fileSizeLimit** argument.
 An example is found in listing below.
-The *getData* function allow users to access the downloaded data (see lines 22-24 of listing below) as a S4Vector object.
+The `getData` function allow users to access the downloaded data (see lines 22-24 of listing below) as a S4Vector object.
 
 
 ```{#numCode .R .numberLines}
@@ -787,7 +788,7 @@ gbm.gistic <- getData(gbm.data,"GISTIC")
 ```
 
 Finnaly, RTCGAtoolbox can access level 4 data, which can be handy when the user requires GISTIC results.
- GISTIC is used to identify genes targeted by somatic copy-number alterations (SCNAs) [@mermel2011gistic2] (see code listing).
+ GISTIC is used to identify genes targeted by somatic copy-number alterations (SCNAs) [@mermel2011gistic2].
 
 ```{#numCode .R .numberLines}
 # Download GISTIC results
@@ -862,7 +863,8 @@ for(tumor in tumorList){
     pathCancer <- paste0("data",tumor)
     datQuery <- TCGAquery(tumor = tumor, platform = PlatformTumor, level = "3")
     lsSample <- TCGAquery_samplesfilter(query = datQuery)
-    selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")
+    # We will use only 200 samples to make the example faster, remove [1:200] to use all samples
+    selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")[1:200]
 
     TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = selected)
 
@@ -1298,8 +1300,8 @@ circos.genomicTrackPlotRegion(s.mut, ylim = c(1.2,4.2),
 
 circos.clear()
 
-legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=3, cex=1.2, title.adj=0)
-legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=3, cex=1.2, title.adj=0)
+legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=2, cex=0.7, title.adj=0)
+legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=2, cex=0.7, title.adj=0)
 ```
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
@@ -1363,9 +1365,9 @@ circos.genomicPosTransformLines(s.mutt,
 circos.clear()
 
 legend(0.4, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"),
-       title="CNVs", text.font=3, cex=1.3, title.adj=0)
+       title="CNVs", text.font=3, cex=0.7, title.adj=0)
 legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors,
-       title="Mutations", text.font=3, cex=1.3, title.adj=0)
+       title="Mutations", text.font=3, cex=0.7, title.adj=0)
 ```
 
 
@@ -1611,7 +1613,7 @@ p=\frac{TP}{TP+FP}.
 $$ 
 The performance of an algorithm can then be summarized using ROC (false positive rate versus true positive rate) or PR (precision versus recall) curves.
 
-A weakness of this type of comparison is that an edge that is not present in the set of known interactions can either mean that an experimental validation has been tried and did not show any regulatory mechanism or (more likely) has not yet been attempted.\\
+A weakness of this type of comparison is that an edge that is not present in the set of known interactions can either mean that an experimental validation has been tried and did not show any regulatory mechanism or (more likely) has not yet been attempted.
 
 In the following, we ran the nce on the differentially expressed genes identified in Section "Transcriptomic analysis"
 
@@ -1647,23 +1649,12 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 	return(mat.biogrid)
 }
 ```
-There are 3,941 unique interactions between the 2,901 differentially expressed genes.
 
 **Using differentially expressed genes from TCGAbiolinks workflow**
 
 We start this analysis by inferring four gene regulatory networks (the corresponding
 number of edges are presented in Table~\ref{table::numberedges}) for the GBM data set
 and for the LGG data set using the two different gene sets.
-
-```{r table2, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
-tabl <- "  
-| gene set  | inference algorithm | aracne | c3net | clr       | mrnet     |
-|-----------|---------------------|--------|-------|-----------|-----------|
-| DE        | GBM                 | 5,903  | 2,678 | 1,718,328 | 1,682,334 |
-|           | LGG                 | 4,443  | 2,684 | 1,939,142 | 1,859,121 |
-"
-cat(tabl) 
-```
 
 ```{#numCode .R .numberLines}
 ### plot details (colors & symbols)
