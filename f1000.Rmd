@@ -22,7 +22,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = FALSE)
+knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = TRUE)
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
@@ -316,7 +316,7 @@ met <- subset(met,subset = !as.character(seqnames(met)) %in% c("chrNA","chrX","c
 
 
 TCGAvisualize_meanMethylation(met,
-                              groupCol = "disease", width = 6, height = 6,
+                              groupCol = "disease", width = 3, height = 3,
                               group.legend  = "Groups",
                               filename = "mean_lgg_gbm.png",
                               print.pvalue = TRUE)
@@ -872,7 +872,7 @@ Cancer related CNV have to be present in many of the analyzed genomes. The most 
 
 Segmented data retrieved from TCGA were used to generate a matrix including all needed information about the observed aberrant regions. Furthermore, GAIA requires genomic probes metadata (specific for each CNV technology), that can be downloaded from broadinstitute website.
 
-```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 #--------------------      Internal functions     ----------------------------
 gaiaCNVplot <- function (calls, tumor=NULL, threshold=0.01)
 {
@@ -1047,7 +1047,7 @@ Using biomaRt we retrieved the genomic ranges of all human genes and we compared
 them with significant aberrant regions to select full length genes. An example of
 the result is shown in table \ref{tab::tab1}.
 
-```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 ##############################
 ## Recurrent CNV annotation ## 
 ##############################
@@ -1611,10 +1611,14 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 		ind <- intersect(ind.A, ind.B)
 	}
 
-	mat.biogrid <- matrix(0, nrow=length(names.genes), ncol=length(names.genes), dimnames=list(names.genes, names.genes))
+	mat.biogrid <- matrix(0, nrow=length(names.genes), ncol=length(names.genes), 
+	                      dimnames=list(names.genes, names.genes))
 
 	for(i in ind){
-		mat.biogrid[tmp.biogrid[i,"Official.Symbol.Interactor.A"], tmp.biogrid[i,"Official.Symbol.Interactor.B"]] <- mat.biogrid[tmp.biogrid[i,"Official.Symbol.Interactor.B"], tmp.biogrid[i,"Official.Symbol.Interactor.A"]] <- 1
+		mat.biogrid[tmp.biogrid[i,"Official.Symbol.Interactor.A"], 
+		            tmp.biogrid[i,"Official.Symbol.Interactor.B"]] <- mat.biogrid[
+		            tmp.biogrid[i,"Official.Symbol.Interactor.B"],
+		            tmp.biogrid[i,"Official.Symbol.Interactor.A"]] <- 1
 	}
 	diag(mat.biogrid) <- 0
 
@@ -1859,7 +1863,7 @@ sequence <- RangedData(space=as.character(probes@seqnames),
                        IRanges(start=probes@ranges@start - 100,
                                end=probes@ranges@start + 100), strand="*")
 #look for motifs
-gadem <- GADEM(sequence, verbose=1, genome=Hsapiens)
+gadem <- GADEM(sequence, verbose=FALSE, genome=Hsapiens)
 
 # How many motifs were found?
 length(gadem@motifList)
@@ -1889,7 +1893,7 @@ library(MotIV)
 # motif matching analysis
 analysis.jaspar <- motifMatch(pwm)
 summary(analysis.jaspar)
-plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.7)
+plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.3)
 
 #  visualize the quality of the results looking into the alignments
 # E-value give an estimation of the match.
@@ -2089,9 +2093,21 @@ p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_
 dev.off()
 ```
 
-![](chip_heatmap.png)
+The result from TCGAanalyze_Preprocessing is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("chip_heatmap.png")
+grid.raster(img)
+```
 
-![](chip-seq.png)
+The result from TCGAanalyze_Preprocessing is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("chip-seq.png")
+grid.raster(img)
+```
 
 
 To annotate the location of a given peak in terms of genomic features, annotatePeak
