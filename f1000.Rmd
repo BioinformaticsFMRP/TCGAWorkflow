@@ -1100,7 +1100,7 @@ for(tumor in tumorList){
 
 
 ### Visualizing multiple genomic alteration events
-In order to visualize multiple genomic alteration events we recommend using OncoPrint plot which is provided by bioconductor package  [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)  [@ComplexHeatmap]. The listing \ref{lst:mut} shows how to download mutation data using
+In order to visualize multiple genomic alteration events we recommend using OncoPrint plot which is provided by bioconductor package  [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)  [@ComplexHeatmap]. The listing below shows how to download mutation data using
  `TCGAquery_maf` (line 4), then we filtered the genes to obtain genes with mutations found among glioma
 specific pathways (lines 6 - 12).  The following steps prepared the data into a matrix to fit
  `oncoPrint` function.
@@ -1109,7 +1109,7 @@ The upper barplot indicates the number of genetic mutation per patient,
 while the right barplot shows the number of genetic mutations per gene.
 Also, it is possible to add annotations to rows or columns.
 In the columns case, if an insertion is made at the top, will remove the barplot.
-The final result for adding the annotation to the bottom is highlighted in figure \ref{oncoprint} .
+The final result for adding the annotation to the bottom is highlighted in the figure.
 
 ```{#numCode .R .numberLines}
 library(ComplexHeatmap) # Version 1.10.2
@@ -1380,7 +1380,7 @@ The  data used for following transcriptomic analysis were downloaded using TCGAb
 We downloaded only primary solid tumor (TP) samples t, which resulted in 516 LGG samples and 156 GBM samples, then
 prepared it in two separate rse object (RangedSummarizedExperiment) saving them as an
 R object with a filename including both the name of the cancer and the name of the plaftorm used
-for gene expression data (see listing \ref{lst:rnapre}).
+for gene expression data.
 
 ```{#numCode .R .numberLines}
 library(TCGAbiolinks)
@@ -1407,7 +1407,7 @@ for(tumor in tumorList){
 }
 ```
 To pre-process the data, first, we searched for possible outliers using the `TCGAanalyze_Preprocessing`
-function, which performs an Array Array Intensity correlation AAIC (lines 14-17 and 26-29 of listing \ref{lst:dea}).
+function, which performs an Array Array Intensity correlation AAIC (lines 14-17 and 26-29 of listing below).
 In this way we defined a square symmetric matrix of pearson correlation among all samples in each cancer type (LGG or GBM).
 This matrix found 0 samples with low correlation (cor.cut = 0.6)
 that can be identified as possible outliers.
@@ -1488,7 +1488,7 @@ length(gbm.samples)
 
 ### EA: enrichment analysis
 In order to understand the underlying biological process from DEGs we performed an
-enrichment analysis using `TCGAanalyze_EA_complete` function (see listing \ref{lst:ea}).
+enrichment analysis using `TCGAanalyze_EA_complete` function.
 
 ```{#numCode .R .numberLines}
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
@@ -1522,7 +1522,7 @@ pathway over the total number of genes in that pathway (ratio, red line).
 
 To verify if the genes found have a specific role in a pathway, the bioconducotor package
 [pathview](http://bioconductor.org/packages/pathview/) [@luo2013pathview] can be used.
-Listing \ref{lst:pathview} shows an example how to use it. It can receive, for example, a named
+It can receive, for example, a named
 vector of gene with the expression level,
 the pathway.id which can be found in [KEGG database](http://www.genome.jp/kegg/pathway.html),
 the species ('hsa' for Homo sapiens) and the limits for the gene expression.
@@ -1723,9 +1723,8 @@ for (tumor in c("LGG", "GBM")) {
     BioGrid interactions\label{fig::roc_LGG}](roc_biogrid_LGG.png)
 
 
-In Figure~\ref{fig::roc_GBM} , the obtained ROC curve and the corresponding area under curve (AUC) are presented. 
-It can be observed that CLR and MRNET perform best when comparing the inferred network with known interactions from the BioGrid database.
-
+In Figure above , the obtained ROC curve and the corresponding area under curve (AUC) are presented. 
+It can be observed that MRNET perform best when comparing the inferred network with known interactions from the BioGrid database.
 
 
 ## Epigenetic analysis
@@ -1737,13 +1736,13 @@ These CpG islands are normally found in sites of transcription initiation and th
 
 Thus, the investigation of the DNA methylation is crucial to understanding regulatory  gene  networks  in  cancer as the DNA methylation represses transcription [@robertson2005dna]. Therefore, the DMR (differentially Methylation Region) detection can help us investigate regulatory  gene  networks.
 
-This section describes the analysis of DNA methylation using the bioconductor package [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) [@TCGAbiolinks]. For this analysis, DNA methylation data from the platform Infinium HumanMethylation450 for GBM and LGG data were obtained (lines 1-7 of the listing \ref{lst:meanmet} describes how to make the data acquisition). We started by checking the mean DNA methylation of different groups of samples, then a DMR (Differentially methylated region) analysis is performed in which we search for regions that have possible biological significance, for example, regions that are methylated in one group and unmethylated in the other. After finding these regions, they can be visualized using heatmaps.
+This section describes the analysis of DNA methylation using the bioconductor package [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) [@TCGAbiolinks]. For this analysis, DNA methylation data from the platform Infinium HumanMethylation450 for GBM and LGG data were obtained. We started by checking the mean DNA methylation of different groups of samples, then a DMR (Differentially methylated region) analysis is performed in which we search for regions that have possible biological significance, for example, regions that are methylated in one group and unmethylated in the other. After finding these regions, they can be visualized using heatmaps.
 
 ### Visualizing the mean DNA methylation of each patient
 
-It should be highlighted that some pre-processing of the DNA methylation data was done. The DNA methylation data from the 450k platform has three types of probes cg (CpG loci) , ch (non-CpG loci) and rs (SNP assay). The last type of probe can be used for sample identification and tracking and should be excluded for differential methylation analysis according to the [ilumina manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf). Therefore, the rs probes were removed  (see listing \ref{lst:meanmet} lines 22). Also,  probes in chromosomes X, Y were removed to eliminate potential artifacts originating from the presence of a different proportion of males and females [@marabita2013evaluation]. The last pre-processing steps were to selected only primary samples (see listing \ref{lst:meanmet} lines 16) and probes with at least one NA value were removed (see listing \ref{lst:meanmet} lines 19).
+It should be highlighted that some pre-processing of the DNA methylation data was done. The DNA methylation data from the 450k platform has three types of probes cg (CpG loci) , ch (non-CpG loci) and rs (SNP assay). The last type of probe can be used for sample identification and tracking and should be excluded for differential methylation analysis according to the [ilumina manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf). Therefore, the rs probes were removed  (see listing below lines 22). Also,  probes in chromosomes X, Y were removed to eliminate potential artifacts originating from the presence of a different proportion of males and females [@marabita2013evaluation]. The last pre-processing steps were to selected only primary samples (see listing below lines 16) and probes with at least one NA value were removed (see listing below lines 19).
 
-After this pre-processing step, using the function `TCGAvisualize_meanMethylation` provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing \ref{lst:meanmet} lines 25-29).
+After this pre-processing step, using the function `TCGAvisualize_meanMethylation` provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing below lines 25-29).
 
 ```{#numCode .R .numberLines}
 #----------------------------
@@ -1775,20 +1774,17 @@ TCGAvisualize_meanMethylation(met,
 
 ![](mean_lgg_gbm.png)
 
-Figure \ref{mean_met} illustrates a mean DNA methylation plot for each sample in the GBM group (140 samples) and
+The figure above illustrates a mean DNA methylation plot for each sample in the GBM group (140 samples) and
 a mean DNA methylation for each sample in the LGG group.  Genome-wide view of the data highlights a difference between the groups of tumors (p-value = $2.80x10^{-55}$).
 
 
 ### Searching for differentially methylated CpG sites
 
-The next step is to define differentially methylated CpG sites between the two groups. This can be done using the `TCGAanalyze_DMR` function (see listing \ref{lst:dmrcode}). The DNA methylation data (level 3) is presented in the form of beta-values that uses a scale ranging from 0.0 (probes completely unmethylated ) up to 1.0 (probes completely methylated).
+The next step is to define differentially methylated CpG sites between the two groups. This can be done using the `TCGAanalyze_DMR` function. The DNA methylation data (level 3) is presented in the form of beta-values that uses a scale ranging from 0.0 (probes completely unmethylated ) up to 1.0 (probes completely methylated).
 
 To find these differentially methylated CpG sites, first, it calculates the difference between the mean DNA methylation (mean of the beta-values) of each group for each probe. Second, it test for differential expression between two groups using the wilcoxon test adjusting by the Benjamini-Hochberg method. Arguments of  `TCGAanalyze_DMR` was set to require a minimum absolute beta-values difference of 0.25 and an adjusted p-value of less than $10^{-40}$.
 
-After these tests, a volcano plot (x-axis: difference of mean DNA methylation, y-axis: statistical significance) is created to help users identify the differentially
-methylated CpG sites and return the object with the results in the rowRanges.
-Figure \ref{volcano_met} shows the volcano plot produced by listing ~\ref{lst:dmrcode}.
-This plot aids the user in selecting relevant thresholds, as we search for candidate biological DMRs.
+After these tests, a volcano plot (x-axis: difference of mean DNA methylation, y-axis: statistical significance) is created to help users identify the differentially methylated CpG sites and return the object with the results in the rowRanges.
 
 ```{#numCode .R .numberLines}
 #-------  5.2 Searching for differentially methylated CpG sites     ----------
@@ -1809,7 +1805,11 @@ met.chr9 <- TCGAanalyze_DMR(met.chr9,
 )
 ```
 
+The figure below shows the volcano plot produced by listing above.
+This plot aids the user in selecting relevant thresholds, as we search for candidate biological DMRs.
+
 ![](LGG_GBM_metvolcano.png)
+
 
 
 To visualize the level of DNA methylation of these probes across all samples, we use heatmaps that can be generate
@@ -1818,7 +1818,7 @@ To create a heatmap using the [complexHeatmap](http://bioconductor.org/packages/
 the user should provide at least one matrix with the DNA methylation levels.
 Also, annotation layers can be added and placed at the bottom, top, left side and right side of the heatmap
 to provide additional metadata description.
-The listing \ref{lst:metheatmap} shows the code to produce the heatmap of a DNA methylation data (figure \ref{complexheatmap_met}).
+The listing above shows the code to produce the heatmap of a DNA methylation data.
 
 ```{#numCode .R .numberLines}
 #--------------------------
@@ -1867,11 +1867,9 @@ png("heatmap.png",width = 600, height = 400); draw(heatmap); dev.off()
 Motif discovery is the attempt to extract small sequence signals hidden within largely non-functional intergenic sequences. These sequence short nucleotide sequences (6-15 bp) might have a biological significance as it can be used to control the expression of genes. These sequences are called Regulatory motifs.
 The bioconductor package [rGADEM](http://bioconductor.org/packages/rGADEM/) [@droit2015rgadem,@li2009gadem] provides an efficient *de novo* motif discovery algorithm for large-scale genomic sequence data.
 
-The user may be interested in looking for unique signatures in the regions defined by `differentially methylated' to identify candidate transcription factors that could bind to these elements affected by the accumulation or absence of DNA methylation. For this analysis we use a sequence of 100 bases before and after the probe location (See lines 6-8 in the listing \ref{lst:rgadem}).
+The user may be interested in looking for unique signatures in the regions defined by `differentially methylated' to identify candidate transcription factors that could bind to these elements affected by the accumulation or absence of DNA methylation. For this analysis we use a sequence of 100 bases before and after the probe location (See lines 6-8 in the listing below).
 An object will be returned which contains all relevant information about your motif analysis
 (sequence consensus, pwm, chromosome, pvalue...).
-
-Using bioconductor package [motifStack](http://bioconductor.org/packages/motifStack/) [@ou2013motifstack] it is possible to generate a graphic representation of multiple motifs with different similarity scores (see figure \ref{fig::motif}).
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(rGADEM)
@@ -1909,7 +1907,7 @@ length(gadem@motifList[[1]]@alignList)
 
 After [rGADEM](http://bioconductor.org/packages/rGADEM/) returns it's results, the user can use [MotIV](http://bioconductor.org/packages/MotIV/)
 package [@mercier2014motiv,@mahony2007dna,@mahony2007stamp,@mercier2011integrated]
-to start the motif matching analysis. The result is shown in figure \ref{fig::tfmotif}.
+to start the motif matching analysis. 
 
 ```{r results='asis', echo=TRUE,message=FALSE,warning=FALSE}
 library(MotIV)
@@ -1941,10 +1939,9 @@ and gene expression. The $log_{10}$ (FDR-corrected P value) for DNA methylation 
 and for gene expression on the y axis, for each gene.
 The horizontal black dashed line shows the FDR-adjusted P value of $10^{-100}$
 for the expression data and the vertical ones shows the FDR-adjusted P value of $10^{-40}$ for the DNA methylation data.
-The Starburst plot for the listing \ref{lst:starburst} is shown in figure \ref{starplot}.
 While the argument met.p.cut and exp.p.cut controls the black dashed lines, the arguments
 diffmean.cut and logFC.cut will be used to highlight the genes that respects these parameters
-(circled genes in figure \ref{starplot}). For the example below we set higher p.cuts trying
+(circled genes in the figure). For the example below we set higher p.cuts trying
 to get the most significant list of pair gene/probes. But for the next sections we will
 use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 
@@ -2062,7 +2059,7 @@ implements functions that uses Chip-seq data to retrieve the nearest genes aroun
  to TSS regions, genomic annotation, distance to TSS and overlap of peaks or genes.
 
 
-After downloading the histone marks (see listing \ref{lst:annotationhub},
+After downloading the histone marks (see listing above),
 it is useful to verify the average profile of peaks binding to hypomethylated and hypermethylated regions,
 which will help the user understand better the regions found.
 
@@ -2164,7 +2161,7 @@ for the DNA methylation data will remove probes with NA values in more than 20% 
 for RNA expression data it will take the log2(expression + 1) of the expression matrix in order to linearize the relation between
 DNA methylation and expression. Also, it will prepare the row names of the matrix as required by the package.
 
-The listing \ref{lst:prepareelmer} shows how to use
+The listing below shows how to use
 (http://bioconductor.org/packages/TCGAbiolinks/)[TCGAbiolinks}] [@TCGAbiolinks]
 to search, download and prepare the data for the [ELMER](http://bioconductor.org/packages/ELMER/) package.
 Due to time and memory constraints, we will use in this example only data from 11 LGG patients  and 11 GBM patients,
@@ -2327,7 +2324,13 @@ When ELMER Identifies the enriched motifs for the distal enhancer probes which a
 differentially methylated and linked to putative target gene, it will plot the Odds Ratio (x axis) for the each motifs found.
 
 The list of motifs found for the hyper direction (probes hypomethylated in LGG group compared to the GBM group)
-is found in the figure \ref{odds-ration}. To select the motifs we select the motifs that had a minimum incidence
+is found in the motif enrichment plot. 
+
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
+ motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
+```
+
+To select the motifs we select the motifs that had a minimum incidence
 of 10 in the given probes set and the smallest lower boundary of 95% confidence interval for Odds Ratio of 1.1.
 These both values are the default from the ELMER package.
 
@@ -2336,10 +2339,6 @@ These both values are the default from the ELMER package.
 length(TF$motif)
 ```
 
-To make a motif enrichment plot you can use the function motif.enrichment.plot as follows:
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
- motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
-```
 
 ```{r tableTF, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 library(knitr)
@@ -2350,7 +2349,16 @@ After finding these list of enriched motifs, ELMER Identifies regulatory TFs who
 associate with DNA methylation at motifs and for each enriched motif a TF ranking plot is created
 automatically by ELMER. This plot shows the TF ranking plots based on the score $(-log(P value))$ of association between
 TF expression and DNA methylation of the motif. We can see in figure \ref{tfrank} that the top 3 associated
-TFs that are associated with that AP1 motif are  WT1, ZNF208, ATF4 and DDX5.
+TFs that are associated with that AP1 motif are  POLR3K, DLX3 and NEUROD2.
+
+
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE, fig.align='center',fig.height=8,fig.width=8}
+library(ELMER)
+library(grid)
+load("/home/tiagochst/elmer/hypo/ELMER_results_hypo.rda")
+gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, motif="AP1", save=FALSE)
+grid.draw(gg[[1]])
+```	
 
 
 The output of this step is a data frame with the following columns:
