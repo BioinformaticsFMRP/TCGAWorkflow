@@ -1379,32 +1379,48 @@ legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors,
 ### Pre-Processing Data
 
 The  data used for following transcriptomic analysis were downloaded using TCGAbiolinks.
-We downloaded only primary solid tumor (TP) samples t, which resulted in 516 LGG samples and 156 GBM samples, then
+We downloaded 10 primary solid tumor (TP) samples that has both DNA methylation and gene expression data 
+(this number of samples were used to make this workflow faster) then
 prepared it in two separate rse object (RangedSummarizedExperiment) saving them as an
 R object with a filename including both the name of the cancer and the name of the plaftorm used
 for gene expression data.
 
 ```{#numCode .R .numberLines}
 library(TCGAbiolinks)
+library(stringr)
 
 # defining common parameters
 tumorList <- c("LGG","GBM")
 PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
 
+# Get primary solid tumor samples with both DNA methyation and gene expression
+matched_met_exp <- function(tumor, n = NULL){
+    # get primary solid tumor samples: DNA methylation
+    met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
+    met450k.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(met450k$barcode,","))),c("TP"))
+
+    # get primary solid tumor samples: RNAseq
+    rnaseq <- TCGAquery(tumor = tumor,c("IlluminaHiSeq_RNASeqV2"),level = 3)
+    rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
+
+    # Get patients with samples in both platforms
+    patients <- unique(substr(rnaseq.tp,1,15)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) patients <- patients[1:n] # get only n samples
+    return(patients)
+}
+lgg.samples <- matched_met_exp("LGG", n = 10)
+gbm.samples <- matched_met_exp("GBM", n = 10)
+samples <- c(lgg.samples,gbm.samples)
+
 for(tumor in tumorList){
 	pathCancer <- paste0("data",tumor)
 	datQuery <- TCGAquery(tumor = tumor, platform = PlatformTumor, level = "3")
 
-	# get only primary solid Tumor
-	lsSample <- TCGAquery_samplesfilter(query = datQuery)
-	# For speed process we will use only 10 samples from LGG and 10 for GBM
-	dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2, typesample = "TP")[1:10]
-
-  TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = c(dataSmTP))
+  TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = c(samples))
   dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType,
                           save = TRUE, summarizedExperiment = TRUE,
-                          samples = c(dataSmTP),
+                          samples = c(samples),
                           filename = paste0(tumor,"_",PlatformTumor,".rda"))
 }
 ```
@@ -1739,9 +1755,35 @@ After this pre-processing step, using the function `TCGAvisualize_meanMethylatio
 # Obtaining DNA methylation
 #----------------------------
 library(TCGAbiolinks)
-query.met <- TCGAquery(tumor = c("LGG","GBM"),"HumanMethylation450", level = 3)
-TCGAdownload(query.met)
-met <- TCGAprepare(query = query.met,dir = ".", save = TRUE, filename = "lgg_gbm_met.rda")
+library(stringr)
+# Samples
+matched_met_exp <- function(tumor, n = NULL){
+    # get primary solid tumor samples: DNA methylation
+    met450k <- TCGAquery(tumor = tumor,"HumanMethylation450", level = 3)
+    met450k.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(met450k$barcode,","))),c("TP"))
+
+    # get primary solid tumor samples: RNAseq
+    rnaseq <- TCGAquery(tumor = tumor,c("IlluminaHiSeq_RNASeqV2"),level = 3)
+    rnaseq.tp <- TCGAquery_SampleTypes(unique(unlist(stringr::str_split(rnaseq$barcode,","))),c("TP"))
+
+    # Get patients with samples in both platforms
+    patients <- unique(substr(rnaseq.tp,1,15)[substr(rnaseq.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) patients <- patients[1:n] # get only n samples
+    return(patients)
+}
+lgg.samples <- matched_met_exp("LGG", n = 10)
+gbm.samples <- matched_met_exp("GBM", n = 10)
+samples <- c(lgg.samples,gbm.samples)
+
+#-----------------------------------
+# 1 - Methylation
+# ----------------------------------
+# For methylation it is quicker in this case to download the tar.gz file
+# and get the samples we want instead of downloading files by files
+query.met <- TCGAquery(tumor = c("GBM","LGG"), platform = "HumanMethylation450", level = 3, samples = samples)
+TCGAdownload(query.met, samples = samples)
+met <- TCGAprepare(query.met,dir = ".", save = FALSE,samples = samples)
+met.elmer <- TCGAprepare_elmer(met, platform = "HumanMethylation450")
 
 #----------------------------
 # Mean methylation
@@ -2154,8 +2196,8 @@ DNA methylation and expression. Also, it will prepare the row names of the matri
 The listing below shows how to use
 (http://bioconductor.org/packages/TCGAbiolinks/)[TCGAbiolinks}] [@TCGAbiolinks]
 to search, download and prepare the data for the [ELMER](http://bioconductor.org/packages/ELMER/) package.
-Due to time and memory constraints, we will use in this example only data from 11 LGG patients  and 11 GBM patients,
-this patients should have both DNA methylation data and gene expression data.
+Due to time and memory constraints, we will use in this example only data from 10 LGG patients  and 10 GBM patients that 
+have both DNA methylation and gene expression data. This samples are the same used in the previous steps.
 
 ```{#numCode .R .numberLines}
 #--------------------- 8.3 Identification of Regulatory Enhancers   ----------------------------
