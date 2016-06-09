@@ -22,7 +22,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = FALSE)
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
@@ -167,7 +167,8 @@ annotation <- clinical[match(colnames(mat),clinical$bcr_patient_barcode),c("dise
 annotation <- HeatmapAnnotation(annotation_height = rep(unit(0.3, "cm"),ncol(annotation)),
                                 df = annotation,
                                 col = list(disease = c("LGG"="green", "GBM"="orange"),
-                                           radiation_therapy = c("YES"="blue","NO"="red","[Unknown]"="yellow","[Not Available]"="grey")),
+                                           radiation_therapy = c("YES"="blue","NO"="red",
+                                                                 "[Unknown]"="yellow","[Not Available]"="grey")),
                                 annotation_legend_param = list(title_gp = gpar(fontsize = 16, fontface = "bold"),
                                                                labels_gp = gpar(fontsize = 16), # size labels
                                                                grid_height = unit(8, "mm")))
@@ -316,7 +317,7 @@ met <- subset(met,subset = !as.character(seqnames(met)) %in% c("chrNA","chrX","c
 
 
 TCGAvisualize_meanMethylation(met,
-                              groupCol = "disease", width = 3, height = 3,
+                              groupCol = "disease", width = 8, height = 8,dpi = 300,
                               group.legend  = "Groups",
                               filename = "mean_lgg_gbm.png",
                               print.pvalue = TRUE)
@@ -513,7 +514,12 @@ TCGAsurvival_TFplot("FOXE3",mee,clinical)
 
 
 Biotechnological advances in sequencing have led to an explosion of publicly available data via large international consortia such as 
-[The Cancer Genome Atlas (TCGA)](http://cancergenome.nih.gov/), [ENCODE](http://www.encodeproject.org/), and the NIH Roadmap Epigenomics Mapping Consortium [Roadmap](http://www.roadmapepigenomics.org/). These projects have provided unprecedented opportunities to interrogate the epigenome of cultured cancer cell lines as well as normal and tumor tissues with high genomic resolution. The [bioconductor](http://www.bioconductor.org/) project offers more than 1,000 open-source software and statistical packages to analyze high-throughput genomic data. However, most packages are designed for specific data types (e.g. expression, epigenetics, genomics) and there is no one comprehensive tool that provides a complete integrative analysis harnessing the resources and data provided by all three public projects. A need to create an integration of these different analyses was recently proposed. In this workflow, we provide a series of biologically focused integrative downstream analyses of different molecular data. We describe how to download, process and prepare TCGA data and by harnessing several key bioconductor packages, we describe how to extract biologically meaningful genomic and epigenomic data and by using Roadmap and ENCODE data, we provide a workplan to identify candidate biologically relevant functional epigenomic elements associated with cancer. To illustrate our workflow, we analyzed two types of brain tumors : low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM). This workflow introduces the following Bioconductor packages:
+[The Cancer Genome Atlas (TCGA)](http://cancergenome.nih.gov/), [ENCODE](http://www.encodeproject.org/), and the NIH Roadmap Epigenomics Mapping Consortium [Roadmap](http://www.roadmapepigenomics.org/). These projects have provided unprecedented opportunities to interrogate the epigenome of cultured cancer cell lines as well as normal and tumor tissues with high genomic resolution. The [bioconductor](http://www.bioconductor.org/) project offers more than 1,000 open-source software and statistical packages to analyze high-throughput genomic data. However, most packages are designed for specific data types (e.g. expression, epigenetics, genomics) and there is no one comprehensive tool that provides a complete integrative analysis harnessing the resources and data provided by all three public projects. A need to create an integration of these different analyses was recently proposed. In this workflow, we provide a series of biologically focused integrative downstream analyses of different molecular data. We describe how to download, process and prepare TCGA data and by harnessing several key bioconductor packages, we describe how to extract biologically meaningful genomic and epigenomic data and by using Roadmap and ENCODE data, we provide a workplan to identify candidate biologically relevant functional epigenomic elements associated with cancer. 
+
+
+To illustrate our workflow, we analyzed two types of brain tumors : low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM). But in order to create a repeatable workflow in a short time, for some sections we used only a subset of the data available, always adjusting necessary cutting thresholds, and for other  sections the code was executed only for LGG or GBM, but is designed to easily run both tumor types.
+
+This workflow introduces the following Bioconductor packages:
 
 * [AnnotationHub](http://www.bioconductor.org/packages/AnnotationHub/)
 * [ChIPSeeker](http://www.bioconductor.org/packages/ChIPseeker/)
@@ -663,11 +669,15 @@ sample.info <- colData(exp)
 genes.info <- rowRanges(exp)
 ```
 
-Clinical data can be obtained using the function `TCGAquery\_clinical` which can be used as
+Clinical data can be obtained using the function `TCGAquery_clinical` which can be used as
 described in listing below. This function has three arguments *tumor*, *clinical\_data\_type* and *samples*.
 The *clinical\_data\_type* argument is always required and should be accompanied by at least one of the other two parameters.
 Examples for the argument clinical\_data\_type are: "clinical\_drug", "clinical\_patient",and "clinical\_radiation"
 (a complete list and description can be found in the section 'Working with clinical data.' of the TCGAbiolinks [vignette](https://bioconductor.org/packages/3.4/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html#tcgaquery_clinic-tcgaquery_clinicfilt-working-with-clinical-data.).
+
+**Clinical data: important note**
+
+Follow-up data (in biotab format) for TCGA patients are contained in the ‘clinical_follow_up’ files for each cancer type. The different versions of the follow-up files represent changes or new data added to follow-up forms over time. Multiple follow-up files for a single patient often represent a series of follow-ups over a period of time. However, multiple instances of the same follow-up file can also represent multiple new tumor events within the same time period. To obtain all available disease progression information, please use ALL of the follow_up files in your analyses, not just the latest version.
 
 ```{#numCode .R .numberLines}
   # get clinical patient data for GBM samples
@@ -696,7 +706,7 @@ Mutation information is stored in Mutation Annotation Format (MAF) files which c
 and states (validated or putative). A summary of all the Mutation Annotation Format (MAF) can be accessed at
 [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files).
 To download this data using  [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/),
-`TCGAquery\_maf` function is provided. It will download the non-obsolete tables from TCGA wiki,
+`TCGAquery_maf` function is provided. It will download the non-obsolete tables from TCGA wiki,
 remove the protected entries and ask the user which file s/he wants to download (see listing below).
 It will then download and return a data frame with the data.
 
@@ -799,10 +809,10 @@ Level 3 processed data are the aberrant regions along the genome resulting from 
 and they are available for all copy number technologies.
 
 In this section, we will show how to analyze CNV level 3 data from TCGA to identify recurrent alterations in cancer genome.
-We analyzed GBM and LGG segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array 6.0).
+We analyzed LGG segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array 6.0).
 
 ### Pre-Processing Data
-The only CNV platform available for both LGG and GBM in TCGA is "Affymetrix Genome-Wide Human SNP Array 6.0". Using TCGAbiolinks, we queried for CNV SNP6 level 3 data for primary solid tumor samples. Data for selected samples were downloaded and prepared in two separate rse objects (RangedSummarizedExperiment).
+The only CNV platform available for both LGG and GBM in TCGA is "Affymetrix Genome-Wide Human SNP Array 6.0". Using TCGAbiolinks, we queried for CNV SNP6 level 3 data for primary solid tumor samples. Data for selected samples were downloaded and prepared in  separate objects (RangedSummarizedExperiment).
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,include=FALSE}
 library(TCGAbiolinks)
@@ -994,7 +1004,8 @@ for(tumor in tumorList){
     message("Gene information loaded")
     cnv_obj <- load_cnv(cnvMatrix, markers_obj, length(selected))
 
-    # For speed process we will evaluate only chromessome 1, chromosomes = -1 to consider all chromossomes
+    # For speed process we will evaluate only chromessome 14 up to 18, 
+    # use chromosomes = -1 to consider all chromossomes
     results <- runGAIA(cnv_obj, markers_obj, output_file_name=paste0("GAIA_",tumor,"_",PlatformTumor,"_flt.txt"),
                        aberrations = -1,  chromosomes = c(14:18), num_iterations = 10, threshold = 0.25)
 
@@ -1037,7 +1048,7 @@ for(tumor in tumorList){
 }
 ```
 
-Recurrent amplifications and deletions were identified for both LGG and GBM, and represented in chromosomal overview plots by a statistical score (*$-log_{10}$ corrected p-value* for amplifications and *$log_{10}$ corrected p-value* for deletions). Genomic regions identified as significantly altered in copy number (*corrected p-value* < $10^{-4}$) were then annotated to report amplified and deleted genes potentially related with cancer.
+Recurrent amplifications and deletions were identified for LGG, and represented in chromosomal overview plots by a statistical score (*$-log_{10}$ corrected p-value* for amplifications and *$log_{10}$ corrected p-value* for deletions). Genomic regions identified as significantly altered in copy number (*corrected p-value* < $10^{-3}$) were then annotated to report amplified and deleted genes potentially related with cancer.
 
 
 ### Gene annotation of recurrent CNV
@@ -1090,7 +1101,7 @@ for(tumor in tumorList){
 
 ### Visualizing multiple genomic alteration events
 In order to visualize multiple genomic alteration events we recommend using OncoPrint plot which is provided by bioconductor package  [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)  [@ComplexHeatmap]. The listing \ref{lst:mut} shows how to download mutation data using
- `TCGAquery\_maf` (line 4), then we filtered the genes to obtain genes with mutations found among glioma
+ `TCGAquery_maf` (line 4), then we filtered the genes to obtain genes with mutations found among glioma
 specific pathways (lines 6 - 12).  The following steps prepared the data into a matrix to fit
  `oncoPrint` function.
 We defined SNPs as blue, insertions as green and deletions as red.
@@ -1173,7 +1184,8 @@ annotation <- clinical[match(colnames(mat),clinical$bcr_patient_barcode),c("dise
 annotation <- HeatmapAnnotation(annotation_height = rep(unit(0.3, "cm"),ncol(annotation)),
                                 df = annotation,
                                 col = list(disease = c("LGG"="green", "GBM"="orange"),
-                                           radiation_therapy = c("YES"="blue","NO"="red","[Unknown]"="yellow","[Not Available]"="grey")),
+                                           radiation_therapy = c("YES"="blue","NO"="red",
+                                                                 "[Unknown]"="yellow","[Not Available]"="grey")),
                                 annotation_legend_param = list(title_gp = gpar(fontsize = 16, fontface = "bold"),
                                                                labels_gp = gpar(fontsize = 16), # size labels
                                                                grid_height = unit(8, "mm")))
@@ -1202,7 +1214,9 @@ draw(p, annotation_legend_side =  "bottom")
 dev.off()
 ```
 
-![](LGG_GBM_oncoprint.png)
+![Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
+  The upper barplot shows the number of these genetic mutation for each patient,
+  while the right barplot shows the number of genetic mutations for each gene. The bottom bar shows the group of each sample.\label{oncoprint}](LGG_GBM_oncoprint.png)
 
 
 **Overview of genomic alterations by circos plot**
@@ -1211,7 +1225,7 @@ Genomic alterations in cancer, including CNV and mutations, can be represented i
  We used [circlize](https://cran.r-project.org/web/packages/circlize/index.html) CRAN package to represent significant CNV (resulting from GAIA analysis) and recurrent mutations
  (selecting curated genetic variations retrieved from TCGA that are identified in at least two tumor samples) in LGG.
  Circos plot can illustrate molecular alterations genome-wide or only in one or more selected chromosomes.
-```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 
 ###############################################
 ## Genomic aberration overview - Circos plot ## 
@@ -1261,7 +1275,6 @@ colnames(s.cnv) <- c("Chromosome","Start_position","End_position","Aberration_Ki
 
 # Draw genomic circos plot
 library(circlize)
-png("CircosPlot.png",width=800,height=600)
 par(mar=c(1,1,1,1), cex=1)
 circos.initializeWithIdeogram()
 # Add CNV results
@@ -1287,10 +1300,9 @@ circos.clear()
 
 legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=3, cex=1.2, title.adj=0)
 legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=3, cex=1.2, title.adj=0)
-dev.off()
+```
 
-png("CircosPlotChr17.png",width=1000,height=600)
-
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 par(mar=c(1,1,1,1),cex=1.5)
 circos.par("start.degree" = 90, canvas.xlim = c(0, 1), canvas.ylim = c(0, 1),
            gap.degree = 270, cell.padding = c(0, 0, 0, 0), track.margin = c(0.005, 0.005))
@@ -1354,11 +1366,8 @@ legend(0.4, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick"
        title="CNVs", text.font=3, cex=1.3, title.adj=0)
 legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors,
        title="Mutations", text.font=3, cex=1.3, title.adj=0)
-dev.off()
 ```
 
-![](CircosPlot.png)
-![](CircosPlotChr17.png)
 
 ## Transcriptomic analysis
 
@@ -1368,7 +1377,7 @@ dev.off()
 ### Pre-Processing Data
 
 The  data used for following transcriptomic analysis were downloaded using TCGAbiolinks.
-We downloaded only primary solid tumor (TP) samples, which resulted in 516 LGG samples and 156 GBM samples, then
+We downloaded only primary solid tumor (TP) samples t, which resulted in 516 LGG samples and 156 GBM samples, then
 prepared it in two separate rse object (RangedSummarizedExperiment) saving them as an
 R object with a filename including both the name of the cancer and the name of the plaftorm used
 for gene expression data (see listing \ref{lst:rnapre}).
@@ -1397,13 +1406,13 @@ for(tumor in tumorList){
                           filename = paste0(tumor,"_",PlatformTumor,".rda"))
 }
 ```
-To pre-process the data, first, we searched for possible outliers using the `TCGAanalyze\_Preprocessing`
+To pre-process the data, first, we searched for possible outliers using the `TCGAanalyze_Preprocessing`
 function, which performs an Array Array Intensity correlation AAIC (lines 14-17 and 26-29 of listing \ref{lst:dea}).
 In this way we defined a square symmetric matrix of pearson correlation among all samples in each cancer type (LGG or GBM).
 This matrix found 0 samples with low correlation (cor.cut = 0.6)
 that can be identified as possible outliers.
 
-Second, using the `TCGAanalyze\_Normalization` function,
+Second, using the `TCGAanalyze_Normalization` function,
 which encompasses the functions of the [EDASeq](http://bioconductor.org/packages/EDASeq/) package,
 we normalized mRNA transcripts.
 
@@ -1465,12 +1474,21 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFiltLGG,
                             method = "glmLRT")
 ```
 
-Using  *TCGAanalyze\_DEA*, we identified 2,901 differentially expressed genes (DEG)
-(log fold change >=1 and FDR < $1%$) between 515 LGG and 155 GBM samples.
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+# Number of differentially expressed genes (DEG)
+nrow(dataDEGs)
+
+# number of LGG samples
+length(lgg.samples)
+
+# number of LGG samples
+length(gbm.samples)
+```
+
 
 ### EA: enrichment analysis
 In order to understand the underlying biological process from DEGs we performed an
-enrichment analysis using *TCGAanalyze\_EA\_complete* function (see listing \ref{lst:ea}).
+enrichment analysis using `TCGAanalyze_EA_complete` function (see listing \ref{lst:ea}).
 
 ```{#numCode .R .numberLines}
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
@@ -1482,9 +1500,14 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
-![](ea.png)
+![\label{eabarplot} The plot shows canonical pathways significantly overrepresented (enriched)
+by the DEGs (differentially expressed genes)  with the number of genes for the main categories of
+three ontologies (GO:biological process, GO:cellular component, and GO:molecular function, respectively).
+The most statistically significant canonical pathways identified in DEGs list are listed according
+to their p value corrected FDR (-Log) (colored bars) and the ratio of list genes found in each
+pathway over the total number of genes in that pathway (ratio, red line).](ea.png)
 
- `TCGAanalyze\_EAbarplot` outputs a bar chart as shown in figure \ref{eabarplot}
+ `TCGAanalyze_EAbarplot` outputs a bar chart as shown in figure \ref{eabarplot}
  with the number of genes for the main categories of three ontologies (GO:biological process,
  GO:cellular component, and GO:molecular function.
 
@@ -1545,7 +1568,7 @@ hsa05214 <- pathview(gene.data  = genelistDEGs,
 
 ```
 
-![](hsa05214.pathview.png)
+![\label{gliomapathview} Pathways enrichment analysis : glioma pathway. Red defines genes that are up-regulated and green defines genes that are down-regulated.](hsa05214.pathview.png)
 
 The red genes are up-regulated and the
 green genes are down-regulated in the LGG samples compared to GBM.
@@ -1590,8 +1613,7 @@ The performance of an algorithm can then be summarized using ROC (false positive
 
 A weakness of this type of comparison is that an edge that is not present in the set of known interactions can either mean that an experimental validation has been tried and did not show any regulatory mechanism or (more likely) has not yet been attempted.\\
 
-In the following, we ran the nce on i) the 2,901 differentially expressed genes identified in
-Section "Transcriptomic analysis" and ii) the 1,223 genes identified in the starburst analysis of Section "Integration of DNA methylation \& gene expression data". The two sets have 1,223 common genes.
+In the following, we ran the nce on the differentially expressed genes identified in Section "Transcriptomic analysis"
 
 **Retrieving known interactions**
 
@@ -1625,9 +1647,7 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 	return(mat.biogrid)
 }
 ```
-There are 3,941 unique interactions between the 2,901 differentially expressed genes
-and 736 between the 1,223 genes (these form a subset of the 2,901 differentially expressed)
-identified in the second analysis pipeline.
+There are 3,941 unique interactions between the 2,901 differentially expressed genes.
 
 **Using differentially expressed genes from TCGAbiolinks workflow**
 
@@ -1697,11 +1717,14 @@ for (tumor in c("LGG", "GBM")) {
 }
 ```
 
-![](roc_biogrid_GBM.png)
-![](roc_biogrid_LGG.png)
+![ROC with corresponding AUC for inferred GBM networks compared to
+    BioGrid interactions\label{fig::roc_GBM}](roc_biogrid_GBM.png)
+![ROC with corresponding AUC for inferred LGG networks compared to
+    BioGrid interactions\label{fig::roc_LGG}](roc_biogrid_LGG.png)
 
 
-In Figures~\ref{fig::roc_GBM} and~\ref{fig::roc_GBM_sb}, the obtained ROC curve and the corresponding area under curve (AUC) are presented. It can be observed that CLR and MRNET perform best when comparing the inferred network with known interactions from the BioGrid database.
+In Figure~\ref{fig::roc_GBM} , the obtained ROC curve and the corresponding area under curve (AUC) are presented. 
+It can be observed that CLR and MRNET perform best when comparing the inferred network with known interactions from the BioGrid database.
 
 
 
@@ -1720,7 +1743,7 @@ This section describes the analysis of DNA methylation using the bioconductor pa
 
 It should be highlighted that some pre-processing of the DNA methylation data was done. The DNA methylation data from the 450k platform has three types of probes cg (CpG loci) , ch (non-CpG loci) and rs (SNP assay). The last type of probe can be used for sample identification and tracking and should be excluded for differential methylation analysis according to the [ilumina manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf). Therefore, the rs probes were removed  (see listing \ref{lst:meanmet} lines 22). Also,  probes in chromosomes X, Y were removed to eliminate potential artifacts originating from the presence of a different proportion of males and females [@marabita2013evaluation]. The last pre-processing steps were to selected only primary samples (see listing \ref{lst:meanmet} lines 16) and probes with at least one NA value were removed (see listing \ref{lst:meanmet} lines 19).
 
-After this pre-processing step, using the function `TCGAvisualize\_meanMethylation` provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing \ref{lst:meanmet} lines 25-29).
+After this pre-processing step, using the function `TCGAvisualize_meanMethylation` provided we can take a look at the mean DNA methylation of each patient in each group. It receives as argument a summarizedExperiment object with the DNA methylation data, and the arguments groupCol and subgroupCol  which should be two columns from the sample information matrix of the summarizedExperiment object (accessed by the colData function) (see listing \ref{lst:meanmet} lines 25-29).
 
 ```{#numCode .R .numberLines}
 #----------------------------
@@ -1758,9 +1781,9 @@ a mean DNA methylation for each sample in the LGG group.  Genome-wide view of th
 
 ### Searching for differentially methylated CpG sites
 
-The next step is to define differentially methylated CpG sites between the two groups. This can be done using the `TCGAanalyze\_DMR` function (see listing \ref{lst:dmrcode}). The DNA methylation data (level 3) is presented in the form of beta-values that uses a scale ranging from 0.0 (probes completely unmethylated ) up to 1.0 (probes completely methylated).
+The next step is to define differentially methylated CpG sites between the two groups. This can be done using the `TCGAanalyze_DMR` function (see listing \ref{lst:dmrcode}). The DNA methylation data (level 3) is presented in the form of beta-values that uses a scale ranging from 0.0 (probes completely unmethylated ) up to 1.0 (probes completely methylated).
 
-To find these differentially methylated CpG sites, first, it calculates the difference between the mean DNA methylation (mean of the beta-values) of each group for each probe. Second, it test for differential expression between two groups using the wilcoxon test adjusting by the Benjamini-Hochberg method. Arguments of  `TCGAanalyze\_DMR` was set to require a minimum absolute beta-values difference of 0.25 and an adjusted p-value of less than $10^{-40}$.
+To find these differentially methylated CpG sites, first, it calculates the difference between the mean DNA methylation (mean of the beta-values) of each group for each probe. Second, it test for differential expression between two groups using the wilcoxon test adjusting by the Benjamini-Hochberg method. Arguments of  `TCGAanalyze_DMR` was set to require a minimum absolute beta-values difference of 0.25 and an adjusted p-value of less than $10^{-40}$.
 
 After these tests, a volcano plot (x-axis: difference of mean DNA methylation, y-axis: statistical significance) is created to help users identify the differentially
 methylated CpG sites and return the object with the results in the rowRanges.
@@ -1893,7 +1916,7 @@ library(MotIV)
 # motif matching analysis
 analysis.jaspar <- motifMatch(pwm)
 summary(analysis.jaspar)
-plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.3)
+plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.4)
 
 #  visualize the quality of the results looking into the alignments
 # E-value give an estimation of the match.
@@ -1913,7 +1936,7 @@ After finding  differentially methylated CpG sites, one possible question one mi
 
 The starburst plot is proposed to combine information from two volcano plots, and is applied for a study of DNA methylation and gene expression [@noushmehr2010identification]. Even though, being desirable that both gene expression and DNA methylation data are from the same samples, the starburst plot can be applied as a meta-analysis tool, combining data from different samples [@siegmund2011statistical].
 
-The function `TCGAvisualize\_starburst`  creates a Starburst plot for comparison of DNA methylation
+The function `TCGAvisualize_starburst`  creates a Starburst plot for comparison of DNA methylation
 and gene expression. The $log_{10}$ (FDR-corrected P value) for DNA methylation is plotted on the x axis,
 and for gene expression on the y axis, for each gene.
 The horizontal black dashed line shows the FDR-adjusted P value of $10^{-100}$
@@ -1925,7 +1948,7 @@ diffmean.cut and logFC.cut will be used to highlight the genes that respects the
 to get the most significant list of pair gene/probes. But for the next sections we will
 use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 
-```{r results='asis', echo=TRUE}
+```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met.chr9,    # DNA methylation with results
                                      dataDEGs,    # DEG results
@@ -1947,11 +1970,8 @@ proteins influence phenotype-affecting mechanisms. Determining how proteins inte
  to regulate gene expression is essential for fully understanding many biological processes and disease states.
 The aim is to explore significant overlap datasets for inferring co-regulation or
 transcription factor complex for further investigation. A summary of the association
- of each histone mark is shown in table \ref{histone-mark}.
- Besides, ChIP-seq data exists in the ROADMAP database and can be obtained through the
- [AnnotationHub](http://bioconductor.org/packages/AnnotationHub/) package [@annotationHub]
- or from [Roadmap web portal](http://egg2.wustl.edu/roadmap/webportal/processed_data.html).
- The table \ref{roadmapChIP} shows the description for all the roadmap files that are available through AnnotationHub.
+ of each histone mark is shown the in table below .
+ 
 
 ```{r table4, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "  
@@ -1967,6 +1987,12 @@ tabl <- "
 "
 cat(tabl) 
 ```
+
+ Besides, ChIP-seq data exists in the ROADMAP database and can be obtained through the
+ [AnnotationHub](http://bioconductor.org/packages/AnnotationHub/) package [@annotationHub]
+ or from [Roadmap web portal](http://egg2.wustl.edu/roadmap/webportal/processed_data.html).
+ The table below shows the description for all the roadmap files that are available through AnnotationHub.
+
 ```{r table5, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "  
 |                File                |                               Description                              |
@@ -1989,14 +2015,13 @@ tabl <- "
 cat(tabl) 
 ```
 
-After obtaining the ChIP-seq data, we can then identify overlapping regions
-with the regions identified in the starburst plot. The narrowPeak files are
-the ones selected for this step. % explain the differences? when use one or another
-
+To help the user understand better the regions found in the DMR analysis, we
+ downloaded histone marks specific for brain tissue, which was done using the
+AnnotationHub package that can access Roadmap datababse. 
 For a complete pipeline with Chip-seq data, bioconductor provides excellent tutorials to
 work with ChIP-seq and we encourage our readers to review the following article [@ChIP-seqbioc].
 
-The first step shown in listing \ref{lst:annotationhub} is to download the chip-seq data.
+The first step shown in listing below is to download the chip-seq data.
 The function query received as argument the annotationHub database (ah) and a list of
 keywords to be used for searching the data, *EpigenomeRoadmap* is selecting the
 roadmap database, *consolidated* is selecting only the consolidate epigenomes,
@@ -2005,6 +2030,7 @@ roadmap database, *consolidated* is selecting only the consolidate epigenomes,
 [summary table](https://docs.google.com/spreadsheets/d/1yikGx4MsO9Ei36b64yOy9Vb6oPC5IBGlFbYEt-N6gOM/edit#gid=15)
 and narrowPeak is selecting the type of file.
 The data downloaded is a processed data from  an integrative Analysis of 111 reference human epigenomes [@kundaje2015integrative].
+
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
@@ -2039,22 +2065,10 @@ implements functions that uses Chip-seq data to retrieve the nearest genes aroun
 After downloading the histone marks (see listing \ref{lst:annotationhub},
 it is useful to verify the average profile of peaks binding to hypomethylated and hypermethylated regions,
 which will help the user understand better the regions found.
-Listing \ref{lst:annotationhub_3} shows an example of code to plot the average profile.
-Figure \ref{chip-seq} shows the result.
 
-To help the user understand better the regions found in the DMR analysis, we
- downloaded histone marks specific for brain tissue, which was done using the
-AnnotationHub package that can access Roadmap datababse (listing \ref{lst:annotationhub}).
 After, the Chipseeker was used to
-visualize  how histone modifications are enriched to to hypomethylated and hypermethylated regions,
- (listing \ref{lst:annotationhub_3}). The enrichment heatmap  and the average profile of peaks binding to those
- region is shown in figures \ref{chip-seq-heatmap} and \ref{chip-seq} respectively.
+visualize  how histone modifications are enriched to to hypomethylated and hypermethylated regions. 
 
-The hypomethylated and hypermethylated regions are enriched for H3K4me3, H3K27ac, H3K9ac, and H3K4me1
-which indicates regions of enhancers, promoters and increased activation of genomic elements.
-However, these regions are not associated neither with transcribed regions nor
-Polycomb repression as the H3K36me3 and H3K27me3 heatmaps does not show an enrichment nearby the position 0,
-and the average profile also does not show a peak at position 0.
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
@@ -2079,35 +2093,27 @@ tagMatrixList <- pblapply(histone.marks, function(x) {
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
 names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
 names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
+```
 
-png("chip_heatmap.png", height = 500, width = 600)
+To plot the enrichment heatmap use the function `tagHeatmap`
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
-dev.off()
+```
 
+To plot the  average profile of peaks binding to those region use `plotAvgProf`:
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
 p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
 library(ggthemes)
-png("chip-seq.png", height = 500, width = 600)
 p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_legend(override.aes = list(size=4)))
-dev.off()
 ```
 
-The result from TCGAanalyze_Preprocessing is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("chip_heatmap.png")
-grid.raster(img)
-```
-
-The result from TCGAanalyze_Preprocessing is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("chip-seq.png")
-grid.raster(img)
-```
+The hypomethylated and hypermethylated regions are enriched for H3K4me3,  H3K9ac, H3K27ac and H3K4me1
+which indicates regions of enhancers, promoters and increased activation of genomic elements.
+However, these regions are not associated neither with transcribed regions nor
+Polycomb repression as the H3K36me3 and H3K27me3 heatmaps does not show an enrichment nearby the position 0,
+and the average profile also does not show a peak at position 0.
 
 
 To annotate the location of a given peak in terms of genomic features, annotatePeak
@@ -2117,7 +2123,7 @@ whether a peak is in the TSS, Exon, 5’ UTR, 3’ UTR, Intronic or Intergenic.
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 require(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
-peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db")
+peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db",verbose = FALSE)
 plotAnnoPie(peakAnno)
 ```
 
@@ -2153,7 +2159,7 @@ This section shows how to use ELMER to analyze TCGA data using as example LGG an
 ### Preparing the data for ELMER package
 
 After downloading the data with TCGAbiolinks package, some steps are still required to use TCGA data with ELMER.
-These steps can be done with the function *TCGAprepare\_elmer*. This function
+These steps can be done with the function `TCGAprepare_elmer`. This function
 for the DNA methylation data will remove probes with NA values in more than 20% samples and remove the annotation data,
 for RNA expression data it will take the log2(expression + 1) of the expression matrix in order to linearize the relation between
 DNA methylation and expression. Also, it will prepare the row names of the matrix as required by the package.
@@ -2212,10 +2218,10 @@ Finally, the ELMER input is a mee object that contains a DNA methylation matrix,
 a probe information GRanges, the gene information GRanges and a data frame summarizing the data.
 It should be highlighted that samples without both the gene expression and DNA methylation data will be removed from the mee object.
 
-By default the function *fetch.mee* that is used to create the mee will separate the samples into two
+By default the function `fetch.mee` that is used to create the mee will separate the samples into two
 groups, the control group (normal samples) and the experiment group (tumor samples), but the user can relabel the
-samples to compare different groups. For the next sections, we will work with two groups the experiment group (LGG)
-and control samples (GBM).
+samples to compare different groups. For the next sections, we will work with two groups the experiment group (GBM)
+and control samples (LGG).
 
 ```{#numCode .R .numberLines}
 library(ELMER)
@@ -2235,11 +2241,10 @@ mee@sample$TN[mee@sample$ID %in% lgg.samples] <- "Control"
 save(mee,file = "mee.rda")
 ```
 
-To make this example faster, you can download the mee object from here.
 
 ### ELMER analysis
 After preparing the data into a mee object, we executed the five ELMER steps for both the hypo
-(distal enhancer probes hypomethylated in the LGG group) and hyper (distal enhancer probes hypermethylated in the LGG group) direction.
+(distal enhancer probes hypomethylated in the GBM group) and hyper (distal enhancer probes hypermethylated in the GBM group) direction.
 The code is shown below. A description of how these distal enhacer probes are identified is found in
  the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette.
 
@@ -2326,13 +2331,13 @@ is found in the figure \ref{odds-ration}. To select the motifs we select the mot
 of 10 in the given probes set and the smallest lower boundary of 95% confidence interval for Odds Ratio of 1.1.
 These both values are the default from the ELMER package.
 
-The analysis found 10 enriched motifs for the hypo direction.
 ```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis'}
+# The analysis found  how many enriched motifs for the hypo direction?
 length(TF$motif)
 ```
 
-The make a motif enrichment plot you can sue the function motif.enrichment.plot
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis'}
+To make a motif enrichment plot you can use the function motif.enrichment.plot as follows:
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
  motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
 ```
 
