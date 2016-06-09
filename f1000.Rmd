@@ -982,7 +982,7 @@ for(cancer in PanCancer){
 
     # For speed process we will evaluate only chromessome 1, chromosomes = -1 to consider all chromossomes
     results <- runGAIA(cnv_obj, markers_obj, output_file_name=paste0("GAIA_",tumor,"_",PlatformCancer,"_flt.txt"),
-                       aberrations = -1,  chromosomes = c(14:18), num_iterations = 5, threshold = 0.25)
+                       aberrations = -1,  chromosomes = c(14:18), num_iterations = 10, threshold = 0.25)
 
     # Set q-value threshold
     threshold <- 0.001
