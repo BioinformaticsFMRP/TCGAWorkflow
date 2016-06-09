@@ -1652,9 +1652,8 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 
 **Using differentially expressed genes from TCGAbiolinks workflow**
 
-We start this analysis by inferring four gene regulatory networks (the corresponding
-number of edges are presented in Table~\ref{table::numberedges}) for the GBM data set
-and for the LGG data set using the two different gene sets.
+We start this analysis by inferring four gene regulatory networks for the GBM data set
+and for the LGG data set using the DEA gene set.
 
 ```{#numCode .R .numberLines}
 ### plot details (colors & symbols)
