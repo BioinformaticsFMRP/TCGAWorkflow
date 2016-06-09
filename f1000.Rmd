@@ -22,7 +22,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE,fig.align="center",dpi = 300, cache = FALSE)
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
@@ -821,7 +821,7 @@ for(tumor in PanCancer){
     pathCancer <- paste0("data",tumor)
     datQuery <- TCGAquery(tumor = tumor, platform = PlatformCancer, level = "3")
     lsSample <- TCGAquery_samplesfilter(query = datQuery)
-    selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")[1:50]
+    selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")[1:100]
 
     TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = selected)
 
@@ -852,8 +852,7 @@ for(tumor in PanCancer){
     pathCancer <- paste0("data",tumor)
     datQuery <- TCGAquery(tumor = tumor, platform = PlatformCancer, level = "3")
     lsSample <- TCGAquery_samplesfilter(query = datQuery)
-    # We will use only 50 samples to make the example faster
-    selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")[1:50]
+    selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")
 
     TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = selected)
 
@@ -981,11 +980,12 @@ for(cancer in PanCancer){
     message("Gene information loaded")
     cnv_obj <- load_cnv(cnvMatrix, markers_obj, length(selected))
 
+    # For speed process we will evaluate only chromessome 1, chromosomes = -1 to consider all chromossomes
     results <- runGAIA(cnv_obj, markers_obj, output_file_name=paste0("GAIA_",tumor,"_",PlatformCancer,"_flt.txt"),
-                       aberrations = -1,  chromosomes = -1, num_iterations = 10, threshold = 0.25)
+                       aberrations = -1,  chromosomes = c(14:18), num_iterations = 5, threshold = 0.25)
 
     # Set q-value threshold
-    threshold <- 0.0001
+    threshold <- 0.001
 
     # Plot the results
     RecCNV <- t(apply(results,1,as.numeric))
