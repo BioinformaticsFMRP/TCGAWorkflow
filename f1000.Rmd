@@ -196,15 +196,15 @@ draw(p, annotation_legend_side =  "bottom")
 dev.off()
 
 # defining common parameters
-PanCancer <- c("LGG","GBM")
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+tumorList <- c("LGG","GBM")
+PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
-for(cancer in PanCancer){
+for(tumor in tumorList){
 
-    pathCancer <- paste0("data",cancer)
-    datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
+    pathCancer <- paste0("data",tumor)
+    datQuery <- TCGAquery(tumor = tumor, platform = PlatformTumor, level = "3")
 
-    samples <- get(paste0(tolower(cancer),".samples"))
+    samples <- get(paste0(tolower(tumor),".samples"))
 
     TCGAdownload(data = datQuery, path = pathCancer, type = dataType, samples = c(samples))
 
@@ -214,14 +214,14 @@ for(cancer in PanCancer){
                             save = TRUE,
                             summarizedExperiment = TRUE,
                             samples = c(samples),
-                            filename = paste0(cancer,"_",PlatformCancer,".rda"))
+                            filename = paste0(tumor,"_",PlatformTumor,".rda"))
 }
 
 # loading LGG and GBM rse data
 load("LGG_IlluminaHiSeq_RNASeqV2.rda")
-cancer <-  "LGG"
-pathCancer <- paste0("data",cancer)
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+tumor <-  "LGG"
+pathCancer <- paste0("data",tumor)
+PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 
 dataClin_LGG <- TCGAquery_clinic(tumor = "LGG",
                                  clinical_data_type = "clinical_patient")
@@ -230,9 +230,9 @@ dataPrep_LGG <- TCGAanalyze_Preprocessing(object = rse,
                                           filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
 load("GBM_IlluminaHiSeq_RNASeqV2.rda")
-cancer <-  "GBM"
-pathCancer <- paste0("data",cancer)
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+tumor <-  "GBM"
+pathCancer <- paste0("data",tumor)
+PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 
 dataClin_GBM <- TCGAquery_clinic(tumor = "GBM",
                                  clinical_data_type = "clinical_patient")
@@ -249,7 +249,7 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile",
                                   qnt.cut =  0.25)  # 13742   672
 
-save(dataFilt, file = paste0("LGG_GBM_Norm_",PlatformCancer,".rda"))
+save(dataFilt, file = paste0("LGG_GBM_Norm_",PlatformTumor,".rda"))
 
 dataFiltLGG <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_LGG$bcr_patient_barcode)
 dataFiltGBM <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_GBM$bcr_patient_barcode)
@@ -812,14 +812,14 @@ library(gaia)
 # Select common CN technology available for GBM and LGG
 # To make this workflow faster we will run it only for LGG samples
 # To use it for LGG and GBM set use:
-# PanCancer <- c("LGG","GBM")
-PanCancer <- c("LGG")
-PlatformCancer <- "Genome_Wide_SNP_6"
+# tumorList <- c("LGG","GBM")
+tumorList <- c("LGG")
+PlatformTumor <- "Genome_Wide_SNP_6"
 dataType <- "nocnv_hg19"
 
-for(tumor in PanCancer){
+for(tumor in tumorList){
     pathCancer <- paste0("data",tumor)
-    datQuery <- TCGAquery(tumor = tumor, platform = PlatformCancer, level = "3")
+    datQuery <- TCGAquery(tumor = tumor, platform = PlatformTumor, level = "3")
     lsSample <- TCGAquery_samplesfilter(query = datQuery)
     selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")[1:200]
 
@@ -831,7 +831,7 @@ for(tumor in PanCancer){
                              save = FALSE,
                              summarizedExperiment = TRUE,
                              samples = selected)
-    save(PlatformCancer, tumor, pathCancer, selected, dataAssay, file = paste0(tumor,"_",PlatformCancer,".rda"))
+    save(PlatformTumor, tumor, pathCancer, selected, dataAssay, file = paste0(tumor,"_",PlatformTumor,".rda"))
 }
 ```
 
@@ -843,14 +843,14 @@ library(gaia)
 # Select common CN technology available for GBM and LGG
 # To make this workflow faster we will run it only for LGG samples
 # To use it for LGG and GBM set use:
-# PanCancer <- c("LGG","GBM")
-PanCancer <- c("LGG")
-PlatformCancer <- "Genome_Wide_SNP_6"
+# tumorList <- c("LGG","GBM")
+tumorList <- c("LGG")
+PlatformTumor <- "Genome_Wide_SNP_6"
 dataType <- "nocnv_hg19"
 
-for(tumor in PanCancer){
+for(tumor in tumorList){
     pathCancer <- paste0("data",tumor)
-    datQuery <- TCGAquery(tumor = tumor, platform = PlatformCancer, level = "3")
+    datQuery <- TCGAquery(tumor = tumor, platform = PlatformTumor, level = "3")
     lsSample <- TCGAquery_samplesfilter(query = datQuery)
     selected <- TCGAquery_SampleTypes(barcode = lsSample$Genome_Wide_SNP_6, typesample = "TP")
 
@@ -862,7 +862,7 @@ for(tumor in PanCancer){
                              save = TRUE,
                              summarizedExperiment = TRUE,
                              samples = selected)
-    save(PlatformCancer, tumor, pathCancer, selected, dataAssay, file = paste0(tumor,"_",PlatformCancer,".rda"))
+    save(PlatformTumor, tumor, pathCancer, selected, dataAssay, file = paste0(tumor,"_",PlatformTumor,".rda"))
 }
 ```
 
@@ -874,7 +874,7 @@ Segmented data retrieved from TCGA were used to generate a matrix including all 
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 #--------------------      Internal functions     ----------------------------
-gaiaCNVplot <- function (calls, cancer=NULL, threshold=0.01)
+gaiaCNVplot <- function (calls, tumor=NULL, threshold=0.01)
 {
     Calls <- calls[order(calls[,"Region Start [bp]"]),]
     Calls <- Calls[order(Calls[,"Chromosome"]),]
@@ -884,7 +884,7 @@ gaiaCNVplot <- function (calls, cancer=NULL, threshold=0.01)
     Losses <- apply(Calls,1,function(x) ifelse(x["Aberration Kind"]==0, x["score"], 0))
     plot(Gains, ylim = c(-max(Calls[,"score"]+2), max(Calls[,"score"]+2)), type = "h",
          col = "red", xlab = "Chromosome", ylab = "Score",
-         #main = paste("Recurrent Copy Number Variations",cancer, sep=" - "),
+         #main = paste("Recurrent Copy Number Variations",tumor, sep=" - "),
          xaxt = "n")
     points(-(Losses), type = "h", col = "blue")
     abline(h = 0, cex = 4)
@@ -940,9 +940,9 @@ genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
 ## Recurrent CNV identification ## 
 ##################################
 
-for(cancer in PanCancer){
+for(tumor in tumorList){
 
-    load(paste0(cancer,"_Genome_Wide_SNP_6.rda"))
+    load(paste0(tumor,"_Genome_Wide_SNP_6.rda"))
 
     # Prepare CNV matrix
     cnvMatrix <- dataAssay
@@ -995,7 +995,7 @@ for(cancer in PanCancer){
     cnv_obj <- load_cnv(cnvMatrix, markers_obj, length(selected))
 
     # For speed process we will evaluate only chromessome 1, chromosomes = -1 to consider all chromossomes
-    results <- runGAIA(cnv_obj, markers_obj, output_file_name=paste0("GAIA_",tumor,"_",PlatformCancer,"_flt.txt"),
+    results <- runGAIA(cnv_obj, markers_obj, output_file_name=paste0("GAIA_",tumor,"_",PlatformTumor,"_flt.txt"),
                        aberrations = -1,  chromosomes = c(14:18), num_iterations = 10, threshold = 0.25)
 
     # Set q-value threshold
@@ -1065,8 +1065,8 @@ genes <- genes[order(genes[,2]),]
 colnames(genes) <- c("GeneSymbol","Chr","Start","End")
 genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
 
-for(cancer in PanCancer){
-	load(paste0(cancer,"_CNV_results.rda"))
+for(tumor in tumorList){
+	load(paste0(tumor,"_CNV_results.rda"))
 
     sCNV <- RecCNV[RecCNV[,"q-value"]<=threshold,c(1:4,6)]
     sCNV <- sCNV[order(sCNV[,3]),]
@@ -1083,7 +1083,7 @@ for(cancer in PanCancer){
     AmpDel_genes[AmpDel_genes[,2]==1,2] <- "Amp"
     rownames(AmpDel_genes) <- NULL
 
-    save(RecCNV, AmpDel_genes, file = paste0(cancer,"_CNV_results.rda"))
+    save(RecCNV, AmpDel_genes, file = paste0(tumor,"_CNV_results.rda"))
 }
 ```
 
@@ -1217,7 +1217,7 @@ Genomic alterations in cancer, including CNV and mutations, can be represented i
 ## Genomic aberration overview - Circos plot ## 
 ###############################################
 
-# Retrieve curated mutations for selected cancer (e.g. "LGG") 
+# Retrieve curated mutations for selected tumor (e.g. "LGG") 
 library(TCGAbiolinks)
 mut <- TCGAquery_maf(tumor = "LGG",archive.name="LGG.IlluminaGA_DNASeq_curated.Level_2.1.4.0")
 # Select only potentially damaging mutations
@@ -1243,7 +1243,7 @@ Type <- type[s.mut[,4]]
 s.mut <- cbind(s.mut,Type)
 s.mut <- s.mut[,c(1:3,6,4,5)]
 
-# Load recurrent CNV data for selected cancer (e.g. "LGG")
+# Load recurrent CNV data for selected tumor (e.g. "LGG")
 load("LGG_CNV_results.rda")
 # Prepare selected sample CNV data for circos plot
 s.cnv <- as.data.frame(RecCNV[RecCNV[,"q-value"]<=threshold,c(1:4,6)])
@@ -1377,13 +1377,13 @@ for gene expression data (see listing \ref{lst:rnapre}).
 library(TCGAbiolinks)
 
 # defining common parameters
-PanCancer <- c("LGG","GBM")
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+tumorList <- c("LGG","GBM")
+PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
 
-for(tumor in PanCancer){
-	pathCancer <- paste0("../data",tumor)
-	datQuery <- TCGAquery(tumor = tumor, platform = PlatformCancer, level = "3")
+for(tumor in tumorList){
+	pathCancer <- paste0("data",tumor)
+	datQuery <- TCGAquery(tumor = tumor, platform = PlatformTumor, level = "3")
 
 	# get only primary solid Tumor
 	lsSample <- TCGAquery_samplesfilter(query = datQuery)
@@ -1394,7 +1394,7 @@ for(tumor in PanCancer){
   dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType,
                           save = TRUE, summarizedExperiment = TRUE,
                           samples = c(dataSmTP),
-                          filename = paste0(tumor,"_",PlatformCancer,".rda"))
+                          filename = paste0(tumor,"_",PlatformTumor,".rda"))
 }
 ```
 To pre-process the data, first, we searched for possible outliers using the `TCGAanalyze\_Preprocessing`
@@ -1419,9 +1419,9 @@ library(TCGAbiolinks)
 # loading LGG and GBM rse data
 
 load("LGG_IlluminaHiSeq_RNASeqV2.rda")
-cancer <-  "LGG"
-pathCancer <- paste0("../data",cancer)
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+tumor <-  "LGG"
+pathCancer <- paste0("data",tumor)
+PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 
 dataClin_LGG <- TCGAquery_clinic(tumor = "LGG",
                              clinical_data_type = "clinical_patient")
@@ -1432,9 +1432,9 @@ dataPrep_LGG <- TCGAanalyze_Preprocessing(object = rse,
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
 load("GBM_IlluminaHiSeq_RNASeqV2.rda")
-cancer <-  "GBM"
-pathCancer <- paste0("../data",cancer)
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+tumor <-  "GBM"
+pathCancer <- paste0("data",tumor)
+PlatformTumor <- "IlluminaHiSeq_RNASeqV2"
 
 dataClin_GBM <- TCGAquery_clinic(tumor = "GBM",
                                  clinical_data_type = "clinical_patient")
@@ -1451,7 +1451,7 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile",
                                   qnt.cut =  0.25)  # 13742   672
 
-save(dataFilt, file = paste0("LGG_GBM_Norm_",PlatformCancer,".rda"))
+save(dataFilt, file = paste0("LGG_GBM_Norm_",PlatformTumor,".rda"))
 
 dataFiltLGG <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_LGG$bcr_patient_barcode)
 dataFiltGBM <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_GBM$bcr_patient_barcode)
@@ -1661,11 +1661,11 @@ unzip(basename(file),junkpaths =T)
 tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
 net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 
-for (cancertype in c("LGG", "GBM")) {
+for (tumor in c("LGG", "GBM")) {
 
-    if(cancertype == "GBM"){
+    if(tumor == "GBM"){
         mydata <- dataFiltGBM[names.genes.de, ]
-    }else if(cancertype == "LGG"){
+    }else if(tumor == "LGG"){
         mydata <- dataFiltLGG[names.genes.de, ]
     }
     ### infer networks
@@ -1688,8 +1688,8 @@ for (cancertype in c("LGG", "GBM")) {
 
     legend("bottomright", legend=paste(c("aracne","mrnet","clr","c3net"), signif(res.auc,4), sep=": "),
            col=mycols[1:length(tmp.val)],lty=1, bty="n" )
-    dev.copy2pdf(width=8,height=8,device = dev1, file = paste0("roc_biogrid_",cancertype,".pdf"))
-    save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_",cancertype,".RData"))
+    dev.copy2pdf(width=8,height=8,device = dev1, file = paste0("roc_biogrid_",tumor,".pdf"))
+    save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_",tumor,".RData"))
 }
 ```
 
