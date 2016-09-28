@@ -403,8 +403,8 @@ ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status",
 # For exmaple: status.gbm.lgg Hypomethyated means that the
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
-ra = rowAnnotation(df = values(sig.met.100)["status.Glioblastoma Multiforme.Brain Lower Grade Glioma"],
-                   col = list("status.Glioblastoma Multiforme.Brain Lower Grade Glioma" = c("Hypomethylated" = "orange",
+ra = rowAnnotation(df = values(sig.met.100)["status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"],
+                   col = list("status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma" = c("Hypomethylated" = "orange",
                                                  "Hypermethylated" = "darkgreen")),
                    width = unit(1, "cm"))
 
@@ -1911,7 +1911,7 @@ clinical <- plyr::rbind.fill(clin.lgg,clin.gbm)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
-sig.met <- met.chr9[values(met.chr9)[,"status.Glioblastoma Multiforme.Brain Lower Grade Glioma"] %in% c("Hypermethylated","Hypomethylated"),]
+sig.met <- met.chr9[values(met.chr9)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),]
 
 # To speed up the example, let take a look on the first 100 probes
 sig.met.100 <- sig.met[1:100,]
@@ -1928,8 +1928,8 @@ ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status",
 # For exmaple: status.gbm.lgg Hypomethyated means that the
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
-ra = rowAnnotation(df = values(sig.met.100)["status.Glioblastoma Multiforme.Brain Lower Grade Glioma"],
-                   col = list("status.Glioblastoma Multiforme.Brain Lower Grade Glioma" = c("Hypomethylated" = "orange",
+ra = rowAnnotation(df = values(sig.met.100)["status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"],
+                   col = list("status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma" = c("Hypomethylated" = "orange",
                                                  "Hypermethylated" = "darkgreen")),
                    width = unit(1, "cm"))
 
@@ -2159,7 +2159,7 @@ library(ggplot2)
 library(AnnotationHub)
 
 # Create a GR object based on the hypo/hypermethylated probes.
-probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met.chr9)[values(met.chr9)[,"status.Glioblastoma Multiforme.Brain Lower Grade Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
+probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met.chr9)[values(met.chr9)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
 probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@ranges@start + 3000))
 
