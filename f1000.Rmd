@@ -27,35 +27,16 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 suppressPackageStartupMessages({
-    library(TCGAbiolinks)
-    library(stringr)
-    library(SummarizedExperiment)
-    library(ELMER)
     library(gaia)
-    library(parallel)
-    library(ChIPseeker)
-    library(ComplexHeatmap)
-    library(clusterProfiler)
-    library(minet)
-    library(c3net)
-    library(downloader)
-    library(biomaRt)
-    library(pathview)
+   
+    R.utils::gcDLLs()
     library(BSgenome.Hsapiens.UCSC.hg19)
-    library(MotifDb)
     library(MotIV)
     library(rGADEM)
     library(motifStack)
-    library(dnet)
     library(circlize)
-    library(c3net)
-    library(pbapply)
-    library(gplots)
     library(ChIPseeker)
-    library(pbapply)
-    library(GenomeInfoDb)
     library(ggplot2)
-    library(AnnotationHub)
 })
 ```
 
@@ -63,6 +44,9 @@ suppressPackageStartupMessages({
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(TCGAbiolinks)
 library(stringr)
+library(ComplexHeatmap)
+library(SummarizedExperiment)
+
 # Samples: primary solid tumor w/ DNA methylation and gene expression
 matched_met_exp <- function(project, n = NULL){
     # get primary solid tumor samples: DNA methylation
@@ -112,9 +96,9 @@ query.gbm <- GDCquery(project = "TCGA-GBM",
                       barcode = gbm.samples)
 GDCdownload(query.gbm)
 met.gbm <- GDCprepare(query.gbm, save = FALSE)
-met.elmer <- SummarizedExperiment::cbind(met.lgg, met.gbm)
-met.elmer <- TCGAprepare_elmer(met.elmer, 
-                               platform = "HumanMethylation450")
+met <- SummarizedExperiment::cbind(met.lgg, met.gbm)
+save(met, file = "met_f1000.rda")
+met.elmer <- TCGAprepare_elmer(met, platform = "HumanMethylation450")
 
 #-----------------------------------
 # 2 - Expression
@@ -241,8 +225,8 @@ p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
 )
 draw(p, annotation_legend_side =  "bottom")
 dev.off()
-
-
+```
+```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Gene expression",
                   data.type = "Gene expression quantification",
@@ -250,7 +234,11 @@ query <- GDCquery(project = "TCGA-GBM",
                   file.type  = "results", 
                   sample.type = c("Primary solid Tumor"),
                   legacy = TRUE)
-GDCdownload(query)
+result = tryCatch({
+    GDCdownload(query, chunks.per.download = 100)
+}, error = function(e) {
+    GDCdownload(query, method = "client")
+})
 gbm.exp <- GDCprepare(query, save = TRUE, summarizedExperiment = TRUE, save.filename = "GBMIllumina_HiSeq.rda")
 
 query <- GDCquery(project = "TCGA-LGG",
@@ -260,7 +248,12 @@ query <- GDCquery(project = "TCGA-LGG",
                   file.type  = "results", 
                   sample.type = c("Primary solid Tumor"),
                   legacy = TRUE)
-GDCdownload(query)
+
+result = tryCatch({
+    GDCdownload(query, chunks.per.download = 100)
+}, error = function(e) {
+    GDCdownload(query, method = "client")
+})
 lgg.exp <- GDCprepare(query, save = TRUE, summarizedExperiment = TRUE, save.filename = "LGGIllumina_HiSeq.rda")
 
 
@@ -268,14 +261,16 @@ rse <- get(load("LGGIllumina_HiSeq.rda"))
 dataClin_LGG <- GDCquery_clinic("TCGA-LGG", "Clinical")
 
 dataPrep_LGG <- TCGAanalyze_Preprocessing(object = rse,
-                                      cor.cut = 0.6, 
+                                      cor.cut = 0.6,    
+                                      datatype = "raw_count",
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
 rse <- get(load("GBMIllumina_HiSeq.rda"))
 dataClin_GBM <- GDCquery_clinic("TCGA-GBM", "Clinical")
 
 dataPrep_GBM <- TCGAanalyze_Preprocessing(object = rse,
-                                          cor.cut = 0.6,
+                                          cor.cut = 0.6, 
+                                          datatype = "raw_count",
                                           filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = cbind(dataPrep_LGG, dataPrep_GBM),
@@ -318,9 +313,9 @@ dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"LGG","GBM",
                                           dataFilt[,colnames(dataFiltGBM)])
 
 dataDEGsFiltLevel$GeneID <- 0
-
+ library(clusterProfiler)
+library(pathview)
 # Converting Gene symbol to geneID
-library(clusterProfiler)
 eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
                         fromType="SYMBOL",
                         toType="ENTREZID",
@@ -340,13 +335,14 @@ dataDEGsFiltLevel_sub <- subset(dataDEGsFiltLevel, select = c("GeneID", "logFC")
 genelistDEGs <- as.numeric(dataDEGsFiltLevel_sub$logFC)
 names(genelistDEGs) <- dataDEGsFiltLevel_sub$GeneID
 
-require("pathview")
 # pathway.id: hsa05214 is the glioma pathway
 # limit: sets the limit for gene expression legend and color
-hsa05214 <- pathview(gene.data  = genelistDEGs,
-                     pathway.id = "hsa05214",
-                     species    = "hsa",
-                     limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
+hsa05214 <- pathview::pathview(gene.data  = genelistDEGs,
+                               pathway.id = "hsa05214",
+                               species    = "hsa",
+                               limit = list(gene=as.integer(max(abs(genelistDEGs)))))
+```
+```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 #----------------------------
 # Mean methylation
 #----------------------------
@@ -389,10 +385,11 @@ clinical <- plyr::rbind.fill(clin.lgg,clin.gbm)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
-sig.met <- met.chr9[values(met.chr9)[,"status.Glioblastoma Multiforme.Brain Lower Grade Glioma"] %in% c("Hypermethylated","Hypomethylated"),]
+sig.met <- met.chr9[values(met.chr9)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),]
 
-# To speed up the example, let take a look on the first 100 probes
-sig.met.100 <- sig.met[1:100,]
+# To speed up the example, we will select no more than 100 probes
+nb.probes <- ifelse(nrow(sig.met) > 100, 100, nrow(sig.met)) # If there is more than 100 get 100
+sig.met.100 <- sig.met[1:nb.probes,]
 
 # top annotation, which sampples are LGG and GBM
 # We will add clinical data as annotation of the samples
@@ -423,6 +420,9 @@ heatmap  <- Heatmap(assay(sig.met.100),
 # Save to png
 png("heatmap.png",width = 600, height = 400); draw(heatmap, annotation_legend_side =  "bottom"); dev.off()
 
+```
+```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
+library(ELMER)
 geneAnnot <- txs()
 geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
 geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
@@ -1047,7 +1047,7 @@ for(cancer in c("LGG","GBM")){
     gdac.root <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/"
     file <- paste0(gdac.root, "genome.info.6.0_hg19.na31_minus_frequent_nan_probes_sorted_2.1.txt")
     # Retrieve probes meta file from broadinstitute website
-    if(!file.exists(basename(file))) download(file, basename(file))
+    if(!file.exists(basename(file))) downloader::download(file, basename(file))
     markersMatrix <-  readr::read_tsv(basename(file), col_names = FALSE, col_types = "ccn", progress = TRUE)
     colnames(markersMatrix) <- c("Probe.Name", "Chromosome", "Start")
     unique(markersMatrix$Chromosome)
@@ -1071,7 +1071,7 @@ for(cancer in c("LGG","GBM")){
     markerID <- apply(markersMatrix,1,function(x) paste0(x[2],":",x[3]))
     
     file <- paste0(gdac.root,"CNV.hg19.bypos.111213.txt")
-    if(!file.exists(basename(file))) download(file, basename(file))
+    if(!file.exists(basename(file))) downloader::download(file, basename(file))
     commonCNV <- readr::read_tsv(basename(file), progress = TRUE)
     commonID <- apply(commonCNV,1,function(x) paste0(x[2],":",x[3]))
     print(table(commonID %in% markerID))
@@ -1707,9 +1707,8 @@ library(c3net)
 names.genes.de <- rownames(dataDEGs)
 
 ### read biogrid info
-library(downloader)
 file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
-download(file,basename(file))
+downloader::download(file,basename(file))
 unzip(basename(file),junkpaths =T)
 tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
 
@@ -2119,9 +2118,7 @@ The data downloaded is a processed data from  an integrative Analysis of 111 ref
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
-library(pbapply)
 library(SummarizedExperiment)
-library(GenomeInfoDb)
 library(ggplot2)
 library(AnnotationHub)
 
@@ -2135,7 +2132,7 @@ ah = AnnotationHub()
 bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","brain","E068"))
 
 # Get chip-seq data
-histone.marks <-  pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
+histone.marks <- pbapply::pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
 names(histone.marks) <- names(bpChipEpi_brain)
 ```
 
@@ -2157,14 +2154,12 @@ visualize  how histone modifications are enriched to to hypomethylated and hyper
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
-library(pbapply)
 library(SummarizedExperiment)
-library(GenomeInfoDb)
 library(ggplot2)
 library(AnnotationHub)
 
 # Create a GR object based on the hypo/hypermethylated probes.
-probes <- keepStandardChromosomes(rowRanges(met.chr9)[values(met.chr9)[,"status.Glioblastoma Multiforme.Brain Lower Grade Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
+probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met.chr9)[values(met.chr9)[,"status.Glioblastoma Multiforme.Brain Lower Grade Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
 probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@ranges@start + 3000))
 
@@ -2172,8 +2167,8 @@ probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@r
 # First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
 # prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
 # Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pblapply(histone.marks, function(x) {
-    getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
+tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
+    getTagMatrix(GenomeInfoDb::keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
 names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
@@ -2370,7 +2365,6 @@ The code is shown below. A description of how these distal enhacer probes are id
  the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette.
 
 ```{#numCode .R .numberLines}
-library(parallel)
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
 direction <- c("hyper")
@@ -2384,7 +2378,7 @@ for (j in direction){
     #--------------------------------------
     # Step 3.1: Get diff methylated probes |
     #--------------------------------------
-    Sig.probes <- get.diff.meth(mee, cores=detectCores(),
+    Sig.probes <- get.diff.meth(mee, cores=parallel::detectCores(),
                                 dir.out =dir.out,
                                 diff.dir=j,
                                 pvalue = 0.01)
@@ -2394,7 +2388,7 @@ for (j in direction){
     #-------------------------------------------------------------
     # Collect nearby 20 genes for Sig.probes
     nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
-                              cores=detectCores(),
+                              cores=parallel::detectCores(),
                               geneAnnot=getGeneInfo(mee))
 
     pair <- get.pair(mee=mee,
@@ -2402,7 +2396,7 @@ for (j in direction){
                      nearGenes=nearGenes,
                      permu.dir=paste0(dir.out,"/permu"),
                      dir.out=dir.out,
-                     cores=detectCores(),
+                     cores=parallel::detectCores(),
                      label= j,
                      permu.size=100, # For significant results use 10000
                      Pe = 0.01) # For significant results use 0.001
@@ -2439,7 +2433,7 @@ for (j in direction){
             TF <- get.TFs(mee = mee,
                           enriched.motif = enriched.motif,
                           dir.out = dir.out,
-                          cores = detectCores(), label = j)
+                          cores = parallel::detectCores(), label = j)
             TF.meth.cor <- get(load(paste0(dir.out,
 	                                   "/getTF.",j,
 					   ".TFs.with.motif.pvalue.rda")))
@@ -2616,7 +2610,6 @@ new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) biocLite(new.packages)
 if(!require("dnet")) install.packages("dnet")
 if(!require("circlize")) install.packages("circlize")
-if(!require("VennDiagram")) install.packages("VennDiagram")
 if(!require("c3net")) install.packages("c3net")
 if(!require("pbapply")) install.packages("pbapply")
 if(!require("gplots")) install.packages("gplots")
