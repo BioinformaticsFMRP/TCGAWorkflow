@@ -22,13 +22,12 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
+knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = TRUE)
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 suppressPackageStartupMessages({
     library(gaia)
-   
     R.utils::gcDLLs()
     library(BSgenome.Hsapiens.UCSC.hg19)
     library(MotIV)
@@ -313,7 +312,7 @@ dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"LGG","GBM",
                                           dataFilt[,colnames(dataFiltGBM)])
 
 dataDEGsFiltLevel$GeneID <- 0
- library(clusterProfiler)
+library(clusterProfiler)
 library(pathview)
 # Converting Gene symbol to geneID
 eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
@@ -341,6 +340,9 @@ hsa05214 <- pathview::pathview(gene.data  = genelistDEGs,
                                pathway.id = "hsa05214",
                                species    = "hsa",
                                limit = list(gene=as.integer(max(abs(genelistDEGs)))))
+detach("package:pathview", unload=TRUE)
+detach("package:clusterProfiler", unload=TRUE)
+R.utils::gcDLLs()
 ```
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 #----------------------------
@@ -562,6 +564,8 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 TCGAsurvival_TFplot("ELF4",mee,clinical)
 TCGAsurvival_TFplot("HMGA2",mee,clinical)
 TCGAsurvival_TFplot("FOXD3",mee,clinical)
+detach("package:ELMER", unload=TRUE)
+R.utils::gcDLLs()
 ```
 
 # Abstract
@@ -920,7 +924,11 @@ query.lgg.nocnv <- GDCquery(project = "TCGA-LGG",
                             legacy = TRUE,
                             file.type = "nocnv_hg19.seg",
                             sample.type = c("Primary solid Tumor"))
-GDCdownload(query.lgg.nocnv)
+result = tryCatch({
+    GDCdownload(query.lgg.nocnv, chunks.per.download = 100)
+}, error = function(e) {
+    GDCdownload(query.lgg.nocnv, method = "client")
+})
 lgg.nocnv <- GDCprepare(query.lgg.nocnv, save = TRUE, save.filename = "LGGnocnvhg19.rda")
 
 query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
@@ -928,7 +936,11 @@ query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
                             legacy = TRUE,
                             file.type = "nocnv_hg19.seg",
                             sample.type = c("Primary solid Tumor"))
-GDCdownload(query.gbm.nocnv)
+result = tryCatch({
+    GDCdownload(query.gbm.nocnv, chunks.per.download = 100)
+}, error = function(e) {
+    GDCdownload(query.gbm.nocnv, method = "client")
+})
 gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
 ```
 
@@ -1084,10 +1096,10 @@ for(cancer in c("LGG","GBM")){
     results <- runGAIA(cnv_obj,
                        markers_obj,
                        output_file_name=paste0("GAIA_",cancer,"_flt.txt"),
-		       aberrations = -1,
-                       chromosomes = -1,
-		       num_iterations = 10,
-		       threshold = 0.25)
+		                   aberrations = -1,
+                       chromosomes = 9,
+		                   num_iterations = 10,
+		                   threshold = 0.25)
     
     # Set q-value threshold
     threshold <- 0.0001
