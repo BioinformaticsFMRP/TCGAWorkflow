@@ -22,30 +22,14 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
 ```
-
-```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
-suppressPackageStartupMessages({
-    library(gaia)
-    R.utils::gcDLLs()
-    library(BSgenome.Hsapiens.UCSC.hg19)
-    library(MotIV)
-    library(rGADEM)
-    library(motifStack)
-    library(circlize)
-    library(ChIPseeker)
-    library(ggplot2)
-})
-```
-
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(TCGAbiolinks)
 library(stringr)
 library(ComplexHeatmap)
 library(SummarizedExperiment)
-
 # Samples: primary solid tumor w/ DNA methylation and gene expression
 matched_met_exp <- function(project, n = NULL){
     # get primary solid tumor samples: DNA methylation
@@ -421,7 +405,8 @@ heatmap  <- Heatmap(assay(sig.met.100),
                     column_title = "DNA Methylation") 
 # Save to png
 png("heatmap.png",width = 600, height = 400); draw(heatmap, annotation_legend_side =  "bottom"); dev.off()
-
+detach("package:ComplexHeatmap", unload=TRUE)
+R.utils::gcDLLs(quiet=F)
 ```
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(ELMER)
@@ -565,7 +550,7 @@ TCGAsurvival_TFplot("ELF4",mee,clinical)
 TCGAsurvival_TFplot("HMGA2",mee,clinical)
 TCGAsurvival_TFplot("FOXD3",mee,clinical)
 detach("package:ELMER", unload=TRUE)
-R.utils::gcDLLs()
+R.utils::gcDLLs(quiet=F)
 ```
 
 # Abstract
@@ -980,7 +965,7 @@ Segmented data retrieved from TCGA were used to generate a matrix including all 
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 #--------------------      Internal functions     ----------------------------
-
+library(gaia)
 gaiaCNVplot <- function (calls, cancer=NULL, threshold=0.01) 
 {
     Calls <- calls[order(calls[,"Region Start [bp]"]),]
@@ -1096,13 +1081,13 @@ for(cancer in c("LGG","GBM")){
     results <- runGAIA(cnv_obj,
                        markers_obj,
                        output_file_name=paste0("GAIA_",cancer,"_flt.txt"),
-		                   aberrations = -1,
+        		       aberrations = -1,
                        chromosomes = 9,
-		                   num_iterations = 10,
-		                   threshold = 0.25)
+		               num_iterations = 10,
+		               threshold = 0.25)
     
     # Set q-value threshold
-    threshold <- 0.0001
+    threshold <- 0.01
     
     # Plot the results
     RecCNV <- t(apply(results,1,as.numeric))
@@ -1118,6 +1103,8 @@ for(cancer in c("LGG","GBM")){
     save(results, RecCNV, threshold, file = paste0(cancer,"_CNV_results.rda"))
     message(paste0("Results saved as:", cancer,"_CNV_results.rda"))
 }
+detach("package:gaia", unload=TRUE)
+R.utils::gcDLLs()
 ```
 
 Recurrent amplifications and deletions were identified for LGG, and represented in chromosomal overview plots by a statistical score (*$-log_{10}$ corrected p-value* for amplifications and *$log_{10}$ corrected p-value* for deletions). Genomic regions identified as significantly altered in copy number (*corrected p-value* < $10^{-3}$) were then annotated to report amplified and deleted genes potentially related with cancer.
@@ -1334,7 +1321,7 @@ s.mut <- s.mut[,c(1:3,6,4,5)]
 # Load recurrent CNV data for selected cancer (e.g. "LGG")
 load("LGG_CNV_results.rda")
 # Prepare selected sample CNV data for circos plot
-s.cnv <- as.data.frame(RecCNV[RecCNV[,"q-value"]<=10^-4,c(1:4,6)])
+s.cnv <- as.data.frame(RecCNV[RecCNV[,"q-value"]<=threshold,c(1:4,6)])
 s.cnv <- s.cnv[,c(1,3,4,2)]
 xidx <- which(s.cnv$Chromosome==23)
 yidx <- which(s.cnv$Chromosome==24)
@@ -1974,16 +1961,15 @@ An object will be returned which contains all relevant information about your mo
 library(rGADEM)
 library(BSgenome.Hsapiens.UCSC.hg19)
 library(motifStack)
-library(rGADEM)
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(motifStack)
-probes <- rowRanges(met.chr9)[values(met.chr9)$status.GBM.LGG %in% c("Hypermethylated" ,"Hypomethylated") ,]
-# Get hypo/hyper methylated probes and Make 200bp windows around it
+
+probes <- rowRanges(met.chr9)[values(met.chr9)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated" ,"Hypomethylated") ,]
+# Get hypo/hyper methylated probes and make a 200bp window 
+# surrounding each probe.
 sequence <- RangedData(space=as.character(probes@seqnames),
                        IRanges(start=probes@ranges@start - 100,
                                end=probes@ranges@start + 100), strand="*")
 #look for motifs
-gadem <- GADEM(sequence, verbose=FALSE, genome=Hsapiens)
+gadem <- GADEM(sequence, verbose=1, genome=Hsapiens)
 
 # How many motifs were found?
 length(gadem@motifList)
@@ -1994,13 +1980,14 @@ nOccurrences(gadem)
 # view all sequences consensus
 consensus(gadem)
 
-# Print the first two motif logos.
+# Print motif
 pwm <- getPWM(gadem)
-pfm  <- new("pfm",mat=pwm[[2]],name="Novel Site 1")
+pfm  <- new("pfm",mat=pwm[[1]],name="Novel Site 1")
 plotMotifLogo(pfm)
 
-# Number of instances of motif 1? 
+# Number of instances of motif 1?
 length(gadem@motifList[[1]]@alignList)
+
 ```
 
 
