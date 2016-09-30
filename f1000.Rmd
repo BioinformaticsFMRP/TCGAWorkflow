@@ -5,9 +5,8 @@ author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, G
   Bontempi Michele Ceccarelli , and Houtan Noushmehr
 date: "`r Sys.Date()`"
 output: 
-    html_document:
+    BiocStyle::html_document:
         toc: true
-        theme: paper
         number_sections: false
         toc_depth: 2
         highlight: haddock
@@ -1102,8 +1101,8 @@ data are the aberrant regions along the genome resulting from CNV
 segmentation, and they are available for all copy number technologies.
 
 In this section, we will show how to analyze CNV level 3 data from TCGA
-to identify recurrent alterations in cancer genome. We analyzed GBM and
-LGG segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array
+to identify recurrent alterations in cancer genome. We analyzed GBM 
+segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array
 6.0).
 
 ### Pre-Processing Data {#pre-processing-data .unnumbered}
@@ -1115,7 +1114,7 @@ legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
 
-```{#numCode .R .numberLines}
+```{#numCode .R}
 library(TCGAbiolinks)
 library(GenomicRanges)
 library(biomaRt)
@@ -1140,22 +1139,6 @@ result = tryCatch({
 })
 gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
 ```
-
-
-### Identification of recurrent CNV in cancer
-Cancer related CNV have to be present in many of the analyzed genomes.
-The most significant recurrent CNV were identified using
-[GAIA](http://bioconductor.org/packages/gaia/) [@morganellagaia], an
-iterative procedure where a statistical hypothesis framework is extended
-to take into account within-sample homogeneity. GAIA is based on a
-conservative permutation test allowing the estimation of the probability
-distribution of the contemporary mutations expected for non-driver
-markers.
-
-Segmented data retrieved from TCGA were used to generate a matrix
-including all needed information about the observed aberrant regions.
-Furthermore, GAIA requires genomic probes metadata (specific for each
-CNV technology), that can be downloaded from broadinstitute website.
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,include=FALSE}
 library(TCGAbiolinks)
@@ -1173,7 +1156,7 @@ query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
                             legacy = TRUE,
                             file.type = "nocnv_hg19.seg",
                             sample.type = c("Primary solid Tumor"))
-# to reduce time
+# to reduce time we will select only 20 samples
 query.gbm.nocnv$results[[1]] <-  query.gbm.nocnv$results[[1]][1:20,]
 result = tryCatch({
     GDCdownload(query.gbm.nocnv, chunks.per.download = 100)
@@ -1192,6 +1175,23 @@ to take into account within-sample homogeneity. GAIA is based on a
 conservative permutation test allowing the estimation of the probability
 distribution of the contemporary mutations expected for non-driver
 markers.
+
+Segmented data retrieved from TCGA were used to generate a matrix
+including all needed information about the observed aberrant regions.
+Furthermore, GAIA requires genomic probes metadata (specific for each
+CNV technology), that can be downloaded from broadinstitute website.
+
+
+### Identification of recurrent CNV in cancer
+Cancer related CNV have to be present in many of the analyzed genomes.
+The most significant recurrent CNV were identified using
+[GAIA](http://bioconductor.org/packages/gaia/) [@morganellagaia], an
+iterative procedure where a statistical hypothesis framework is extended
+to take into account within-sample homogeneity. GAIA is based on a
+conservative permutation test allowing the estimation of the probability
+distribution of the contemporary mutations expected for non-driver
+markers.
+
 
 Segmented data retrieved from TCGA were used to generate a matrix
 including all needed information about the observed aberrant regions.
@@ -1280,7 +1280,7 @@ for(cancer in c("GBM")){
     file <- paste0(gdac.root, "genome.info.6.0_hg19.na31_minus_frequent_nan_probes_sorted_2.1.txt")
     # Retrieve probes meta file from broadinstitute website
     if(!file.exists(basename(file))) downloader::download(file, basename(file))
-    markersMatrix <-  readr::read_tsv(basename(file), col_names = FALSE, col_types = "ccn", progress = TRUE)
+    markersMatrix <-  readr::read_tsv(basename(file), col_names = FALSE, col_types = "ccn", progress = FALSE)
     colnames(markersMatrix) <- c("Probe.Name", "Chromosome", "Start")
     unique(markersMatrix$Chromosome)
     xidx <- which(markersMatrix$Chromosome=="X")
@@ -1289,14 +1289,6 @@ for(cancer in c("GBM")){
     markersMatrix[yidx,"Chromosome"] <- 24
     markersMatrix$Chromosome <- sapply(markersMatrix$Chromosome,as.integer)
     markerID <- apply(markersMatrix,1,function(x) paste0(x[2],":",x[3]))
-    print(table(duplicated(markerID)))
-    ## FALSE    TRUE
-    ## 1831041     186
-    # There are 186 duplicated markers
-    print(table(duplicated(markersMatrix$Probe.Name)))
-    ## FALSE
-    ## 1831227
-    # ...with different names!
     # Removed duplicates
     markersMatrix <- markersMatrix[-which(duplicated(markerID)),]
     # Filter markersMatrix for common CNV
@@ -1323,7 +1315,7 @@ for(cancer in c("GBM")){
 		               threshold = 0.25)
     
     # Set q-value threshold
-    threshold <- 0.01
+    threshold <- 0.1
     
     # Plot the results
     RecCNV <- t(apply(results,1,as.numeric))
@@ -1340,9 +1332,8 @@ for(cancer in c("GBM")){
     message(paste0("Results saved as:", cancer,"_CNV_results.rda"))
 }
 ```
-    
-Recurrent amplifications and deletions were identified for both LGG
-(Figure \[fig::cnvlgg\]) and GBM (Figure \[fig::cnvgbm\]), and
+
+Recurrent amplifications and deletions were identified for GBM, and
 represented in chromosomal overview plots by a statistical score
 (*$-log_{10}$ corrected p-value* for amplifications and *$log_{10}$
 corrected p-value* for deletions). Genomic regions identified as
@@ -1350,14 +1341,12 @@ significantly altered in copy number (*corrected p-value* &lt;
 $10^{-4}$) were then annotated to report amplified and deleted genes
 potentially related with cancer.
 
-
 ### Gene annotation of recurrent CNV
 The aberrant recurrent genomic regions in cancer, as identified by GAIA,
 have to be annotated to verify which genes are significantly amplified
 or deleted. Using biomaRt we retrieved the genomic ranges of all human
 genes and we compared them with significant aberrant regions to select
-full length genes. An example of the result is shown in table
-\[tab::tab1\].
+full length genes.
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 ##############################
@@ -1378,7 +1367,7 @@ genes <- genes[order(genes[,2]),]
 colnames(genes) <- c("GeneSymbol","Chr","Start","End")
 genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
 
-for(cancer in c("LGG","GBM")){
+for(cancer in c("GBM")){
     load(paste0(cancer,"_CNV_results.rda"))
     sCNV <- RecCNV[RecCNV[,"q-value"]<=threshold,c(1:4,6)]
     sCNV <- sCNV[order(sCNV[,3]),]
@@ -1396,10 +1385,13 @@ for(cancer in c("LGG","GBM")){
     rownames(AmpDel_genes) <- NULL
 
     save(RecCNV, AmpDel_genes, file = paste0(cancer,"_CNV_results.rda"))
-    # Chromossome 9  recurrent deleted genes in GBM
-    print(head(AmpDel_genes))
 }
+
 ```
+```{r results='asis', echo=TRUE, message=TRUE,warning=FALSE}
+knitr::kable(head(AmpDel_genes))
+```
+
 
 ### Visualizing multiple genomic alteration events
 In order to visualize multiple genomic alteration events we recommend
