@@ -314,6 +314,7 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFiltLGG,
 png("ea.png", width = 800,height = 800)
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         GOBPTab = ansEA$ResBP, GOCCTab = ansEA$ResCC,
                         GOMFTab = ansEA$ResMF, PathTab = ansEA$ResPat,
                         nRGTab = rownames(dataDEGs),
