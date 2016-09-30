@@ -1569,7 +1569,7 @@ knitr::kable(head(AmpDel_genes), caption = "Chromosome 9 recurrent deleted genes
 In order to visualize multiple genomic alteration events we recommend
 using OncoPrint plot which is provided by Bioconductor package
 [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)
-[@ComplexHeatmap]. The listing \[lst:mut\] shows how to download
+[@ComplexHeatmap]. The listing below shows how to download
 mutation data using *GDCquery\_maf* (line 4), then we filtered the genes
 to obtain genes with mutations found among glioma specific pathways
 (lines 6 - 12). The following steps prepared the data into a matrix to
@@ -2000,7 +2000,7 @@ resulted in 516 LGG samples and 156 GBM samples, then prepared it in two
 separate rse objects (*RangedSummarizedExperiment*) saving them as an R
 object with a filename including both the name of the cancer and the
 name of the plaftorm used for gene expression data (see listing
-\[lst:rnapre\]).
+below).
 
 
 
@@ -2030,7 +2030,7 @@ lgg.exp <- GDCprepare(query, save = TRUE, summarizedExperiment = TRUE, save.file
 To pre-process the data, first, we searched for possible outliers using
 the *TCGAanalyze\_Preprocessing* function, which performs an Array Array
 Intensity correlation AAIC (lines 14-17 and 26-29 of listing
-\[lst:dea\]). In this way we defined a square symmetric matrix of
+below). In this way we defined a square symmetric matrix of
 pearson correlation among all samples in each cancer type (LGG or GBM).
 This matrix found 0 samples with low correlation (cor.cut = 0.6) that
 can be identified as possible outliers.
@@ -2116,28 +2116,26 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
+![\label{eabarplot} The plot shows canonical pathways significantly overrepresented (enriched)
+by the DEGs (differentially expressed genes)  with the number of genes for the main categories of
+three ontologies (GO:biological process, GO:cellular component, and GO:molecular function, respectively).
+The most statistically significant canonical pathways identified in DEGs list are listed according
+to their p value corrected FDR (-Log) (colored bars) and the ratio of list genes found in each
+pathway over the total number of genes in that pathway (ratio, red line).](ea.png)
+
 *TCGAanalyze\_EAbarplot* outputs a bar chart as shown in figure
-\[eabarplot\] with the number of genes for the main categories of three
+\ref{eabarplot} with the number of genes for the main categories of three
 ontologies (i.e., GO:biological process, GO:cellular component, and
 GO:molecular function).
 
-The Figure \[eabarplot\] shows canonical pathways significantly
+The Figure  shows canonical pathways significantly
 overrepresented (enriched) by the DEGs. The most statistically
 significant canonical pathways identified in the DEGs are ranked
 according to their p-value corrected FDR (-Log10) (colored bars) and the
 ratio of list genes found in each pathway over the total number of genes
 in that pathway (ratio, red line).
 
-![\[eabarplot\] The plot shows canonical pathways significantly
-overrepresented (enriched) by the DEGs (differentially expressed genes)
-with the number of genes for the main categories of three ontologies
-(GO:biological process, GO:cellular component, and GO:molecular
-function, respectively). The most statistically significant canonical
-pathways identified in DEGs are listed according to their p-value
-corrected FDR (-Log10) (colored bars) and the ratio of listed genes
-found in each pathway over the total number of genes in that pathway
-(ratio, red
-line).](figures/TCGAvisualize_EAbarplot_Output.png){width="100.00000%"}
+
 
 
 ### PEA: Pathways enrichment analysis
@@ -2145,12 +2143,11 @@ line).](figures/TCGAvisualize_EAbarplot_Output.png){width="100.00000%"}
 To verify if the genes found have a specific role in a pathway, the
 Bioconductor package
 [pathview](http://bioconductor.org/packages/pathview/)
-[@luo2013pathview] can be used. Listing \[lst:pathview\] shows an
+[@luo2013pathview] can be used. Listing below shows an
 example how to use it. It can receive, for example, a named vector of
 gene with the expression level, the pathway.id which can be found in
 [KEGG database](http://www.genome.jp/kegg/pathway.html), the species
-(’hsa’ for Homo sapiens) and the limits for the gene expression (see
-figure \[gliomapathview\]).
+(’hsa’ for Homo sapiens) and the limits for the gene expression.
 
 ```{#numCode .R .numberLines}
 GenelistComplete <- rownames(assay(rse,1))
@@ -2198,11 +2195,7 @@ hsa05214 <- pathview(gene.data  = genelistDEGs,
 The red genes are up-regulated and the green genes are down-regulated in
 the LGG samples compared to GBM.
 
-![\[gliomapathview\] Pathways enrichment analysis : glioma pathway. Red
-defines genes that are up-regulated and green defines genes that are
-down-regulated.](figures/hsa05214_pathview.png){width="100.00000%"}
-
-
+![\label{gliomapathview} Pathways enrichment analysis : glioma pathway. Red defines genes that are up-regulated and green defines genes that are down-regulated.](hsa05214.pathview.png)
 
 ### Inference of gene regulatory networks
 
@@ -2225,7 +2218,7 @@ small subset of the real interactome. The quality assessment of the
 inferred networks can be carried out by comparing the inferred
 interactions to those that have been validated. This comparison results
 in a confusion matrix as presented in
-Table \[table::confusion\_matrix\].
+Table below.
 
                   validated   not validated/non-existing
   -------------- ----------- ----------------------------
@@ -2348,9 +2341,13 @@ for (cancertype in c("LGG", "GBM")) {
 }
 ```
 
-\[t!\] ![image](figures/roc_biogrid_GBM.png){width="100.00000%"}
 
-In Figure \[fig::roc\_GBM\], the obtained ROC curve and the
+![ROC with corresponding AUC for inferred GBM networks compared to
+    BioGrid interactions\label{fig::roc_GBM}](roc_biogrid_GBM.png)
+![ROC with corresponding AUC for inferred LGG networks compared to
+    BioGrid interactions\label{fig::roc_LGG}](roc_biogrid_LGG.png)
+
+In Figure above, the obtained ROC curve and the
 corresponding area under curve (AUC) are presented. It can be observed
 that CLR and MRNET perform best when comparing the inferred network with
 known interactions from the BioGrid database.
@@ -2382,7 +2379,7 @@ Bioconductor package
 perform it, we selected only 10 LGG samples and 10 GBM samples that have
 both DNA methylation data from Infinium HumanMethylation450 and gene
 expression from Illumina HiSeq 2000 RNA Sequencing Version 2 analysis
-(lines 1-56 of the listing \[lst:meanmet\] describes how to make the
+(lines 1-56 of the listing below describes how to make the
 data acquisition). We started by checking the mean DNA methylation of
 different groups of samples, then performed a DMR in which we search for
 regions of possible biological significance, (e.g., regions that are
@@ -2399,12 +2396,12 @@ The last type of probe can be used for sample identification and
 tracking and should be excluded for differential methylation analysis
 according to the [ilumina
 manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf).
-Therefore, the rs probes were removed (see listing \[lst:meanmet\] lines
+Therefore, the rs probes were removed (see listing below lines
 68). Also, probes in chromosomes X, Y were removed to eliminate
 potential artifacts originating from the presence of a different
 proportion of males and females [@marabita2013evaluation]. The last
 pre-processing steps were to remove probes with at least one NA value
-(see listing \[lst:meanmet\] lines 65).
+(see listing below lines 65).
 
 After this pre-processing step and using the function
 *TCGAvisualize\_meanMethylation* function, we can look at the mean DNA
@@ -2412,7 +2409,7 @@ methylation of each patient in each group. It receives as argument a
 *SummarizedExperiment* object with the DNA methylation data, and the
 arguments *groupCol* and *subgroupCol* which should be two columns from
 the sample information matrix of the *SummarizedExperiment* object
-(accessed by the *colData* function) (see listing \[lst:meanmet\] lines
+(accessed by the *colData* function) (see listing below lines
 70-74).
 
 
@@ -2506,7 +2503,7 @@ dots)](mean_lgg_gbm.png){width="50.00000%"}
 
 The next step is to define differentially methylated CpG sites between
 the two groups. This can be done using the *TCGAanalyze\_DMR* function
-(see listing \[lst:dmrcode\]). The DNA methylation data (level 3) is
+(see listing below). The DNA methylation data (level 3) is
 presented in the form of beta-values that uses a scale ranging from 0.0
 (probes completely unmethylated ) up to 1.0 (probes completely
 methylated).
@@ -2522,10 +2519,7 @@ difference of 0.15 and an adjusted p-value of less than $0.05$.
 After these tests, a volcano plot (x-axis: difference of mean DNA
 methylation, y-axis: statistical significance) is created to help users
 identify the differentially methylated CpG sites and return the object
-with the results in the rowRanges. Figure \[volcano\_met\] shows the
-volcano plot produced by listing  \[lst:dmrcode\]. This plot aids the
-user in selecting relevant thresholds, as we search for candidate
-biological DMRs.
+with the results in the rowRanges. 
 
 ```{#numCode .R .numberLines}
 #------- Searching for differentially methylated CpG sites     ----------
@@ -2546,10 +2540,15 @@ met.chr9 <- TCGAanalyze_DMR(met.chr9,
 )
 ```
 
-![\[volcano\_met\] Volcano plot: searching for differentially methylated
+Figure below shows the
+volcano plot produced by listing below. This plot aids the
+user in selecting relevant thresholds, as we search for candidate
+biological DMRs.
+
+![Volcano plot: searching for differentially methylated
 CpG sites (x-axis:difference of mean DNA methylation, y-axis:
 statistical
-significance)](figures/LGG_GBM_metvolcano.png){width="100.00000%"}
+significance)](LGG_GBM_metvolcano.png)
 
 To visualize the level of DNA methylation of these probes across all
 samples, we use heatmaps that can be generate by the bioconductor
@@ -2675,8 +2674,7 @@ After [rGADEM](http://bioconductor.org/packages/rGADEM/) returns it’s
 results, the user can use
 [MotIV](http://bioconductor.org/packages/MotIV/) package
 [@mercier2014motiv; @mahony2007dna; @mahony2007stamp; @mercier2011integrated]
-to start the motif matching analysis (line 4 of listing \[lst:MotIV\]).
-The result is shown in Figure \[fig::tfmotif\].
+to start the motif matching analysis (line 4 of listing below).
 
 ```{r results='asis', echo=TRUE,message=FALSE,warning=FALSE}
 library(MotIV)
@@ -2757,7 +2755,7 @@ expression is essential for fully understanding many biological
 processes and disease states. The aim is to explore significant overlap
 datasets for inferring co-regulation or transcription factor complex for
 further investigation. A summary of the association of each histone mark
-is shown in table \[histone-mark\].
+is shown in the table below.
  
 
 ```{r table4, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
@@ -2857,13 +2855,12 @@ shows an example of code to plot the average profile.
 
 To help the user better understand the regions found in the DMR
 analysis, we downloaded histone marks specific for brain tissue using
-the AnnotationHub package that can access the Roadmap database(listing
-\[lst:annotationhub\]). Next, the Chipseeker was used to visualize how
+the AnnotationHub package that can access the Roadmap database. 
+Next, the Chipseeker was used to visualize how
 histone modifications are enriched onto hypomethylated and
-hypermethylated regions, (listing \[lst:annotationhub\_3\]). The
+hypermethylated regions, (listing below). The
 enrichment heatmap and the average profile of peaks binding to those
-region is shown in Figures \[chip-seq-heatmap\] and \[chip-seq\]
-respectively.
+regions.
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
@@ -2975,7 +2972,7 @@ take the log2(expression + 1) of the expression matrix in order to
 linearize the relation between DNA methylation and expression. Also, it
 will prepare the row names of the matrix as required by the package.
 
-The listing \[lst:prepareelmer\] shows how to use
+The listing below shows how to use
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/)
 [@TCGAbiolinks] to search, download and prepare the data for the
 [ELMER](http://bioconductor.org/packages/ELMER/) package. Due to time
@@ -3193,7 +3190,7 @@ found.
 
 The list of motifs for the hyper direction (probes hypermethylated in
 LGG group compared to the GBM group) is found in the Figure
-\[odds-ration\]. 
+below. 
 
 ```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
 motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
@@ -3223,7 +3220,7 @@ methylation at motifs. [ELMER](http://bioconductor.org/packages/ELMER/)
 automatically creates a TF ranking plot for each enriched motif. This
 plot shows the TF ranking plots based on the association score
 $(-log(P value))$ between TF expression and DNA methylation of the
-motif. We can see in Figure \[tfrank\] that the top three TFs that are
+motif. We can see in Figure below that the top three TFs that are
 associated with that FOX motif are FOXD3, HMGA2 and HIST1H2BH.
 
 
@@ -3247,7 +3244,7 @@ The output of this step is a data frame with the following columns:
     list considered candidate upstream regulators
 
 Also, for each motif we can take a look at the three most relevant TFs.
-For example, Figure \[tfvsmet\] shows the average DNA methylation level
+For example, Figure below shows the average DNA methylation level
 of sites with the FOX motif plotted against the expression of the TFs
 FOXD3, HIST1H1D, HIST1H2BH and HMGA2. We can see that the experiment
 group (LGG samples) has a lower average methylation level of sites with
@@ -3363,7 +3360,7 @@ a number of software packages, including
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) and
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/). Version
 numbers for all packages used are in section "Session Information".
-Listing \[lst:install\] shows how to install all the required packages.
+The listing below shows how to install all the required packages.
 
 
 ```{r, eval = FALSE}
