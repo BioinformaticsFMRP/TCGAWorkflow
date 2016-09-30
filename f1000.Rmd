@@ -535,53 +535,6 @@ for (j in direction){
         }
     }
 }
-png("TF.png",width = 800, height = 400)
-scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
-             byTF=list(TF=c("FOXD3","HIST1H1D","HIST1H2BH","HMGA2"), 
-             probe=enriched.motif[["FOX"]]))
-dev.off()
-
-TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
-    
-    # For the transcription factor, gets it getGeneID
-    gene <- getGeneID(mee,symbol=TF)
-    # Get the expression values for the genes.
-    # (getExp is a ELMER function)
-    exp <- getExp(mee,geneID=gene)
-    
-    # Get the names of the 30% patients with lower expression
-    g1 <- names(sort(exp)[1:ceiling(length(exp) * percentage)])
-    
-    # Get the names of the 30% patients with higher expression
-    g2 <- names(sort(exp,decreasing = T)[1:ceiling(length(exp) * percentage)])
-
-    # get the data of only these patients
-    idx <- clinical$bcr_patient_barcode %in% substr(c(g1, g2),1,12)
-    clinical <- clinical[idx,]
-    # Create the labels for each sample
-    clinical$tf_groups <- "high"
-    low.idx <- clinical$bcr_patient_barcode %in% substr(c(g1),1,12) 
-    clinical[low.idx,]$tf_groups <- "low"
-    
-    # Use TCGAbiolinks to create the survival curve
-    TCGAanalyze_survival(clinical,"tf_groups",
-                         legend=paste0(TF," Exp level"),
-                         filename = paste0(TF,".pdf"))
-}
-
-# get clinical patient data for GBM samples
-gbm_clin <- GDCquery_clinic("TCGA-GBM","Clinical")
-
-# get clinical patient data for LGG samples
-lgg_clin <- GDCquery_clinic("TCGA-LGG","Clinical")
-
-# Bind the results, as the columns might not be the same,
-# we will will plyr rbind.fill, to have all columns from both files
-clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
-# Call the function we created
-TCGAsurvival_TFplot("ELF4",mee,clinical)
-TCGAsurvival_TFplot("HMGA2",mee,clinical)
-TCGAsurvival_TFplot("FOXD3",mee,clinical)
 ```
 
 # Abstract
@@ -3091,8 +3044,7 @@ mee <- fetch.mee(meth = met.elmer, exp = exp.elmer,
 mee@sample$TN[mee@sample$ID %in% gbm.samples] <- "Control"
 ```
 
-
-### ELMER analysis
+## ELMER analysis
 After preparing the data into a mee object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for both the hypo
 (distal enhancer probes hypomethylated in the LGG group) and hyper
@@ -3192,20 +3144,16 @@ The list of motifs for the hyper direction (probes hypermethylated in
 LGG group compared to the GBM group) is found in the Figure
 below. 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
+```{#numCode .R .numberLines}
 motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
 ```
-
+```{r, echo=FALSE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
+motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
+```
 We selected motifs that had a minimum incidence of 10
 in the given probes set and the smallest lower boundary of 95%
 confidence interval for Odds Ratio of 1.1. These both values are the
 default from the ELMER package.
-
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis'}
-# The analysis found  how many enriched motifs for the hypo direction?
-length(TF$motif)
-```
-
 
 ```{r tableTF, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 library(knitr)
@@ -3221,14 +3169,17 @@ automatically creates a TF ranking plot for each enriched motif. This
 plot shows the TF ranking plots based on the association score
 $(-log(P value))$ between TF expression and DNA methylation of the
 motif. We can see in Figure below that the top three TFs that are
-associated with that FOX motif are FOXD3, HMGA2 and HIST1H2BH.
+associated with a motif found.
 
-
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE, fig.align='center',fig.height=8,fig.width=8}
+```{#numCode .R .numberLines}
 library(ELMER)
 library(grid)
-load("/home/tiagochst/elmer/hypo/ELMER_results_hypo.rda")
-gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, motif="AP1", save=FALSE)
+TF.rank.plot(motif.pvalue=TF.meth.cor, motif="AP1", save=FALSE)
+```	
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,  fig.align='center',fig.height=8,fig.width=8}
+library(ELMER)
+library(grid)
+gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
 grid.draw(gg[[1]])
 ```	
 
@@ -3245,15 +3196,25 @@ The output of this step is a data frame with the following columns:
 
 Also, for each motif we can take a look at the three most relevant TFs.
 For example, Figure below shows the average DNA methylation level
-of sites with the FOX motif plotted against the expression of the TFs
-FOXD3, HIST1H1D, HIST1H2BH and HMGA2. We can see that the experiment
+of sites with the first motif plotted against the expression of some top TFs
+ associated with it. We can see that the experiment
 group (LGG samples) has a lower average methylation level of sites with
-the FOX motif plotted and a higher average expression of the TFs.
-```{#numCode .R .numberLines}
-scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
-             byTF=list(TF=c("WT1","ZNF208","ATF4","DDX5"), probe=enriched.motif[["AP1"]]))
-```
+the motif plotted and a higher average expression of the TFs.
 
+```{#numCode .R .numberLines}
+png("TF.png",width = 800, height = 400)
+scatter.plot(mee, category="TN", save=T, lm_line=TRUE,
+             byTF=list(TF=unlist(str_split(TF[1,"top_5percent"],";"))[1:4], 
+             probe=enriched.motif[[TF$motif[1]]]))
+dev.off()
+```
+```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE}
+png("TF.png",width = 800, height = 400)
+scatter.plot(mee, category="TN", save=F, lm_line=TRUE,
+             byTF=list(TF=unlist(str_split(TF[1,"top_5percent"],";"))[1:4], 
+             probe=enriched.motif[[TF$motif[1]]]))
+dev.off()
+```
 ![](TF.png)
 
 And for each relevant TF we will use the clinical data to analyze the
@@ -3301,19 +3262,66 @@ lgg_clin <- GDCquery_clinic("TCGA-LGG","Clinical")
 # we will will plyr rbind.fill, to have all columns from both files
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 # Call the function we created
-TCGAsurvival_TFplot("ELF4",mee,clinical)
-TCGAsurvival_TFplot("HMGA2",mee,clinical)
-TCGAsurvival_TFplot("FOXD3",mee,clinical)
+TCGAsurvival_TFplot(unlist(str_split(TF[1,"top_5percent"],";"))[1],mee,clinical)
+TCGAsurvival_TFplot(unlist(str_split(TF[1,"top_5percent"],";"))[2],mee,clinical)
+TCGAsurvival_TFplot(unlist(str_split(TF[2,"top_5percent"],";"))[1],mee,clinical)
 ```
 
 The Figure below, shows that the samples with lower
 expression of some of these TFs have a better survival than those with
 higher expression.
 
-![](FOXE3.png)
-![](FOXP4.png)
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
+    
+    # For the transcription factor, gets it getGeneID
+    gene <- getGeneID(mee,symbol=TF)
+    # Get the expression values for the genes.
+    # (getExp is a ELMER function)
+    exp <- getExp(mee,geneID=gene)
+    
+    # Get the names of the 30% patients with lower expression
+    g1 <- names(sort(exp)[1:ceiling(length(exp) * percentage)])
+    
+    # Get the names of the 30% patients with higher expression
+    g2 <- names(sort(exp,decreasing = T)[1:ceiling(length(exp) * percentage)])
 
+    # get the data of only these patients
+    idx <- clinical$bcr_patient_barcode %in% substr(c(g1, g2),1,12)
+    clinical <- clinical[idx,]
+    # Create the labels for each sample
+    clinical$tf_groups <- "high"
+    low.idx <- clinical$bcr_patient_barcode %in% substr(c(g1),1,12) 
+    clinical[low.idx,]$tf_groups <- "low"
+    
+    # Use TCGAbiolinks to create the survival curve
+    TCGAanalyze_survival(clinical,"tf_groups",
+                         legend=paste0(TF," Exp level"),
+                         filename = NULL)
+}
 
+# get clinical patient data for GBM samples
+gbm_clin <- GDCquery_clinic("TCGA-GBM","Clinical")
+
+# get clinical patient data for LGG samples
+lgg_clin <- GDCquery_clinic("TCGA-LGG","Clinical")
+
+# Bind the results, as the columns might not be the same,
+# we will will plyr rbind.fill, to have all columns from both files
+clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+TCGAsurvival_TFplot(unlist(str_split(TF[1,"top_5percent"],";"))[1],mee,clinical)
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+TCGAsurvival_TFplot(unlist(str_split(TF[1,"top_5percent"],";"))[2],mee,clinical)
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+TCGAsurvival_TFplot(unlist(str_split(TF[2,"top_5percent"],";"))[1],mee,clinical)
+```
 
 # Conclusion
 
@@ -3360,10 +3368,11 @@ a number of software packages, including
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) and
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/). Version
 numbers for all packages used are in section "Session Information".
-The listing below shows how to install all the required packages.
+Listing \[lst:install\] shows how to install all the required packages.
 
 
-```{r, eval = FALSE}
+
+```{#numCode .R .numberLines}
 source("https://bioconductor.org/biocLite.R")
 packages <- c("TCGAbiolinks","ELMER","gaia","ChIPseeker","AnnotationHub",
               "ComplexHeatmap", "clusterProfiler", "RTCGAToolbox",
@@ -3377,6 +3386,7 @@ if(!require("c3net")) install.packages("c3net")
 if(!require("pbapply")) install.packages("pbapply")
 if(!require("gplots")) install.packages("gplots")
 ```
+
 All data used in this workflow is freely available and some of them can
 be accessed using a R/Bioconductor package. There are three main sources
 of data: [The NCI Genomic Data Commons
