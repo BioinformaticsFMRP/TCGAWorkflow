@@ -25,6 +25,40 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
 ```
 
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
+suppressPackageStartupMessages({
+    library(TCGAbiolinks)
+    library(stringr)
+    library(SummarizedExperiment)
+    library(ELMER)
+    library(gaia)
+    library(parallel)
+    library(ChIPseeker)
+    library(ComplexHeatmap)
+    library(clusterProfiler)
+    library(minet)
+    library(c3net)
+    library(downloader)
+    library(biomaRt)
+    library(pathview)
+    library(BSgenome.Hsapiens.UCSC.hg19)
+    library(MotifDb)
+    library(MotIV)
+    library(rGADEM)
+    library(motifStack)
+    library(dnet)
+    library(circlize)
+    library(c3net)
+    library(pbapply)
+    library(gplots)
+    library(ChIPseeker)
+    library(pbapply)
+    library(GenomeInfoDb)
+    library(ggplot2)
+    library(AnnotationHub)
+})
+```
+
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(TCGAbiolinks)
 library(stringr)
@@ -549,8 +583,6 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 TCGAsurvival_TFplot("ELF4",mee,clinical)
 TCGAsurvival_TFplot("HMGA2",mee,clinical)
 TCGAsurvival_TFplot("FOXD3",mee,clinical)
-detach("package:ELMER", unload=TRUE)
-R.utils::gcDLLs(quiet=F)
 ```
 
 # Abstract
@@ -1076,47 +1108,12 @@ LGG segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array
 
 ### Pre-Processing Data {#pre-processing-data .unnumbered}
 
-The only CNV platform available for both LGG and GBM in TCGA is
+The only CNV platform available for GBM in TCGA is
 "Affymetrix Genome-Wide Human SNP Array 6.0". Using TCGAbiolinks, we
-queried for CNV SNP6 level 3 data for primary solid tumor samples in the
+queried for CNV SNP6 level 3 data for 20 primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
-in two separate rse objects (RangedSummarizedExperiment).
+in a rse objects (RangedSummarizedExperiment).
 
-```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,include=FALSE}
-library(TCGAbiolinks)
-library(GenomicRanges)
-library(biomaRt)
-library(gaia)
-# Select common CN technology available for GBM and LGG
-#############################
-## CNV data pre-processing ##
-#############################
-library(TCGAbiolinks)
-
-query.lgg.nocnv <- GDCquery(project = "TCGA-LGG",
-                            data.category =  "Copy number variation",
-                            legacy = TRUE,
-                            file.type = "nocnv_hg19.seg",
-                            sample.type = c("Primary solid Tumor"))
-result = tryCatch({
-    GDCdownload(query.lgg.nocnv, chunks.per.download = 100)
-}, error = function(e) {
-    GDCdownload(query.lgg.nocnv, method = "client")
-})
-lgg.nocnv <- GDCprepare(query.lgg.nocnv, save = TRUE, save.filename = "LGGnocnvhg19.rda")
-
-query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
-                            data.category =  "Copy number variation",
-                            legacy = TRUE,
-                            file.type = "nocnv_hg19.seg",
-                            sample.type = c("Primary solid Tumor"))
-result = tryCatch({
-    GDCdownload(query.gbm.nocnv, chunks.per.download = 100)
-}, error = function(e) {
-    GDCdownload(query.gbm.nocnv, method = "client")
-})
-gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
-```
 
 ```{#numCode .R .numberLines}
 library(TCGAbiolinks)
@@ -1129,27 +1126,62 @@ library(gaia)
 #############################
 library(TCGAbiolinks)
 
-query.lgg.nocnv <- GDCquery(project = "TCGA-LGG",
+query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
                             data.category =  "Copy number variation",
                             legacy = TRUE,
                             file.type = "nocnv_hg19.seg",
                             sample.type = c("Primary solid Tumor"))
-GDCdownload(query.lgg.nocnv)
-lgg.nocnv <- GDCprepare(query.lgg.nocnv, save = TRUE, save.filename = "LGGnocnvhg19.rda")
+# to reduce time
+query.gbm.nocnv$results[[1]] <-  query.gbm.nocnv$results[[1]][1:20,]
+result = tryCatch({
+    GDCdownload(query.gbm.nocnv, chunks.per.download = 100)
+}, error = function(e) {
+    GDCdownload(query.gbm.nocnv, method = "client")
+})
+gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
+```
+
+
+### Identification of recurrent CNV in cancer
+Cancer related CNV have to be present in many of the analyzed genomes.
+The most significant recurrent CNV were identified using
+[GAIA](http://bioconductor.org/packages/gaia/) [@morganellagaia], an
+iterative procedure where a statistical hypothesis framework is extended
+to take into account within-sample homogeneity. GAIA is based on a
+conservative permutation test allowing the estimation of the probability
+distribution of the contemporary mutations expected for non-driver
+markers.
+
+Segmented data retrieved from TCGA were used to generate a matrix
+including all needed information about the observed aberrant regions.
+Furthermore, GAIA requires genomic probes metadata (specific for each
+CNV technology), that can be downloaded from broadinstitute website.
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,include=FALSE}
+library(TCGAbiolinks)
+library(GenomicRanges)
+library(biomaRt)
+library(gaia)
+# Select common CN technology available for GBM and LGG
+#############################
+## CNV data pre-processing ##
+#############################
+library(TCGAbiolinks)
 
 query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
                             data.category =  "Copy number variation",
                             legacy = TRUE,
                             file.type = "nocnv_hg19.seg",
                             sample.type = c("Primary solid Tumor"))
-GDCdownload(query.gbm.nocnv)
+# to reduce time
+query.gbm.nocnv$results[[1]] <-  query.gbm.nocnv$results[[1]][1:20,]
+result = tryCatch({
+    GDCdownload(query.gbm.nocnv, chunks.per.download = 100)
+}, error = function(e) {
+    GDCdownload(query.gbm.nocnv, method = "client")
+})
 gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
-
-# We will work with less samples, just to make the example faster
-lgg.nocnv <- lgg.nocnv[,1:50]
-gbm.nocnv <- gbm.nocnv[,1:50]
 ```
-
 
 ### Identification of recurrent CNV in cancer
 Cancer related CNV have to be present in many of the analyzed genomes.
@@ -1218,8 +1250,8 @@ gaiaCNVplot <- function (calls, cancer=NULL, threshold=0.01)
 }
 
 
-for(cancer in c("LGG","GBM")){
-    message(paste0("Starting", cancer))
+for(cancer in c("GBM")){
+    message(paste0("Starting ", cancer))
     # Prepare CNV matrix
     cnvMatrix <- get(load(paste0(cancer,"nocnvhg19.rda")))
     
@@ -1284,9 +1316,10 @@ for(cancer in c("LGG","GBM")){
     results <- runGAIA(cnv_obj,
                        markers_obj,
                        output_file_name=paste0("GAIA_",cancer,"_flt.txt"),
-        		       aberrations = -1,
-                       chromosomes = 9,
-		               num_iterations = 10,
+        		       aberrations = -1,  # -1 to all aberrations
+                       chromosomes = 9, # -1 to all chromosomes
+        		       approximation = TRUE, # Set to TRUE to speed up the time requirements
+		               num_iterations = 5000, # Reduced to speed up the time requirements
 		               threshold = 0.25)
     
     # Set q-value threshold
@@ -1306,10 +1339,8 @@ for(cancer in c("LGG","GBM")){
     save(results, RecCNV, threshold, file = paste0(cancer,"_CNV_results.rda"))
     message(paste0("Results saved as:", cancer,"_CNV_results.rda"))
 }
-detach("package:gaia", unload=TRUE)
-R.utils::gcDLLs()
 ```
-
+    
 Recurrent amplifications and deletions were identified for both LGG
 (Figure \[fig::cnvlgg\]) and GBM (Figure \[fig::cnvgbm\]), and
 represented in chromosomal overview plots by a statistical score
@@ -1365,22 +1396,11 @@ for(cancer in c("LGG","GBM")){
     rownames(AmpDel_genes) <- NULL
 
     save(RecCNV, AmpDel_genes, file = paste0(cancer,"_CNV_results.rda"))
+    # Chromossome 9  recurrent deleted genes in GBM
+    print(head(AmpDel_genes))
 }
 ```
 
-  --- ------------ ------------ ---------------------- ---------------------- ----------------------
-      GeneSymbol   Aberration   q-value                AberrantRegion         GeneRegion
-  1   EIF4E2P1     Del          5.74967741935484e-05   20:20540891-21005246   20:20659710-20659964
-  2   LLPHP1       Del          5.74967741935484e-05   20:20540891-21005246   20:20721187-20721879
-  3   RN7SL607P    Del          5.74967741935484e-05   20:20540891-21005246   20:20738433-20738731
-  4   MRPS11P1     Del          5.74967741935484e-05   20:20540891-21005246   20:20854121-20854642
-  5   RPL24P2      Del          5.74967741935484e-05   20:21091497-21220212   20:21114723-21115197
-  --- ------------ ------------ ---------------------- ---------------------- ----------------------
-
-  : Chromosome 20 recurrent deleted genes in LGG<span
-  data-label="tab::tab1"></span>
-  
-  
 ### Visualizing multiple genomic alteration events
 In order to visualize multiple genomic alteration events we recommend
 using OncoPrint plot which is provided by Bioconductor package
@@ -2041,7 +2061,7 @@ known interactions from the BioGrid database.
 The DNA methylation is an important component in numerous cellular
 processes, such as embryonic development, genomic imprinting,
 X-chromosome inactivation, and preservation of chromosome stability
-[@phillips2008role] .
+[@phillips2008role].
 
 In mammals DNA methylation is found sparsely but globally, distributed
 in definite CpG sequences throughout the entire genome; however, there
@@ -2174,13 +2194,13 @@ TCGAvisualize_meanMethylation(met,
                               print.pvalue = TRUE)
 ```
 
-Figure \[mean\_met\] illustrates a mean DNA methylation plot for each
+The figure below illustrates a mean DNA methylation plot for each
 sample in the GBM group (140 samples) and a mean DNA methylation for
 each sample in the LGG group. Genome-wide view of the data highlights a
-difference between the groups of tumors (p-value = $6.1x10^{-06}$).
+difference between the groups of tumors.
 
-![\[mean\_met\] Boxplot of mean DNA methylation of each sample (black
-dots)](figures/mean_lgg_gbm.png){width="50.00000%"}
+![Boxplot of mean DNA methylation of each sample (black
+dots)](mean_lgg_gbm.png){width="50.00000%"}
 
 
 ### Searching for differentially methylated CpG sites {#searching-for-differentially-methylated-cpg-sites .unnumbered}
@@ -2241,16 +2261,9 @@ package
 package, the user should provide at least one matrix with the DNA
 methylation levels. Also, annotation layers can be added and placed at
 the bottom, top, left side and right side of the heatmap to provide
-additional metadata description. The listing \[lst:metheatmap\] shows
-the code to produce the heatmap of a DNA methylation datum (Figure
-\[complexheatmap\_met\]).
+additional metadata description. The listing below shows
+the code to produce the heatmap of a DNA methylation datum.
 
-![\[complexheatmap\_met\] Heatmap of DNA methylation in probes. Rows are
-probes and columns are samples (patients). The DNA methylation values
-range from 0.0 (completely DNA unmethylated, blue) to 1.0 (completely
-DNA methylated, red). The groups of each sample were annotated in the
-top bar and the DNA methylation status for each probe was annotated in
-the right bar](figures/heatmap.pdf){width="100.00000%"}
 
 ```{#numCode .R .numberLines}
 #--------------------------
@@ -2318,15 +2331,14 @@ regions defined by ‘differentially methylated’ to identify candidate
 transcription factors that could bind to these elements affected by the
 accumulation or absence of DNA methylation. For this analysis we use a
 sequence of 100 bases before and after the probe location (See lines 6-8
-in the listing \[lst:rgadem\]). An object will be returned which
+in the listing below). An object will be returned which
 contains all relevant information about your motif analysis (i.e.,
 sequence consensus, pwm, chromosome, p-value, etc).
 
 Using Bioconductor package
 [motifStack](http://bioconductor.org/packages/motifStack/)
 [@ou2013motifstack] it is possible to generate a graphic representation
-of multiple motifs with different similarity scores (see Figure
-\[fig::motif\]).
+of multiple motifs with different similarity scores.
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 library(rGADEM)
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -2359,10 +2371,6 @@ plotMotifLogo(pfm)
 length(gadem@motifList[[1]]@alignList)
 
 ```
-
-
-![Motif logos found during *de-novo* motif analysis<span
-data-label="fig::motif"></span>](figures/gadem.png){width="60.00000%"}
 
 After [rGADEM](http://bioconductor.org/packages/rGADEM/) returns it’s
 results, the user can use
@@ -2416,11 +2424,10 @@ $log_{10}$ (FDR-corrected P value) for DNA methylation is plotted on the
 x axis, and for gene expression on the y axis, for each gene. The
 horizontal black dashed line shows the FDR-adjusted P value of $10^{-2}$
 for the expression data and the vertical ones shows the FDR-adjusted P
-value of $10^{-2}$ for the DNA methylation data. The starburst plot for
-the listing \[lst:starburst\] is shown in Figure \[starplot\]. While the
+value of $10^{-2}$ for the DNA methylation data. While the
 argument met.p.cut and exp.p.cut controls the black dashed lines, the
 arguments diffmean.cut and logFC.cut will be used to highlight the genes
-that respects these parameters (circled genes in Figure \[starplot\]).
+that respects these parameters (circled genes in Figure below).
 For the example below we set higher p.cuts trying to get the most
 significant list of pair gene/probes. But for the next sections we will
 use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
@@ -2430,8 +2437,8 @@ use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met.chr9,    # DNA methylation with results
                                      dataDEGs,    # DEG results
-                                     group1 = "Glioblastoma Multiforme", # a type of the disease type column
-                                     group2= "Brain Lower Grade Glioma", # a type of the disease column
+                                     group1 = "Glioblastoma Multiforme", 
+                                     group2 = "Brain Lower Grade Glioma", 
                                      filename = "starburst.png",
                                      met.p.cut = 10^-2,
                                      exp.p.cut = 10^-2,
@@ -2502,7 +2509,7 @@ narrowPeak files are the ones selected for this step. For a complete
 pipeline with Chip-seq data, Bioconductor provides excellent tutorials
 to work with ChIP-seq and we encourage our readers to review the
 following article [@ChIP-seqbioc]. The first step shown in listing
-\[lst:annotationhub\] is to download the chip-seq data. The function
+below is to download the chip-seq data. The function
 *query* received as argument the annotationHub database (ah) and a list
 of keywords to be used for searching the data, *EpigenomeRoadmap* is
 selecting the roadmap database, *consolidated* is selecting only the
@@ -2543,12 +2550,11 @@ functions to summarize the coverage of the peak, average profile and
 heatmap of peaks binding to TSS regions, genomic annotation, distance to
 TSS and overlap of peaks or genes.
 
-After downloading the histone marks (see listing \[lst:annotationhub\],
+After downloading the histone marks,
 it is useful to verify the average profile of peaks binding to
 hypomethylated and hypermethylated regions, which will help the user
-understand better the regions found. Listing \[lst:annotationhub\_3\]
-shows an example of code to plot the average profile. Figure
-\[chip-seq\] shows the result.
+understand better the regions found. Listing below
+shows an example of code to plot the average profile. 
 
 To help the user better understand the regions found in the DMR
 analysis, we downloaded histone marks specific for brain tissue using
@@ -2891,7 +2897,7 @@ LGG group compared to the GBM group) is found in the Figure
 \[odds-ration\]. 
 
 ```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
- motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
+motif.enrichment.plot(motif.enrichment=motif.enrichment,save = FALSE)
 ```
 
 We selected motifs that had a minimum incidence of 10
@@ -3002,10 +3008,9 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 TCGAsurvival_TFplot("ELF4",mee,clinical)
 TCGAsurvival_TFplot("HMGA2",mee,clinical)
 TCGAsurvival_TFplot("FOXD3",mee,clinical)
-
 ```
 
-The Figure \[survival\_hoxa6\], shows that the samples with lower
+The Figure below, shows that the samples with lower
 expression of some of these TFs have a better survival than those with
 higher expression.
 
