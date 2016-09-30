@@ -22,7 +22,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
@@ -359,8 +359,8 @@ met.chr9 <- TCGAanalyze_DMR(met.chr9,
                             groupCol = "disease_type", # a column in the colData matrix
                             group1 = "Glioblastoma Multiforme", # a type of the disease type column
                             group2= "Brain Lower Grade Glioma", # a type of the disease column
-                            p.cut = 10^-2,
-                            diffmean.cut = 0.25,
+                            p.cut = 0.05,
+                            diffmean.cut = 0.15,
                             legend = "State",
                             plot.filename = "LGG_GBM_metvolcano.png",
                             cores = 1 # if set to 1 there will be a progress bar
@@ -579,12 +579,11 @@ Biotechnological advances in sequencing have led to an explosion of
     biologically relevant functional epigenomic elements associated with
     cancer. 
     
-    To illustrate our workflow, we analyzed two types of brain
-    tumors : low-grade glioma (LGG) versus high-grade glioma (glioblastoma
-    multiform or GBM). 
+To illustrate our workflow, we analyzed two types of brain
+tumors : low-grade glioma (LGG) versus high-grade glioma (glioblastoma
+multiform or GBM). 
     
-    This workflow introduces the following Bioconductor
-    packages:
+This workflow introduces the following Bioconductor packages:
 
 * [AnnotationHub](http://www.bioconductor.org/packages/AnnotationHub/)
 * [ChIPSeeker](http://www.bioconductor.org/packages/ChIPseeker/)
@@ -786,7 +785,7 @@ the samples, or the [gdc client
 tools](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool). The
 downloaded data will be saved in a directory with the project name and a
 sub-folder with the data.category, for example
-“TCGA-GBM/DNA\_methylation”.
+"TCGA-GBM/DNA\_methylation".
 
 Finally, *GDCprepare* transforms the downloaded data into a
 [summarizedExperiment](http://bioconductor.org/packages/SummarizedExperiment/)
@@ -904,9 +903,9 @@ treatment, treatment id, therapeutic agents, treatment intent type),
 demographic (gender, race, ethnicity) and exposures (cigarettes per day,
 weight, height, alcohol history) information. This indexed clinical data
 can be obtained using the function *GDCquery\_clinical* which can be
-used as described in listing \[lst:clin\]. This function has two
-arguments *project* (“TCGA-GBM”,“TARGET-AML”,etc) and *type* (“Clinical”
-or “Biospecimen”). The second method will download the xml files with
+used as described in listing below. This function has two
+arguments *project* ("TCGA-GBM","TARGET-AML",etc) and *type* ("Clinical"
+or "Biospecimen"). The second method will download the xml files with
 all clinical data for the patient and retrieve the desired information
 from it. This will give access to all clinical data available which
 includes patient (tumor tissue site, histological type, gender, vital
@@ -964,10 +963,10 @@ mutation <- GDCquery_Maf(tumor = "ACC")
 Finally, the Cancer Genome Atlas (TCGA) Research Network has reported
 integrated genome-wide studies of various diseases (ACC
 [@zheng2016comprehensive], BRCA [@cancer2012comprehensive_brca], COAD
-[@cancer2012comprehensive_colon], GBM [@cell], HNSC
+[@cancer2012comprehensive_colon], GBM [@Cell], HNSC
 [@cancer2015comprehensive], KICH [@davis2014somatic], KIRC
 [@cancer2013comprehensive], KIRP [@cancer2016comprehensive], LGG
-[@cell], LUAD [@cancer2014comprehensive_lung], LUSC
+[@Cell], LUAD [@cancer2014comprehensive_lung], LUSC
 [@cancer2012comprehensive_lusc], PRAD [@cancer2015molecular_prad], READ
 [@cancer2012comprehensive_colon], SKCM [@cancer2015genomic_skcm], STAD
 [@cancer2014comprehensive_stad], THCA [@cancer2014integrated_thca] and
@@ -1078,7 +1077,7 @@ LGG segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array
 ### Pre-Processing Data {#pre-processing-data .unnumbered}
 
 The only CNV platform available for both LGG and GBM in TCGA is
-“Affymetrix Genome-Wide Human SNP Array 6.0”. Using TCGAbiolinks, we
+"Affymetrix Genome-Wide Human SNP Array 6.0". Using TCGAbiolinks, we
 queried for CNV SNP6 level 3 data for primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
 in two separate rse objects (RangedSummarizedExperiment).
@@ -1145,6 +1144,10 @@ query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
                             sample.type = c("Primary solid Tumor"))
 GDCdownload(query.gbm.nocnv)
 gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
+
+# We will work with less samples, just to make the example faster
+lgg.nocnv <- lgg.nocnv[,1:50]
+gbm.nocnv <- gbm.nocnv[,1:50]
 ```
 
 
@@ -1733,6 +1736,7 @@ dataClin_LGG <- GDCquery_clinic("TCGA-LGG", "Clinical")
 
 dataPrep_LGG <- TCGAanalyze_Preprocessing(object = rse,
                                       cor.cut = 0.6, 
+                                      datatype = "raw_count",
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
 rse <- get(load("GBMIllumina_HiSeq.rda"))
@@ -1740,6 +1744,7 @@ dataClin_GBM <- GDCquery_clinic("TCGA-GBM", "Clinical")
 
 dataPrep_GBM <- TCGAanalyze_Preprocessing(object = rse,
                                           cor.cut = 0.6,
+                                          datatype = "raw_count",
                                           filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = cbind(dataPrep_LGG, dataPrep_GBM),
@@ -1923,7 +1928,7 @@ present in the set of known interactions can either mean that an
 experimental validation has been tried and did not show any regulatory
 mechanism or (more likely) has not yet been attempted.\
 In the following, we ran the nce on i) the 2,901 differentially
-expressed genes identified in Section “Transcriptomic analysis”.
+expressed genes identified in Section "Transcriptomic analysis".
 
 
 **Retrieving known interactions**
@@ -2193,7 +2198,7 @@ beta-values) of each group for each probe. Second, it test for
 differential expression between two groups using the wilcoxon test
 adjusting by the Benjamini-Hochberg method. Arguments of
 TCGAanalyze\_DMR was set to require a minimum absolute beta-values
-difference of 0.25 and an adjusted p-value of less than $10^{-2}$.
+difference of 0.15 and an adjusted p-value of less than $0.05$.
 
 After these tests, a volcano plot (x-axis: difference of mean DNA
 methylation, y-axis: statistical significance) is created to help users
@@ -2214,8 +2219,8 @@ met.chr9 <- TCGAanalyze_DMR(met.chr9,
                             groupCol = "disease_type", # a column in the colData matrix
                             group1 = "Glioblastoma Multiforme", # a type of the disease type column
                             group2= "Brain Lower Grade Glioma", # a type of the disease column
-                            p.cut = 10^-2,
-                            diffmean.cut = 0.25,
+                            p.cut = 0.05,
+                            diffmean.cut = 0.15,
                             legend = "State",
                             plot.filename = "LGG_GBM_metvolcano.png",
                             cores = 1 # if set to 1 there will be a progress bar
@@ -2425,7 +2430,8 @@ use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met.chr9,    # DNA methylation with results
                                      dataDEGs,    # DEG results
-                                     "GBM","LGG", # Groups
+                                     group1 = "Glioblastoma Multiforme", # a type of the disease type column
+                                     group2= "Brain Lower Grade Glioma", # a type of the disease column
                                      filename = "starburst.png",
                                      met.p.cut = 10^-2,
                                      exp.p.cut = 10^-2,
@@ -2601,7 +2607,7 @@ enrichment nearby the position 0, and the average profile also does not
 show a peak at position 0.
 
 To annotate the location of a given peak in terms of genomic features,
-annotatePeak assigns peaks to genomic annotation in “annotation” column
+annotatePeak assigns peaks to genomic annotation in "annotation" column
 of the output, which includes whether a peak is in the TSS, Exon, 5’
 UTR, 3’ UTR, Intronic or Intergenic location.
 
@@ -3036,10 +3042,8 @@ can acquire ENCODE/Roadmap data and integrate these data with the
 results obtained from analyzing TCGA data to identify and characterize
 candidate regulatory enhancers associated with cancer.
 
-# Software availability
 
-Data and software availability {#data-and-software-availability .unnumbered}
-==============================
+# Data and software availability {#data-and-software-availability .unnumbered}
 
 This workflow depends on various packages from version 3.2 of the
 Bioconductor project, running on R version 3.2.2 or higher. It requires
@@ -3054,7 +3058,7 @@ a number of software packages, including
 [MINET](http://bioconductor.org/packages/minet/),
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) and
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/). Version
-numbers for all packages used are in section “Session Information”.
+numbers for all packages used are in section "Session Information".
 Listing \[lst:install\] shows how to install all the required packages.
 
 
@@ -3097,28 +3101,25 @@ data portal.
 sessionInfo()
 ```
 
-Author contributions {#author-contributions .unnumbered}
-====================
+# Author contributions {#author-contributions .unnumbered}
 
 HN conceived the study. HN, MC and GB provided direction on the design
 of the Transcriptomics, Genomics, master regulatory networks and DNA
-methylation workflows. TCS developed and tested sections “Experimental
-data”, “DNA methylation analysis”, “Motif analysis” and “Integrative
-analysis”. AC developed and tested section “Transcriptomic analysis”. CO
-developed and tested the section “Inference of gene regulatory
-networks”. FDA developed and tested section “Genomic analysis”. TCS, AC,
+methylation workflows. TCS developed and tested sections "Experimental
+data", "DNA methylation analysis", "Motif analysis" and "Integrative
+analysis". AC developed and tested section "Transcriptomic analysis". CO
+developed and tested the section "Inference of gene regulatory
+networks". FDA developed and tested section "Genomic analysis". TCS, AC,
 CO, and FDA prepared the first draft of the manuscript. All authors were
 involved in the revision of the draft manuscript and have agreed to the
 final content. Also, AC, TS, CO, MC, GB and HN are authors of the
 TCGAbiolinks package and MC is author of the GAIA package.
 
-Competing interests {#competing-interests .unnumbered}
-===================
+# Competing interests {#competing-interests .unnumbered}
 
 No competing interests were disclosed.
 
-Grant information {#grant-information .unnumbered}
-=================
+# Grant information {#grant-information .unnumbered}
 
 The project was supported by the São Paulo Research Foundation
 ([FAPESP](http://www.fapesp.br/)) (2015/02844-7 and 2016/01389-7 to
@@ -3130,8 +3131,7 @@ Gastrointestinal Inflammatory-Sensitive CANcers
 (T100914F to G.B.). Funding for open access charge: São Paulo Research
 Foundation (FAPESP) (2015/07925-5).
 
-Acknowledgements {#acknowledgements .unnumbered}
-================
+# Acknowledgements {#acknowledgements .unnumbered}
 
 We are grateful to all the authors of the packages used in this article.
 Also, we would like to thank The GDC Support Team for the provided help,
