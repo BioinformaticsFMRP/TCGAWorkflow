@@ -2335,7 +2335,6 @@ regions of possible biological significance, (e.g., regions that are
 methylated in one group and unmethylated in the other). After finding
 these regions, they can be visualized using heatmaps.
 
-
 ### Visualizing the mean DNA methylation of each patient
 
 It should be highlighted that some pre-processing of the DNA methylation
@@ -2563,6 +2562,7 @@ dev.off()
 
 ![](heatmap.png)
 
+
 ### Motif analysis 
 Motif discovery is the attempt to extract small sequence signals hidden
 within largely non-functional intergenic sequences. These small sequence
@@ -2679,7 +2679,21 @@ significant list of pair gene/probes. But for the next sections we will
 use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 
 
-```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
+```{#numCode .R .numberLines}
+#------------------- Starburst plot ------------------------------
+starburst <- TCGAvisualize_starburst(met.chr9,    # DNA methylation with results
+                                     dataDEGs,    # DEG results
+                                     group1 = "Glioblastoma Multiforme", 
+                                     group2 = "Brain Lower Grade Glioma", 
+                                     filename = "starburst.png",
+                                     met.p.cut = 10^-2,
+                                     exp.p.cut = 10^-2,
+                                     diffmean.cut = 0.25,
+                                     logFC.cut = 1,width = 15,height = 10,
+                                     names = TRUE)
+```
+
+```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE}
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met.chr9,    # DNA methylation with results
                                      dataDEGs,    # DEG results
@@ -2694,7 +2708,6 @@ starburst <- TCGAvisualize_starburst(met.chr9,    # DNA methylation with results
 ```
 
 ![](starburst.png)
-
 ### ChIP-seq analysis
 
 ChIP-seq is used primarily to determine how transcription factors and
@@ -2767,7 +2780,27 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{#numCode .R .numberLines}
+library(ChIPseeker)
+library(SummarizedExperiment)
+library(ggplot2)
+library(AnnotationHub)
+
+#------------------ Working with ChipSeq data ---------------
+# Step 1: download histone marks for a brain and non-brain samples.
+#------------------------------------------------------------
+# loading annotation hub database
+ah = AnnotationHub()
+
+# Searching for brain consolidated epigenomes in the roadmap database
+bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","brain","E068"))
+
+# Get chip-seq data
+histone.marks <- pbapply::pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
+names(histone.marks) <- names(bpChipEpi_brain)
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(SummarizedExperiment)
 library(ggplot2)
@@ -2811,7 +2844,30 @@ hypermethylated regions, (listing below). The
 enrichment heatmap and the average profile of peaks binding to those
 regions.
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{#numCode .R .numberLines}
+library(ChIPseeker)
+library(SummarizedExperiment)
+library(ggplot2)
+library(AnnotationHub)
+
+# Create a GR object based on the hypo/hypermethylated probes.
+probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met.chr9)[values(met.chr9)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
+# Defining a window of 3kbp - 3kbp_probe_3kbp
+probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@ranges@start + 3000))
+
+### Profile of ChIP peaks binding to TSS regions
+# First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
+# prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
+# Then align the peaks that are mapping to these regions, and generate the tagMatrix.
+tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
+    getTagMatrix(GenomeInfoDb::keepStandardChromosomes(x), windows = probes, weightCol = "score")
+})
+names(tagMatrixList) <- basename(bpChipEpi_brain$title)
+names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
+names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(SummarizedExperiment)
 library(ggplot2)
@@ -2836,12 +2892,25 @@ names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type
 ```
 
 To plot the enrichment heatmap use the function `tagHeatmap`
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+
+```{#numCode .R .numberLines}
+tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
 To plot the  average profile of peaks binding to those region use `plotAvgProf`:
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{#numCode .R .numberLines}
+p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
+# We are centreing in the CpG instead of the TSS. So we'll change the labels manually
+p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
+library(ggthemes)
+p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_legend(override.aes = list(size=4)))
+```
+
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
 p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
@@ -2861,8 +2930,13 @@ To annotate the location of a given peak in terms of genomic features,
 annotatePeak assigns peaks to genomic annotation in "annotation" column
 of the output, which includes whether a peak is in the TSS, Exon, 5’
 UTR, 3’ UTR, Intronic or Intergenic location.
-
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{#numCode .R .numberLines}
+require(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db",verbose = FALSE)
+plotAnnoPie(peakAnno)
+```
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 require(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db",verbose = FALSE)
