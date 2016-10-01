@@ -2143,9 +2143,6 @@ hsa05214 <- pathview(gene.data  = genelistDEGs,
                      limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
 ```
 
-![\label{gliomapathview} Pathways enrichment analysis : glioma pathway. Red defines genes that are up-regulated and green defines genes that are down-regulated.](hsa05214.pathview.png)
-
-
 The red genes are up-regulated and the green genes are down-regulated in
 the LGG samples compared to GBM.
 
@@ -2237,9 +2234,7 @@ expressed genes.
 **Using differentially expressed genes from TCGAbiolinks workflow**
 
 
-We start this analysis by inferring two gene regulatory networks (the
-corresponding number of edges are presented in
-Table \[table::numberedges\]) for the GBM data set and one gene set for
+We start this analysis by inferring two gene regulatory networks for the GBM data set and one gene set for
 the LGG data.
 
 
@@ -2603,7 +2598,7 @@ sequence <- RangedData(space=as.character(probes@seqnames),
                        IRanges(start=probes@ranges@start - 100,
                                end=probes@ranges@start + 100), strand="*")
 #look for motifs
-gadem <- GADEM(sequence, verbose=1, genome=Hsapiens)
+gadem <- GADEM(sequence, verbose=FALSE, genome=Hsapiens)
 
 # How many motifs were found?
 length(gadem@motifList)
