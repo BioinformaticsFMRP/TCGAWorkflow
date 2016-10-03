@@ -1731,8 +1731,8 @@ circos.genomicTrackPlotRegion(s.mut, ylim = c(1.2,4.2),
 
 circos.clear()
 
-legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=3, cex=1.2, title.adj=0)
-legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=3, cex=1.2, title.adj=0)
+legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=1, cex=1.2, title.adj=0)
+legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=1, cex=1.2, title.adj=0)
 ```
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 ###############################################
@@ -1804,8 +1804,8 @@ circos.genomicTrackPlotRegion(s.mut, ylim = c(1.2,4.2),
 
 circos.clear()
 
-legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=1, cex=1.2, title.adj=0)
-legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=1, cex=1.2, title.adj=0)
+legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick","forestgreen"), title="CNVs", text.font=1, cex=0.4, title.adj=0)
+legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=1, cex=0.4, title.adj=0)
 ```
 
 
