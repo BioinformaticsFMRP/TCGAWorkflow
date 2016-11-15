@@ -139,8 +139,8 @@ exp.gbm <-GDCprepare(query.exp.gbm, save = FALSE)
 exp.elmer <- SummarizedExperiment::cbind(exp.lgg, exp.gbm)
 exp.elmer <- TCGAprepare_elmer(exp.elmer, platform = "IlluminaHiSeq_RNASeqV2")
 
-LGGmut <- GDCquery_Maf(tumor = "LGG")
-GBMmut <- GDCquery_Maf(tumor = "GBM")
+LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+GBMmut <- GDCquery_Maf(tumor = "GBM", pipelines = "mutect2")
 mut <- plyr::rbind.fill(LGGmut,GBMmut)
 
 # Filtering mutations in gliomas
@@ -942,7 +942,7 @@ and potential germline variants. To download Somatic MAFs data using
 *GDCquery\_maf* function is provided (see listing below).
 
 ```{#numCode .R .numberLines}
-mutation <- GDCquery_Maf(tumor = "ACC")
+mutation <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect2")
 ```
 
 Finally, the Cancer Genome Atlas (TCGA) Research Network has reported
@@ -1540,8 +1540,8 @@ bottom is highlighted in the figure .
 library(ComplexHeatmap) # Version 1.10.2
 library(TCGAbiolinks)
 
-LGGmut <- GDCquery_Maf(tumor = "LGG")
-GBMmut <- GDCquery_Maf(tumor = "GBM")
+LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+GBMmut <- GDCquery_Maf(tumor = "GBM", pipelines = "mutect2")
 mut <- plyr::rbind.fill(LGGmut,GBMmut)
 
 # Filtering mutations in gliomas
@@ -1668,7 +1668,7 @@ one or more selected chromosomes.
 
 # Retrieve curated mutations for selected cancer (e.g. "LGG") 
 library(TCGAbiolinks)
-mut <- GDCquery_Maf(tumor = "LGG")
+mut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 # Select only potentially damaging mutations
 mut <- mut[mut$Variant_Classification %in% c("Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation","Frame_Shift_Del","Frame_Shift_Ins"),]
 # Select recurrent mutations (identified in at least two samples)
@@ -1741,7 +1741,8 @@ legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="
 
 # Retrieve curated mutations for selected cancer (e.g. "LGG") 
 library(TCGAbiolinks)
-mut <- GDCquery_Maf(tumor = "LGG")
+
+mut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 # Select only potentially damaging mutations
 mut <- mut[mut$Variant_Classification %in% c("Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation","Frame_Shift_Del","Frame_Shift_Ins"),]
 # Select recurrent mutations (identified in at least two samples)
