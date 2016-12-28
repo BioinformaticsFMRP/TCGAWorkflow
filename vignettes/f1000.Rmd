@@ -45,7 +45,6 @@ suppressPackageStartupMessages({
     library(MotIV)
     library(rGADEM)
     library(motifStack)
-    library(dnet)
     library(circlize)
     library(c3net)
     library(pbapply)
@@ -3407,7 +3406,7 @@ Bioconductor packages in order to illustrate how one can acquire TCGA
 specific data, followed by key steps for genomics analysis using
 [GAIA](http://bioconductor.org/packages/gaia/) package, for
 transcriptomic analysis using
-[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/), dnet,
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/), 
 [pathview](http://bioconductor.org/packages/pathview/) packages and for
 DNA methylation analysis using
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) package.
@@ -3451,7 +3450,6 @@ packages <- c("TCGAbiolinks","ELMER","gaia","ChIPseeker","AnnotationHub",
               "rGADEM","BSgenome.Hsapiens.UCSC.hg19")
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) biocLite(new.packages)
-if(!require("dnet")) install.packages("dnet")
 if(!require("circlize")) install.packages("circlize")
 if(!require("c3net")) install.packages("c3net")
 if(!require("pbapply")) install.packages("pbapply")
