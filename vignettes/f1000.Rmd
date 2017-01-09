@@ -27,7 +27,6 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 suppressPackageStartupMessages({
     library(TCGAbiolinks)
-    library(stringr)
     library(SummarizedExperiment)
     library(ELMER)
     library(gaia)
@@ -48,7 +47,6 @@ suppressPackageStartupMessages({
     library(circlize)
     library(c3net)
     library(pbapply)
-    library(gplots)
     library(ChIPseeker)
     library(pbapply)
     library(GenomeInfoDb)
@@ -59,7 +57,6 @@ suppressPackageStartupMessages({
 
 ```{r results='asis', echo=FALSE, message=FALSE,include=FALSE}
 library(TCGAbiolinks)
-library(stringr)
 library(ComplexHeatmap)
 library(SummarizedExperiment)
 # Samples: primary solid tumor w/ DNA methylation and gene expression
@@ -2366,7 +2363,6 @@ the sample information matrix of the *SummarizedExperiment* object
 # Obtaining DNA methylation
 #----------------------------
 library(TCGAbiolinks)
-library(stringr)
 # Samples
 matched_met_exp <- function(project, n = NULL){
     # get primary solid tumor samples: DNA methylation
@@ -2913,9 +2909,14 @@ p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
-p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
-library(ggthemes)
-p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_legend(override.aes = list(size=4)))
+if (requireNamespace("ggplot2", quietly = TRUE)) 
+  p <- p + ggplot2::scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),
+                                       labels=c(-3000,-1500,"CpG",1500,3000))
+
+if (requireNamespace("ggthemes", quietly = TRUE)) 
+  p + ggthemes::theme_few() + 
+  ggthemes::scale_colour_few(name="Histone marks") + 
+  guides(colour = guide_legend(override.aes = list(size=4)))
 ```
 
 The hypomethylated and hypermethylated regions are enriched for H3K4me3,
@@ -3006,7 +3007,6 @@ expression data. This samples are the same used in the previous steps.
 ```{#numCode .R .numberLines}
 #----------- 8.3 Identification of Regulatory Enhancers   -------
 library(TCGAbiolinks)
-library(stringr)
 # Samples: primary solid tumor w/ DNA methylation and gene expression
 matched_met_exp <- function(project, n = NULL){
     # get primary solid tumor samples: DNA methylation
@@ -3125,10 +3125,11 @@ are identified is found in the
 vignette.
 
 ```{#numCode .R .numberLines}
+cores <- ifelse(requireNamespace("parallel", quietly = TRUE), parallel::detectCores(), 1)
+
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
 direction <- c("hyper")
-
 for (j in direction){
     print(j)
     dir.out <- paste0("elmer/",j)
@@ -3138,7 +3139,8 @@ for (j in direction){
     #--------------------------------------
     # Step 3.1: Get diff methylated probes |
     #--------------------------------------
-    Sig.probes <- get.diff.meth(mee, cores=parallel::detectCores(),
+    Sig.probes <- get.diff.meth(mee, 
+                                cores=cores,
                                 dir.out =dir.out,
                                 diff.dir=j,
                                 pvalue = 0.01)
@@ -3148,7 +3150,7 @@ for (j in direction){
     #-------------------------------------------------------------
     # Collect nearby 20 genes for Sig.probes
     nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
-                              cores=parallel::detectCores(),
+                              cores=cores,
                               geneAnnot=getGeneInfo(mee))
 
     pair <- get.pair(mee=mee,
@@ -3156,7 +3158,7 @@ for (j in direction){
                      nearGenes=nearGenes,
                      permu.dir=paste0(dir.out,"/permu"),
                      dir.out=dir.out,
-                     cores=parallel::detectCores(),
+                     cores=cores,
                      label= j,
                      permu.size=100, # For significant results use 10000
                      Pe = 0.01) # For significant results use 0.001
@@ -3193,7 +3195,7 @@ for (j in direction){
             TF <- get.TFs(mee = mee,
                           enriched.motif = enriched.motif,
                           dir.out = dir.out,
-                          cores = parallel::detectCores(), label = j)
+                          cores = cores, label = j)
             TF.meth.cor <- get(load(paste0(dir.out,
 	                                   "/getTF.",j,
 					   ".TFs.with.motif.pvalue.rda")))
@@ -3453,7 +3455,6 @@ if(length(new.packages)) biocLite(new.packages)
 if(!require("circlize")) install.packages("circlize")
 if(!require("c3net")) install.packages("c3net")
 if(!require("pbapply")) install.packages("pbapply")
-if(!require("gplots")) install.packages("gplots")
 ```
 
 All data used in this workflow is freely available and some of them can
