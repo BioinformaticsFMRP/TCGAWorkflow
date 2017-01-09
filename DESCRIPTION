@@ -1,51 +1,55 @@
-Package: f1000_TCGA_Workflow
-Title: TCGA Workflow  Analyze cancer genomics and epigenomics data using Bioconductor packages
-Version: 0.99.0
+Package: TCGAWorkflow
+Title: TCGA Workflow Analyze cancer genomics and epigenomics data using
+    Bioconductor packages
+Version: 0.99.1
 Date: 2016-12-28
-Author: 
-  Tiago Chedraoui Silva  <tiagochst@usp.br>,
-  Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
-  Catharina Olsen <colsen@ulb.ac.be>,
-  Fulvio D Angelo <fulvio.dan13@gmail.com>,
-  Gianluca Bontempi <gbonte@ulb.ac.be>,
-  Michele Ceccarelli <m.ceccarelli@gmail.com>,
-  Houtan Noushmehr <houtan@usp.br>
+Author: Tiago Chedraoui Silva  <tiagochst@usp.br>,
+    Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
+    Catharina Olsen <colsen@ulb.ac.be>,
+    Fulvio D Angelo <fulvio.dan13@gmail.com>,
+    Gianluca Bontempi <gbonte@ulb.ac.be>,
+    Michele Ceccarelli <m.ceccarelli@gmail.com>,
+    Houtan Noushmehr <houtan@usp.br>
 Maintainer: Tiago Chedraoui Silva <tiagochst@usp.br>
-Description: A workflow pacakge to analyze cancer genomics and epigenomics data using Bioconductor packages
-Depends: 
-  R (>= 3.3.0), 
-  downloader (>= 0.4),
-  TCGAbiolinks,
-  stringr,
-  SummarizedExperiment,
-  ELMER,
-  gaia,
-  parallel,
-  ChIPseeker,
-  ComplexHeatmap,
-  clusterProfiler,
-  minet,
-  c3net,
-  biomaRt,
-  pathview,
-  BSgenome.Hsapiens.UCSC.hg19,
-  MotifDb,
-  MotIV,
-  rGADEM,
-  motifStack,
-  circlize,
-  c3net,
-  pbapply,
-  gplots,
-  ChIPseeker,
-  pbapply,
-  GenomeInfoDb,
-  ggplot2,
-  AnnotationHub
+Description: A workflow pacakge to analyze cancer genomics and epigenomics data
+    using Bioconductor packages
+Depends:
+    R (>= 3.3.0),
+    downloader (>= 0.4),
+    TCGAbiolinks,
+    stringr,
+    SummarizedExperiment,
+    ELMER,
+    gaia,
+    parallel,
+    ChIPseeker,
+    ComplexHeatmap,
+    clusterProfiler,
+    minet,
+    c3net,
+    biomaRt,
+    pathview,
+    BSgenome.Hsapiens.UCSC.hg19,
+    MotifDb,
+    MotIV,
+    rGADEM,
+    motifStack,
+    circlize,
+    c3net,
+    pbapply,
+    gplots,
+    ChIPseeker,
+    pbapply,
+    GenomeInfoDb,
+    ggplot2,
+    AnnotationHub
 License: GPL (>= 3)
 VignetteBuilder: knitr
 biocViews: WorkflowStep
-Suggests: knitr, knitcitations
+Suggests:
+    knitr,
+    knitcitations
 NeedsCompilation: no
 URL: https://f1000research.com/articles/5-1542/v2
 BugReports: https://github.com/BioinformaticsFMRP/f1000_TCGA_Workflow/issues
+RoxygenNote: 5.0.1
