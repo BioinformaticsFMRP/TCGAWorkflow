@@ -1007,8 +1007,6 @@ gbm.data <- getFirehoseData(dataset = "GBM",
                             Methylation = TRUE, Clinic = TRUE, RNAseq2_Gene_Norm = TRUE,
                             fileSizeLimit = 10000)
 
-# To access the data you should use the getData function
-# or simply access with @ (for example gbm.data@Clinical)
 gbm.mut <- getData(gbm.data,"Mutations")
 gbm.clin <- getData(gbm.data,"Clinical")
 gbm.gistic <- getData(gbm.data,"GISTIC")
@@ -1024,8 +1022,8 @@ copy-number alterations (SCNAs) [@mermel2011gistic2].
 gistic <- getFirehoseData("GBM",gistic2_Date ="20141017" )
 
 # get GISTIC results
-gistic.allbygene <- gistic@GISTIC@AllByGene
-gistic.thresholedbygene <- gistic@GISTIC@ThresholedByGene
+gistic.allbygene <- getData(gistic,type = "GISTIC", CN = "All")
+gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
 ```
 
 
