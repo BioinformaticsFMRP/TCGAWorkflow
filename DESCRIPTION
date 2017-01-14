@@ -15,11 +15,12 @@ Description: A workflow pacakge to analyze cancer genomics and epigenomics data
     using Bioconductor packages
 Depends:
     R (>= 3.3.0)
+Imports:
+    TCGAbiolinks,
+    ELMER
 Suggests:
     downloader (>= 0.4),
-    TCGAbiolinks,
     SummarizedExperiment,
-    ELMER,
     gaia,
     ChIPseeker,
     ComplexHeatmap,

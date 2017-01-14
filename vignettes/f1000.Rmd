@@ -39,11 +39,7 @@ suppressPackageStartupMessages({
     library(c3net)
     library(biomaRt)
     library(pathview)
-    library(BSgenome.Hsapiens.UCSC.hg19)
     library(MotifDb)
-    library(MotIV)
-    library(rGADEM)
-    library(motifStack)
     library(circlize)
     library(ChIPseeker)
     library(pbapply)
@@ -320,8 +316,6 @@ dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"LGG","GBM",
                                           dataFilt[,colnames(dataFiltGBM)])
 
 dataDEGsFiltLevel$GeneID <- 0
-library(clusterProfiler)
-library(pathview)
 # Converting Gene symbol to geneID
 eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
                         fromType="SYMBOL",
@@ -1191,7 +1185,7 @@ RecCNV[RecCNV[,"q-value"]==0,"q-value"] <- as.numeric(minval)
 RecCNV[,"score"] <- sapply(RecCNV[,"q-value"],function(x) -log10(as.numeric(x)))
 RecCNV[RecCNV[,"q-value"]==as.numeric(minval),]
 
-gaiaCNVplot(RecCNV,cancer,threshold)
+gaiaCNVplot(RecCNV,threshold)
 save(results, RecCNV, threshold, file = paste0(cancer,"_CNV_results.rda"))
 message(paste0("Results saved as:", cancer,"_CNV_results.rda"))
 ```
@@ -1271,7 +1265,7 @@ RecCNV[RecCNV[,"q-value"]==0,"q-value"] <- as.numeric(minval)
 RecCNV[,"score"] <- sapply(RecCNV[,"q-value"],function(x) -log10(as.numeric(x)))
 RecCNV[RecCNV[,"q-value"]==as.numeric(minval),]
 
-gaiaCNVplot(RecCNV,cancer,threshold)
+gaiaCNVplot(RecCNV,threshold)
 save(results, RecCNV, threshold, file = paste0(cancer,"_CNV_results.rda"))
 message(paste0("Results saved as:", cancer,"_CNV_results.rda"))
 ```
@@ -1298,7 +1292,7 @@ full length genes.
 # Get gene information
 mart <- useMart(biomart="ensembl", dataset="hsapiens_gene_ensembl")
 genes <- getBM(attributes = c("hgnc_symbol", "chromosome_name","start_position","end_position"), mart=mart)
-genes <- genes[genes[,1]!="" & genes[,2]%in%c(1:22,"X","Y"),]
+genes <- genes[genes[,1]!="" & genes[,2] %in% c(1:22,"X","Y"),]
 xidx <- which(genes[,2]=="X")
 yidx <- which(genes[,2]=="Y")
 genes[xidx, 2] <- 23

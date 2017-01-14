@@ -1,34 +1,52 @@
-#' Access biomart to get 
-#' @description getRNAseq is a function to download RNAseq data for all samples of a certain cancer type from TCGA
-#' @param disease A character specifies disease in TCGA such as BLCA
-#' @param basedir Download all RNA seq level 3 data for the specified disease.
-#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
-#' @usage getRNAseq(disease, basedir = "./Data")
-#' @return Download all RNA seq level 3 data for the specified disease.
-#' @importFrom TCGAbiolinks GDCdownload GDCquery GDCprepare
-gaiaCNVplot <- function (calls, cancer=NULL, threshold=0.01) 
+#' Creates a plot for GAIA ouptut (all significant aberrant regions.)
+#' @description 
+#' This function is a auxiliary function to visualize GAIA ouptut 
+#' (all significant aberrant regions.)
+#' @param calls A matrix with the following columns: Chromossome, Aberration Kind
+#' Region Start, Region End, Region Size and score
+#' @param threshold Score threshold (orange horizontal line in the plot)
+#' @examples 
+#' call <- data.frame("Chromossome" = rep(9,100),
+#'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
+#'            "Region Start [bp]" = 18259823:18259922,
+#'            "Region End [bp]" = 18259823:18259922,
+#'            "score"=rep(c(1,2,3,4),25))
+#'  gaiaCNVplot(call,threshold = 0.01)  
+#'  call <- data.frame("Chromossome" = rep(c(1,9),50),
+#'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
+#'            "Region Start [bp]" = 18259823:18259922,
+#'            "Region End [bp]" = 18259823:18259922,
+#'            "score"=rep(c(1,2,3,4),25))
+#'  gaiaCNVplot(call,threshold = 0.01)       
+gaiaCNVplot <- function (calls,  threshold=0.01) 
 {
-  Calls <- calls[order(calls[,"Region Start [bp]"]),]
-  Calls <- Calls[order(Calls[,"Chromosome"]),]
+  Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = T)]),]
+  Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = T)]),]
   rownames(Calls) <- NULL
-  Chromo <- Calls[,"Chromosome"]
-  Gains <- apply(Calls,1,function(x) ifelse(x["Aberration Kind"]==1, x["score"], 0))
-  Losses <- apply(Calls,1,function(x) ifelse(x["Aberration Kind"]==0, x["score"], 0))
-  plot(Gains, ylim = c(-max(Calls[,"score"]+2), max(Calls[,"score"]+2)), type = "h", 
-       col = "red", xlab = "Chromosome", ylab = "Score", 
-       #main = paste("Recurrent Copy Number Variations",cancer, sep=" - "), 
+  Chromo <- Calls[,grep("chr",colnames(calls),ignore.case = T)]
+  Gains <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = T)] == 1, x["score"], 0))
+  Losses <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = T)] == 0, x["score"], 0))
+  plot(Gains, 
+       ylim = c(-max(Calls[,"score"]+2), max(Calls[,"score"]+2)), 
+       type = "h", 
+       col = "red", 
+       xlab = "Chromosome", 
+       ylab = "Score", 
        xaxt = "n")
   points(-(Losses), type = "h", col = "blue")
+  # Draw origin line
   abline(h = 0, cex = 4)
+  # Draw threshold lines
   abline(h = -log10(threshold), col = "orange", cex = 4, main="test")
   abline(h = log10(threshold), col = "orange", cex = 4, main="test")
+  
   uni.chr <- unique(Chromo)
   temp <- rep(0, length(uni.chr))
   for (i in 1:length(uni.chr)) {
     temp[i] <- max(which(uni.chr[i] == Chromo))
   }
   for (i in 1:length(temp)) {
-    abline(v = temp[i], col = "black", lty = "dashed", )
+    abline(v = temp[i], col = "black", lty = "dashed")
   }
   nChroms <- length(uni.chr)
   begin <- c()
@@ -91,6 +109,9 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 #' @usage matched_met_exp("TCGA-ACC)
 #' @return A vector of barcodes
 #' @importFrom TCGAbiolinks  GDCquery
+#' @examples 
+#' # Get ACC samples with both DNA methylation and gene expression
+#' samples <- matched_met_exp("TCGA-ACC")
 matched_met_exp <- function(project, n = NULL){
   # get primary solid tumor samples: DNA methylation
   message("Download DNA methylation information")
@@ -131,8 +152,8 @@ matched_met_exp <- function(project, n = NULL){
 #' group and  30% in the lower expression group
 #' @return A pdf wuth the survival plot
 #' @importFrom TCGAbiolinks  TCGAanalyze_survival
-#' @importFrom ELMER  getGeneID getExp
-TCGAsurvival_TFplot <- function(TF,mee, clinical, percentage = 0.3){
+#' @importFrom ELMER getGeneID getExp
+TCGAsurvival_TFplot <- function(TF, mee, clinical, percentage = 0.3){
   
   # For the transcription factor, gets it getGeneID
   gene <- getGeneID(mee,symbol=TF)

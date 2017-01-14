@@ -2,7 +2,5 @@
 
 importFrom(ELMER,getExp)
 importFrom(ELMER,getGeneID)
-importFrom(TCGAbiolinks,GDCdownload)
-importFrom(TCGAbiolinks,GDCprepare)
 importFrom(TCGAbiolinks,GDCquery)
 importFrom(TCGAbiolinks,TCGAanalyze_survival)
