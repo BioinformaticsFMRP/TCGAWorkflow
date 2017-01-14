@@ -26,10 +26,12 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 suppressPackageStartupMessages({
+    devtools::load_all(".")
     library(TCGAbiolinks)
     library(SummarizedExperiment)
     library(ELMER)
     library(gaia)
+    library(ggplot2)
     library(ChIPseeker)
     library(ComplexHeatmap)
     library(clusterProfiler)
@@ -1331,14 +1333,13 @@ save(RecCNV, AmpDel_genes, file = paste0(cancer,"_CNV_results.rda"))
 ##############################
 # Get gene information from GENCODE using biomart
 genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = "hg19") 
-genes <- genes[genes[,1]!="" & genes[,2]%in%c(1:22,"X","Y"),]
-xidx <- which(genes[,2]=="X")
-yidx <- which(genes[,2]=="Y")
-genes[xidx, 2] <- 23
-genes[yidx, 2] <- 24
-genes[,2] <- sapply(genes[,2],as.integer)
-genes <- genes[order(genes[,3]),]
-genes <- genes[order(genes[,2]),]
+genes <- genes[genes$external_gene_id != "" & genes$chromosome_name %in% c(1:22,"X","Y"),]
+genes[genes$chromosome_name=="X", "chromosome_name"] <- 23
+genes[genes$chromosome_name=="Y", "chromosome_name"] <- 24
+genes$chromosome_name <- sapply(genes$chromosome_name,as.integer)
+genes <- genes[order(genes$start_position),]
+genes <- genes[order(genes$chromosome_name),]
+genes <- genes[,c("external_gene_id", "chromosome_name", "start_position","end_position")]
 colnames(genes) <- c("GeneSymbol","Chr","Start","End")
 genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
 
@@ -1535,7 +1536,7 @@ s.mut <- cbind(s.mut,Type)
 s.mut <- s.mut[,c(1:3,6,4,5)]
 
 # Load recurrent CNV data for selected cancer (e.g. "LGG")
-load("LGG_CNV_results.rda")
+load("GBM_CNV_results.rda")
 # Prepare selected sample CNV data for circos plot
 s.cnv <- as.data.frame(RecCNV[RecCNV[,"q-value"]<=threshold,c(1:4,6)])
 s.cnv <- s.cnv[,c(1,3,4,2)]
@@ -1606,7 +1607,7 @@ s.mut <- cbind(s.mut,Type)
 s.mut <- s.mut[,c(1:3,6,4,5)]
 
 # Load recurrent CNV data for selected cancer (e.g. "LGG")
-load("LGG_CNV_results.rda")
+load("GBM_CNV_results.rda")
 # Prepare selected sample CNV data for circos plot
 s.cnv <- as.data.frame(RecCNV[RecCNV[,"q-value"]<=threshold,c(1:4,6)])
 s.cnv <- s.cnv[,c(1,3,4,2)]
@@ -1622,7 +1623,6 @@ s.cnv <- cbind(s.cnv,CNV=1)
 colnames(s.cnv) <- c("Chromosome","Start_position","End_position","Aberration_Kind","CNV")
 
 # Draw genomic circos plot
-library(circlize)
 par(mar=c(1,1,1,1), cex=1)
 circos.initializeWithIdeogram()
 # Add CNV results
@@ -1780,9 +1780,6 @@ legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="M
 
 
 ## Transcriptomic analysis
-
-
-
 
 ### Pre-Processing Data
 
@@ -2682,7 +2679,7 @@ p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
 p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
 library(ggthemes)
-p + theme_few() + scale_colour_few(name="Histone marks") +guides(colour = guide_legend(override.aes = list(size=4)))
+p + theme_few() + scale_colour_few(name="Histone marks") +  guides(colour = guide_legend(override.aes = list(size=4)))
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
@@ -2695,7 +2692,7 @@ if (requireNamespace("ggplot2", quietly = TRUE))
 if (requireNamespace("ggthemes", quietly = TRUE)) 
   p + ggthemes::theme_few() + 
   ggthemes::scale_colour_few(name="Histone marks") + 
-  guides(colour = guide_legend(override.aes = list(size=4)))
+  ggplot2::guides(colour = guide_legend(override.aes = list(size=4)))
 ```
 
 The hypomethylated and hypermethylated regions are enriched for H3K4me3,
@@ -3058,7 +3055,7 @@ dev.off()
 ```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE}
 png("TF.png",width = 800, height = 400)
 scatter.plot(mee, category="TN", save=F, lm_line=TRUE,
-             byTF=list(TF=unlist(str_split(TF[1,"top_5percent"],";"))[1:4], 
+             byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent"],";"))[1:4], 
              probe=enriched.motif[[TF$motif[1]]]))
 dev.off()
 ```
@@ -3131,15 +3128,15 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
-TCGAsurvival_TFplot(unlist(str_split(TF[1,"top_5percent"],";"))[1],mee,clinical)
+TCGAsurvival_TFplot(unlist(stringr::str_split(TF[1,"top_5percent"],";"))[1],mee,clinical)
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
-TCGAsurvival_TFplot(unlist(str_split(TF[1,"top_5percent"],";"))[2],mee,clinical)
+TCGAsurvival_TFplot(unlist(stringr::str_split(TF[1,"top_5percent"],";"))[2],mee,clinical)
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
-TCGAsurvival_TFplot(unlist(str_split(TF[2,"top_5percent"],";"))[1],mee,clinical)
+TCGAsurvival_TFplot(unlist(stringr::str_split(TF[2,"top_5percent"],";"))[1],mee,clinical)
 ```
 
 # Conclusion
