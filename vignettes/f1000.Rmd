@@ -523,6 +523,10 @@ for (j in direction){
 }
 ```
 
+# About
+
+This workflow is based on the article: TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages[@10.12688/f1000research.8923.2]
+
 # Abstract
 
 Biotechnological advances in sequencing have led to an explosion of
@@ -558,7 +562,6 @@ All the  package landing pages used in this workflow can be found through the [b
 **Keywords:** Epigenomics, Genomics, Cancer, non-coding, TCGA, ENCODE, Roadmap, Bioinformatics.
 
 # Introduction
-
 
 Cancer is a complex genetic disease spanning multiple molecular events
 such as point mutations, structural variations, translocations and
