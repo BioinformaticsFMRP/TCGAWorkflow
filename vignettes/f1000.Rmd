@@ -433,8 +433,11 @@ geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
 probe <- get.feature.probe()
 
 # create mee object, use @ to access the matrices inside the object
-mee <- fetch.mee(meth = met.elmer, exp = exp.elmer, 
-                 TCGA = TRUE, probeInfo = probe, geneInfo = geneInfo)
+mee <- fetch.mee(meth = met.elmer, 
+                 exp = exp.elmer, 
+                 TCGA = TRUE, 
+                 probeInfo = probe, 
+                 geneInfo = geneInfo)
 
 # Relabel GBM samples in the mee object: GBM is control
 mee@sample$TN[mee@sample$ID %in% gbm.samples] <- "Control"
@@ -493,11 +496,11 @@ for (j in direction){
         # Step 3.3: Motif enrichment analysis on the selected probes |
         #-------------------------------------------------------------
         enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
-                                             dir.out=dir.out, label=j,
+                                             dir.out=dir.out, 
+                                             label=j,
                                              background.probes = probe$name)
         motif.enrichment <- read.csv(paste0(dir.out,
-	                                    "/getMotif.",j,
-					    ".motif.enrichment.csv"),
+	                                    "/getMotif.",j,".motif.enrichment.csv"),
                                      stringsAsFactors=FALSE)
         if(length(enriched.motif) > 0){
             #-------------------------------------------------------------
@@ -510,8 +513,7 @@ for (j in direction){
                           dir.out = dir.out,
                           cores = detectCores(), label = j)
             TF.meth.cor <- get(load(paste0(dir.out,
-	                                   "/getTF.",j,
-					   ".TFs.with.motif.pvalue.rda")))
+	                                   "/getTF.",j,".TFs.with.motif.pvalue.rda")))
             save(TF, enriched.motif, Sig.probes.paired,
                  pair, nearGenes, Sig.probes, motif.enrichment,
 		             TF.meth.cor,
@@ -550,9 +552,9 @@ Biotechnological advances in sequencing have led to an explosion of
 To illustrate our workflow, we analyzed two types of brain
 tumors : low-grade glioma (LGG) versus high-grade glioma (glioblastoma
 multiform or GBM). 
-    
-Some of pacakges used in this workflow makes use the following Bioconductor packages 
 
+All the  package landing pages used in this workflow can be found through the [biocViews interface](http://www.bioconductor.org/packages/release/BiocViews.html#___Software).
+    
 **Keywords:** Epigenomics, Genomics, Cancer, non-coding, TCGA, ENCODE, Roadmap, Bioinformatics.
 
 # Introduction
