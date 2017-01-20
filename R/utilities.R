@@ -5,6 +5,7 @@
 #' @param calls A matrix with the following columns: Chromossome, Aberration Kind
 #' Region Start, Region End, Region Size and score
 #' @param threshold Score threshold (orange horizontal line in the plot)
+#' @export
 #' @examples 
 #' call <- data.frame("Chromossome" = rep(9,100),
 #'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
@@ -77,6 +78,7 @@ gaiaCNVplot <- function (calls,  threshold=0.01)
 #' Using biogrid database, it will create a matrix of gene interations.
 #' If columns A and row B has value 1, it means the gene A and gene B interatcs.
 #' @param tmp.biogrid Biogrid table
+#' @export
 #' @param names.genes List of genes to filter from output. Default: consider all genes
 #' @return A matrix with 1 for genes that interacts, 0 for no interaction.
 get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
@@ -109,6 +111,7 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 #' @usage matched_met_exp("TCGA-ACC)
 #' @return A vector of barcodes
 #' @importFrom TCGAbiolinks  GDCquery
+#' @export
 #' @examples 
 #' # Get ACC samples with both DNA methylation and gene expression
 #' samples <- matched_met_exp("TCGA-ACC")
@@ -151,6 +154,7 @@ matched_met_exp <- function(project, n = NULL){
 #' @param percentage Percentage of samples of each group. Default 30% in the higher expression 
 #' group and  30% in the lower expression group
 #' @return A pdf wuth the survival plot
+#' @export
 #' @importFrom TCGAbiolinks  TCGAanalyze_survival
 #' @importFrom ELMER getGeneID getExp
 TCGAsurvival_TFplot <- function(TF, mee, clinical, percentage = 0.3){
