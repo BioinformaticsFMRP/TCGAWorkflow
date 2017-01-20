@@ -108,7 +108,7 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 #' For a given TCGA project it gets the  samples (barcode) with both DNA methylation and Gene expression data
 #' @param project A GDC project
 #' @param n Number of samples to return. If NULL return all (default)
-#' @usage matched_met_exp("TCGA-ACC)
+#' @usage matched_met_exp("TCGA-ACC")
 #' @return A vector of barcodes
 #' @importFrom TCGAbiolinks  GDCquery
 #' @export
@@ -142,7 +142,7 @@ matched_met_exp <- function(project, n = NULL){
   return(patients)
 }
 
-#' Evaluate survival based on the levels of TF expression
+#' @title Evaluate survival based on the levels of TF expression
 #' @description 
 #' This function is an auxiliar function used to integrate ELMER and TCGAbiolinks pacakges.
 #' For a given regulatory TF found by ELMER, we will use TCGAbiolinks to get the clinical data of the
@@ -151,11 +151,11 @@ matched_met_exp <- function(project, n = NULL){
 #' @param TF A transcription factor
 #' @param mee A mee object from ELMER
 #' @param clinical Clinical data from GDC
-#' @param percentage Percentage of samples of each group. Default 30% in the higher expression 
-#' group and  30% in the lower expression group
-#' @return A pdf wuth the survival plot
+#' @param percentage Percentage of samples of each group. Default 30 percent in the higher expression 
+#' group and  30 percent in the lower expression group
+#' @return A pdf with the survival plot
 #' @export
-#' @importFrom TCGAbiolinks  TCGAanalyze_survival
+#' @importFrom TCGAbiolinks TCGAanalyze_survival
 #' @importFrom ELMER getGeneID getExp
 TCGAsurvival_TFplot <- function(TF, mee, clinical, percentage = 0.3){
   
