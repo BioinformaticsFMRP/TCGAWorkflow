@@ -14,7 +14,7 @@ Maintainer: Tiago Chedraoui Silva <tiagochst@usp.br>
 Description: A workflow pacakge to analyze cancer genomics and epigenomics data
     using Bioconductor packages
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.4.0)
 Imports:
     TCGAbiolinks,
     ELMER
