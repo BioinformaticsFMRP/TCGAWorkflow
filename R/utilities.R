@@ -6,6 +6,7 @@
 #' Region Start, Region End, Region Size and score
 #' @param threshold Score threshold (orange horizontal line in the plot)
 #' @export
+#' @importFrom graphics abline axis legend plot points
 #' @examples 
 #' call <- data.frame("Chromossome" = rep(9,100),
 #'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
@@ -107,7 +108,6 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 #' For a given TCGA project it gets the  samples (barcode) with both DNA methylation and Gene expression data
 #' @param project A GDC project
 #' @param n Number of samples to return. If NULL return all (default)
-#' @usage matched_met_exp(project = "TCGA-ACC",n = 10)
 #' @return A vector of barcodes
 #' @importFrom TCGAbiolinks  GDCquery
 #' @export

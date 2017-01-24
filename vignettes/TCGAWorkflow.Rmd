@@ -10,11 +10,12 @@ output:
         number_sections: false
         toc_depth: 2
         highlight: haddock
+        df_print: kable
+        code_folding: show
 bibliography: bibliography.bib
 
 vignette: >
-  %\VignetteIndexEntry{ Analyze cancer genomics and epigenomics data using Bioconductor
-  packages}
+  %\VignetteIndexEntry{'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages'}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
   %\VignetteDepends{AnnotationHub}
@@ -28,7 +29,7 @@ knitr::opts_chunk$set(message = FALSE,
                       results = 'asis',
                       fig.align="center", 
                       dpi = 300, 
-                      cache = TRUE,
+                      cache = FALSE,
                       progress=FALSE, 
                       quite = TRUE)
 ```
@@ -42,7 +43,7 @@ suppressPackageStartupMessages({
 
 # About
 
-This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2)[@10.12688/f1000research.8923.2]
+This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
 
 # Abstract
 
@@ -71,7 +72,7 @@ Biotechnological advances in sequencing have led to an explosion of
     cancer. 
     
 To illustrate our workflow, we analyzed two types of brain
-tumors : low-grade glioma (LGG) versus high-grade glioma (glioblastoma
+tumors: low-grade glioma (LGG) versus high-grade glioma (glioblastoma
 multiform or GBM). 
 
 All the  package landing pages used in this workflow can be found through the [biocViews interface](http://www.bioconductor.org/packages/release/BiocViews.html#___Software).
@@ -351,7 +352,7 @@ query <- GDCquery("TCGA-ACC",
 GDCDownload(query)
 data <- GDCPrepare(query)
 ```
-If a summarizedExperiment object was chosen, the data can be accessed
+If a [summarizedExperiment object](http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html) was chosen, the data can be accessed
 with three different accessors: *assay* for the data information,
 *rowRanges* to gets the range of values in each row and *colData* to get
 the sample information (patient, batch, sample type, etc)
@@ -615,7 +616,6 @@ cancer <- "GBM"
 message(paste0("Starting ", cancer))
 # Prepare CNV matrix
 data(GBMnocnvhg19)
-cnvMatrix <- data
 
 # Add label (0 for loss, 1 for gain)
 cnvMatrix <- cbind(cnvMatrix,Label=NA)
@@ -1724,8 +1724,8 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      group1 = "Glioblastoma Multiforme", 
                                      group2 = "Brain Lower Grade Glioma", 
                                      filename = "starburst.png",
-                                     met.p.cut = 10^-2,
-                                     exp.p.cut = 10^-2,
+                                     met.p.cut = 10^-1,
+                                     exp.p.cut = 10^-1,
                                      diffmean.cut = 0.25,
                                      logFC.cut = 1,width = 15,height = 10,
                                      names = TRUE)
