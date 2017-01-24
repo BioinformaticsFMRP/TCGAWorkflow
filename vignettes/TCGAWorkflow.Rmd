@@ -20,8 +20,17 @@ vignette: >
   %\VignetteDepends{AnnotationHub}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align="center", dpi = 300, cache = FALSE)
+```{r setup, include=FALSE, echo=F, warning= F, message=F}
+knitr::opts_chunk$set(message = FALSE, 
+                      warning = FALSE, 
+                      error = FALSE, 
+                      tidy = FALSE,
+                      results = 'asis',
+                      fig.align="center", 
+                      dpi = 300, 
+                      cache = TRUE,
+                      progress=FALSE, 
+                      quite = TRUE)
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
@@ -1137,7 +1146,7 @@ In order to understand the underlying biological process of DEGs we
 performed an enrichment analysis using *TCGAanalyze\_EA\_complete*
 function.
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10}
 #-------------------  4.2 EA: enrichment analysis             --------------------
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),

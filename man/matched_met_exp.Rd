@@ -4,7 +4,7 @@
 \alias{matched_met_exp}
 \title{Get GDC samples with both DNA methylation and Gene expression data}
 \usage{
-matched_met_exp("TCGA-ACC")
+matched_met_exp(project = "TCGA-ACC",n = 10)
 }
 \arguments{
 \item{project}{A GDC project}

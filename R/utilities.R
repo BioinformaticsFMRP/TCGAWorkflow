@@ -19,8 +19,7 @@
 #'            "Region End [bp]" = 18259823:18259922,
 #'            "score"=rep(c(1,2,3,4),25))
 #'  gaiaCNVplot(call,threshold = 0.01)       
-gaiaCNVplot <- function (calls,  threshold=0.01) 
-{
+gaiaCNVplot <- function (calls,  threshold=0.01) {
   Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = T)]),]
   Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = T)]),]
   rownames(Calls) <- NULL
@@ -108,7 +107,7 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 #' For a given TCGA project it gets the  samples (barcode) with both DNA methylation and Gene expression data
 #' @param project A GDC project
 #' @param n Number of samples to return. If NULL return all (default)
-#' @usage matched_met_exp("TCGA-ACC")
+#' @usage matched_met_exp(project = "TCGA-ACC",n = 10)
 #' @return A vector of barcodes
 #' @importFrom TCGAbiolinks  GDCquery
 #' @export
