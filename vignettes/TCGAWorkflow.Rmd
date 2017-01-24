@@ -549,7 +549,7 @@ legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE,include=TRUE}
+```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################
@@ -605,7 +605,8 @@ CNV technology), that can be downloaded from broadinstitute website.
 cancer <- "GBM"
 message(paste0("Starting ", cancer))
 # Prepare CNV matrix
-cnvMatrix <- get(load(paste0(cancer,"nocnvhg19.rda")))
+data(GBMnocnvhg19)
+cnvMatrix <- data
 
 # Add label (0 for loss, 1 for gain)
 cnvMatrix <- cbind(cnvMatrix,Label=NA)
@@ -1139,7 +1140,7 @@ function.
 #-------------------  4.2 EA: enrichment analysis             --------------------
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
-                        filename = NULL,
+                        filename = "ea.png",
                         GOBPTab = ansEA$ResBP, 
                         GOCCTab = ansEA$ResCC,
                         GOMFTab = ansEA$ResMF, 
