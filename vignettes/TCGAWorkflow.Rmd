@@ -1578,7 +1578,7 @@ heatmap  <- Heatmap(assay(sig.met.100),
                     bottom_annotation = ta,
                     column_title = "DNA Methylation") 
 # Save to pdf
-pdf("heatmap.pdf",width = 10, height = 8)
+png("heatmap.png",width = 600, height = 400)
 draw(heatmap, annotation_legend_side =  "bottom")
 dev.off()
 ```
