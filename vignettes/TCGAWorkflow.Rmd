@@ -33,7 +33,7 @@ suppressPackageStartupMessages({
 
 # About
 
-This workflow is based on the article: TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages[@10.12688/f1000research.8923.2]
+This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2)[@10.12688/f1000research.8923.2]
 
 # Abstract
 
@@ -274,7 +274,7 @@ harmonized data can be found in the [TCGAbiolinks
 vignette](https://www.bioconductor.org/packages/3.3/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html).
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 library(TCGAbiolinks)
 # Obs: The data in the legacy database has been aligned to hg19
 query.met.gbm <- GDCquery(project = "TCGA-GBM", 
@@ -324,7 +324,7 @@ exp.gbm <- GDCprepare(query = query.exp.gbm, save = TRUE, save.filename = "gbmEx
 exp.gbm.lgg <- SummarizedExperiment::cbind(exp.lgg, exp.gbm)
 ```
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 #-----------------------------------------------------------------------------
 #                   Data.category: Copy number variation aligned to hg38
 #-----------------------------------------------------------------------------
@@ -350,7 +350,7 @@ the sample information (patient, batch, sample type, etc)
 listing below.
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 library(summarizedExperiment)
 
 # get expression matrix
@@ -388,7 +388,7 @@ of form completion), stage event (pathologic stage, tnm categories),
 admin (batch number, project code, disease code, Biospecimen Core
 Resource).
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 # get indexed clinical patient data for GBM samples
 gbm_clin <- GDCquery_clinic(project = "TCGA-GBM", type = "Clinical")
 
@@ -424,7 +424,7 @@ and potential germline variants. To download Somatic MAFs data using
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/),
 *GDCquery\_maf* function is provided (see listing below).
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 mutation <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect2")
 ```
 
@@ -444,7 +444,7 @@ different subtypes. This classification can be retrieved using the
 the summarizedExperiment object that created by the *GDCprepare*
 function, which automatically incorporates it into the object.
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
 brca.subtypes <- TCGAquery_subtype(tumor = "brca")
 ```
@@ -479,7 +479,7 @@ example is found in listingbelow. The *getData* function
 allow users to access the downloaded data (see lines 22-24 of listing
 below as a S4Vector object.
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 library(RTCGAToolbox)
 
 # Get the last run dates
@@ -509,7 +509,7 @@ can access level 4 data, which can be handy when the user requires
 GISTIC results. GISTIC is used to identify genes targeted by somatic
 copy-number alterations (SCNAs) [@mermel2011gistic2].
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 # Download GISTIC results
 gistic <- getFirehoseData("GBM",gistic2_Date ="20141017" )
 
@@ -549,7 +549,7 @@ legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
 
-```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################
@@ -759,7 +759,7 @@ remove the barplot. The final result for adding the annotation to the
 bottom is highlighted in the figure .
 
 
-```{r results='asis', echo=FALSE, message=FALSE,include = TRUE}
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(ComplexHeatmap)
 LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 GBMmut <- GDCquery_Maf(tumor = "GBM", pipelines = "mutect2")
@@ -802,7 +802,8 @@ mat[mat == 0] <- ""
 colnames(mat) <- substr(colnames(mat),1,12)
 
 mat[is.na(mat)] = ""
-#mat = t(as.matrix(mat))
+```
+```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
 mat[1:3, 1:3]
 
 alter_fun = list(
@@ -882,7 +883,7 @@ from TCGA that are identified in at least two tumor samples) in LGG.
 Circos plot can illustrate molecular alterations genome-wide or only in
 one or more selected chromosomes. 
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 ###############################################
 ## Genomic aberration overview - Circos plot ## 
 ###############################################
@@ -1039,7 +1040,7 @@ below).
 
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Gene expression",
                   data.type = "Gene expression quantification",
@@ -1140,7 +1141,7 @@ function.
 #-------------------  4.2 EA: enrichment analysis             --------------------
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
-                        filename = "ea.png",
+                        filename = NULL,
                         GOBPTab = ansEA$ResBP, 
                         GOCCTab = ansEA$ResCC,
                         GOMFTab = ansEA$ResMF, 
@@ -1149,12 +1150,12 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
-![\label{eabarplot} The plot shows canonical pathways significantly overrepresented (enriched)
+The plot shows canonical pathways significantly overrepresented (enriched)
 by the DEGs (differentially expressed genes)  with the number of genes for the main categories of
 three ontologies (GO:biological process, GO:cellular component, and GO:molecular function, respectively).
 The most statistically significant canonical pathways identified in DEGs list are listed according
 to their p value corrected FDR (-Log) (colored bars) and the ratio of list genes found in each
-pathway over the total number of genes in that pathway (ratio, red line).](ea.png)
+pathway over the total number of genes in that pathway (ratio, red line).]
 
 *TCGAanalyze\_EAbarplot* outputs a bar chart as shown in figure
 \ref{eabarplot} with the number of genes for the main categories of three
@@ -1295,7 +1296,7 @@ We start this analysis by inferring two gene regulatory networks for the GBM dat
 the LGG data.
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 ### plot details (colors & symbols)
 mycols<-c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628')
 
@@ -1417,7 +1418,7 @@ the sample information matrix of the *SummarizedExperiment* object
 (accessed by the *colData* function) (see listing below lines
 70-74).
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 #----------------------------
 # Obtaining DNA methylation
 #----------------------------
@@ -1495,12 +1496,12 @@ methylation, y-axis: statistical significance) is created to help users
 identify the differentially methylated CpG sites and return the object
 with the results in the rowRanges. 
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 #------- Searching for differentially methylated CpG sites     ----------
 met <- TCGAanalyze_DMR(met,
                        groupCol = "disease_type", # a column in the colData matrix
                        group1 = "Glioblastoma Multiforme", # a type of the disease type column
-                       group2= "Brain Lower Grade Glioma", # a type of the disease column
+                       group2 = "Brain Lower Grade Glioma", # a type of the disease column
                        p.cut = 0.05,
                        diffmean.cut = 0.15,
                        legend = "State",
@@ -1707,7 +1708,7 @@ significant list of pair gene/probes. But for the next sections we will
 use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      dataDEGs,    # DEG results
@@ -1808,7 +1809,7 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 library(ChIPseeker)
 library(SummarizedExperiment)
 library(ggplot2)
@@ -1871,7 +1872,7 @@ hypermethylated regions, (listing below). The
 enrichment heatmap and the average profile of peaks binding to those
 regions.
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 library(ChIPseeker)
 library(SummarizedExperiment)
 library(ggplot2)
@@ -1916,7 +1917,7 @@ names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type
 
 To plot the enrichment heatmap use the function `tagHeatmap`
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
@@ -1925,7 +1926,7 @@ tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
 To plot the  average profile of peaks binding to those region use `plotAvgProf`:
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
 p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
@@ -1958,7 +1959,7 @@ To annotate the location of a given peak in terms of genomic features,
 annotatePeak assigns peaks to genomic annotation in "annotation" column
 of the output, which includes whether a peak is in the TSS, Exon, 5’
 UTR, 3’ UTR, Intronic or Intergenic location.
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 require(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db",verbose = FALSE)
@@ -2040,7 +2041,7 @@ and memory constraints, we will use in this example only data from 10
 LGG patients and 10 GBM patients that have both DNA methylation and gene
 expression data. This samples are the same used in the previous steps.
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 #----------- 8.3 Identification of Regulatory Enhancers   -------
 library(TCGAbiolinks)
 # Samples: primary solid tumor w/ DNA methylation and gene expression
@@ -2116,7 +2117,7 @@ can relabel the samples to compare different groups. For the next
 sections, we will work with both the experimental group (LGG) and
 control group (GBM).
 
-```{r}
+```{r, message=FALSE,warning=FALSE}
 library(ELMER)
 geneAnnot <- txs()
 geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
@@ -2147,7 +2148,7 @@ are identified is found in the
 [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf)
 vignette.
 
-```{r} 
+```{r, warning=FALSE} 
 cores <- ifelse(requireNamespace("parallel", quietly = TRUE), parallel::detectCores(), 1)
 
 # Available directions are hypo and hyper, we will use only hypo
@@ -2253,7 +2254,7 @@ in the given probes set and the smallest lower boundary of 95%
 confidence interval for Odds Ratio of 1.1. These both values are the
 default from the ELMER package.
 
-```{r tableTF, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+```{r tableTF, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 library(knitr)
 kable(TF)
 ```
@@ -2269,7 +2270,7 @@ $(-log(P value))$ between TF expression and DNA methylation of the
 motif. We can see in Figure below that the top three TFs that are
 associated with a motif found.
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif="AP1", save=FALSE)
 ```	
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,  fig.align='center',fig.height=8,fig.width=8}
@@ -2349,11 +2350,11 @@ a number of software packages, including
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) and
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/). Version
 numbers for all packages used are in section "Session Information".
-Listing \[lst:install\] shows how to install all the required packages.
+Listing below shows how to install all the required packages.
 
 
 
-```{#numCode .R .numberLines}
+```{R, eval=FALSE, include=TRUE}
 source("https://bioconductor.org/biocLite.R")
 packages <- c("TCGAbiolinks","ELMER","gaia","ChIPseeker","AnnotationHub",
               "ComplexHeatmap", "clusterProfiler", "RTCGAToolbox",
