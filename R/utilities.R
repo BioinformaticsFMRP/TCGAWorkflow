@@ -19,12 +19,13 @@
 #'            "Region Start [bp]" = 18259823:18259922,
 #'            "Region End [bp]" = 18259823:18259922,
 #'            "score"=rep(c(1,2,3,4),25))
-#'  gaiaCNVplot(call,threshold = 0.01)       
+#'  gaiaCNVplot(call,threshold = 0.01)
+#'  @return A plot with all significant aberrant regions.
 gaiaCNVplot <- function (calls,  threshold=0.01) {
-  Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = T)]),]
-  Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = T)]),]
+  Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = TRUE)]),]
+  Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]),]
   rownames(Calls) <- NULL
-  Chromo <- Calls[,grep("chr",colnames(calls),ignore.case = T)]
+  Chromo <- Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]
   Gains <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = T)] == 1, x["score"], 0))
   Losses <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = T)] == 0, x["score"], 0))
   plot(Gains, 
@@ -81,22 +82,37 @@ gaiaCNVplot <- function (calls,  threshold=0.01) {
 #' @export
 #' @param names.genes List of genes to filter from output. Default: consider all genes
 #' @return A matrix with 1 for genes that interacts, 0 for no interaction.
+#' @examples 
+#' tmp.biogrid <- data.frame("Official.Symbol.Interactor.A" = names.genes.de,
+#'                           "Official.Symbol.Interactor.B" = rev(names.genes.de))
+#' net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+#' \dontrun{
+#'   file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
+#'   downloader::download(file,basename(file))
+#'   unzip(basename(file),junkpaths =T)
+#'   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
+#'   names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
+#'   net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+#' }
 get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
+  it.a <- "Official.Symbol.Interactor.A"
+  it.b <- "Official.Symbol.Interactor.B"
   
   if(is.null(names.genes)){
-    names.genes <- sort(union(unique(tmp.biogrid[,"Official.Symbol.Interactor.A"]), 
-                              unique(tmp.biogrid[,"Official.Symbol.Interactor.B"])))
+    names.genes <- sort(union(unique(tmp.biogrid[,it.a]), unique(tmp.biogrid[,it.b])))
     ind <- seq(1,nrow(tmp.biogrid))
-  }else{
-    ind.A <- which(tmp.biogrid[,"Official.Symbol.Interactor.A"] %in% names.genes)
-    ind.B <- which(tmp.biogrid[,"Official.Symbol.Interactor.B"] %in% names.genes)
+  } else {
+    ind.A <- which(tmp.biogrid[,it.a] %in% names.genes)
+    ind.B <- which(tmp.biogrid[,it.b] %in% names.genes)
     ind <- intersect(ind.A, ind.B)
   }
   
-  mat.biogrid <- matrix(0, nrow=length(names.genes), ncol=length(names.genes), dimnames=list(names.genes, names.genes))
+  mat.biogrid <- matrix(0, nrow=length(names.genes), 
+                        ncol=length(names.genes), 
+                        dimnames=list(names.genes, names.genes))
   
   for(i in ind){
-    mat.biogrid[tmp.biogrid[i,"Official.Symbol.Interactor.A"], tmp.biogrid[i,"Official.Symbol.Interactor.B"]] <- mat.biogrid[tmp.biogrid[i,"Official.Symbol.Interactor.B"], tmp.biogrid[i,"Official.Symbol.Interactor.A"]] <- 1
+    mat.biogrid[tmp.biogrid[i,it.a], tmp.biogrid[i,it.b]] <- mat.biogrid[tmp.biogrid[i,it.b], tmp.biogrid[i,it.a]] <- 1
   }
   diag(mat.biogrid) <- 0
   

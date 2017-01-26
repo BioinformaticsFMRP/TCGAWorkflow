@@ -4,11 +4,13 @@
 \name{met}
 \alias{met}
 \title{A SummarizedExperiment containing
-TCGA data: DNA methylation platform 450K chromossome 9 for 10 LGG samples and 10 GBM samples}
+TCGA data: DNA methylation platform 450K chromossome 9 
+for 10 LGG samples and 10 GBM samples}
 \format{A SumarrizedExperiment with 9861 rows and 20 samples}
 \description{
 A SummarizedExperiment containing
-TCGA data: DNA methylation platform 450K chromossome 9 for 10 LGG samples and 10 GBM samples
+TCGA data: DNA methylation platform 450K chromossome 9 
+for 10 LGG samples and 10 GBM samples
 }
 \keyword{internal}
 

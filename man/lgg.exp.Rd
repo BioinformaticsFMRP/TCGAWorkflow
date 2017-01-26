@@ -4,7 +4,8 @@
 \name{lgg.exp}
 \alias{lgg.exp}
 \title{A gene expression matrix wih 20 LGG samples}
-\format{Gene expression: A SummariedExperiment object with 21022 rows and 20 columns}
+\format{Gene expression: A SummariedExperiment object 
+with 21022 rows and 20 columns}
 \description{
 A gene expression matrix wih 20 LGG samples
 }

@@ -18,4 +18,17 @@ A matrix with 1 for genes that interacts, 0 for no interaction.
 Using biogrid database, it will create a matrix of gene interations.
 If columns A and row B has value 1, it means the gene A and gene B interatcs.
 }
+\examples{
+tmp.biogrid <- data.frame("Official.Symbol.Interactor.A" = names.genes.de,
+                          "Official.Symbol.Interactor.B" = rev(names.genes.de))
+net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+\dontrun{
+  file <- "http://thebiogrid.org/downloads/archives/Release\%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
+  downloader::download(file,basename(file))
+  unzip(basename(file),junkpaths =T)
+  tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\\t", stringsAsFactors=FALSE)
+  names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
+  net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+}
+}
 

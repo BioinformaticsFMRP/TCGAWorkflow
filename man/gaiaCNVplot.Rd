@@ -28,6 +28,7 @@ call <- data.frame("Chromossome" = rep(9,100),
            "Region Start [bp]" = 18259823:18259922,
            "Region End [bp]" = 18259823:18259922,
            "score"=rep(c(1,2,3,4),25))
- gaiaCNVplot(call,threshold = 0.01)       
+ gaiaCNVplot(call,threshold = 0.01)
+ @return A plot with all significant aberrant regions.
 }
 

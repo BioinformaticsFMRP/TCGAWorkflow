@@ -500,7 +500,7 @@ lastAnalyseDate <- getFirehoseAnalyzeDates(1)
 lgg.data <- getFirehoseData(dataset = "LGG",
                             gistic2_Date = getFirehoseAnalyzeDates(1), runDate = lastRunDate,
                             Methylation = TRUE, RNAseq2_Gene_Norm = TRUE, Clinic = TRUE,
-                            Mutation = T,
+                            Mutation = TRUE,
                             fileSizeLimit = 10000)
 
 # get DNA methylation data, RNAseq2 and clinical data for GBM
@@ -559,7 +559,7 @@ legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
 
-```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results='hide', echo=FALSE, message=FALSE, warning=FALSE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################
@@ -1587,10 +1587,10 @@ ra = rowAnnotation(df = values(sig.met.100)[status.col],
 heatmap  <- Heatmap(assay(sig.met.100),
                     name = "DNA methylation",
                     col = matlab::jet.colors(200),
-                    show_row_names = F,
-                    cluster_rows = T,
-                    cluster_columns = F,
-                    show_column_names = F,
+                    show_row_names = FALSE,
+                    cluster_rows = TRUE,
+                    cluster_columns = FALSE,
+                    show_column_names = FALSE,
                     bottom_annotation = ta,
                     column_title = "DNA Methylation") 
 # Save to pdf
@@ -2313,7 +2313,7 @@ the motif plotted and a higher average expression of the TFs.
 
 ```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
 png("TF.png",width = 800, height = 400)
-scatter.plot(mee, category="TN", save=F, lm_line=TRUE,
+scatter.plot(mee, category="TN", save=FALSE, lm_line=TRUE,
              byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent"],";"))[1:4], 
              probe=enriched.motif[[TF$motif[1]]]))
 dev.off()
