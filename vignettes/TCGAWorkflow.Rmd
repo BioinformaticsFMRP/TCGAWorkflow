@@ -640,6 +640,12 @@ gdac.root <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/"
 file <- paste0(gdac.root, "genome.info.6.0_hg19.na31_minus_frequent_nan_probes_sorted_2.1.txt")
 # Retrieve probes meta file from broadinstitute website
 if(!file.exists(basename(file))) downloader::download(file, basename(file))
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-==--=--==---=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-==--=--==--
+# For hg38 analysis please take a look on:
+# https://gdc.cancer.gov/about-data/data-harmonization-and-generation/gdc-reference-files
+# File: SNP6 GRCh38 Liftover Probeset File for Copy Number Variation Analysis
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-==--=--==---=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-==--=--==--
+
 markersMatrix <-  readr::read_tsv(basename(file), col_names = FALSE, col_types = "ccn", progress = FALSE)
 colnames(markersMatrix) <- c("Probe.Name", "Chromosome", "Start")
 unique(markersMatrix$Chromosome)
