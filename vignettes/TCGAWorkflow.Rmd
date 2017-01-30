@@ -666,7 +666,7 @@ markersMatrix_fil <- markersMatrix[!markerID %in% commonID,]
 
 library(gaia)
 markers_obj <- load_markers(as.data.frame(markersMatrix_fil))
-nbsamples <- length(query.gbm.nocnv$results[[1]]$cases)
+nbsamples <- length(unique(cnvMatrix$Sample))
 cnv_obj <- load_cnv(cnvMatrix, markers_obj, nbsamples)
 results <- runGAIA(cnv_obj,
                    markers_obj,
