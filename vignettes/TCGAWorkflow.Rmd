@@ -559,7 +559,7 @@ legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
 
-```{r results='hide', echo=FALSE, message=FALSE, warning=FALSE}
+```{r results='hide', include=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################

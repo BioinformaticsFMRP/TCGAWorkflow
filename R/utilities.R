@@ -7,6 +7,7 @@
 #' @param threshold Score threshold (orange horizontal line in the plot)
 #' @export
 #' @importFrom graphics abline axis legend plot points
+#' @return A plot with all significant aberrant regions.
 #' @examples 
 #' call <- data.frame("Chromossome" = rep(9,100),
 #'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
@@ -20,7 +21,6 @@
 #'            "Region End [bp]" = 18259823:18259922,
 #'            "score"=rep(c(1,2,3,4),25))
 #'  gaiaCNVplot(call,threshold = 0.01)
-#'  @return A plot with all significant aberrant regions.
 gaiaCNVplot <- function (calls,  threshold=0.01) {
   Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = TRUE)]),]
   Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]),]

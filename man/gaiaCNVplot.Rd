@@ -12,6 +12,9 @@ Region Start, Region End, Region Size and score}
 
 \item{threshold}{Score threshold (orange horizontal line in the plot)}
 }
+\value{
+A plot with all significant aberrant regions.
+}
 \description{
 This function is a auxiliary function to visualize GAIA ouptut 
 (all significant aberrant regions.)
@@ -29,6 +32,5 @@ call <- data.frame("Chromossome" = rep(9,100),
            "Region End [bp]" = 18259823:18259922,
            "score"=rep(c(1,2,3,4),25))
  gaiaCNVplot(call,threshold = 0.01)
- @return A plot with all significant aberrant regions.
 }
 
