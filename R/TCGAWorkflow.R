@@ -21,7 +21,7 @@
 #'
 #' @docType package
 #' @name TCGAbiolinks
-#' @import ELMER  downloader SummarizedExperiment  TCGAWorkflowExampleData
+#' @import ELMER  downloader SummarizedExperiment  TCGAWorkflowData
 #' @import gaia ChIPseeker ComplexHeatmap
 #' @import minet c3net biomaRt pathview
 #' @import BSgenome.Hsapiens.UCSC.hg19 motifStack
