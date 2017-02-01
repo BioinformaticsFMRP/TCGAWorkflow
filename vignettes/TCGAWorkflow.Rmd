@@ -645,25 +645,24 @@ colnames(cnvMatrix) <- c("Sample.Name", "Chromosome", "Start", "End", "Num.of.Ma
 # Substitute Chromosomes "X" and "Y" with "23" and "24"
 cnvMatrix[cnvMatrix$Chromosome == "X","Chromosome"] <- 23
 cnvMatrix[cnvMatrix$Chromosome == "Y","Chromosome"] <- 24
-cnvMatrix$Chromosome <- sapply(cnvMatrix$Chromosome,as.integer)
+cnvMatrix$Chromosome <- as.integer(cnvMatrix$Chromosome)
 
 # Recurrent CNV identification with GAIA
 colnames(markersMatrix) <- c("Probe.Name", "Chromosome", "Start")
 unique(markersMatrix$Chromosome)
-cnvMatrix[cnvMatrix$Chromosome == "X","Chromosome"] <- 23
-cnvMatrix[cnvMatrix$Chromosome == "Y","Chromosome"] <- 24
-markersMatrix$Chromosome <- sapply(markersMatrix$Chromosome,as.integer)
-markerID <- apply(markersMatrix,1,function(x) paste0(x[2],":",x[3]))
+markersMatrix[markersMatrix$Chromosome == "X","Chromosome"] <- 23
+markersMatrix[markersMatrix$Chromosome == "Y","Chromosome"] <- 24
+markersMatrix$Chromosome <- as.integer(markersMatrix$Chromosome)
+markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 # Removed duplicates
 markersMatrix <- markersMatrix[-which(duplicated(markerID)),]
 # Filter markersMatrix for common CNV
-markerID <- apply(markersMatrix,1,function(x) paste0(x[2],":",x[3]))
-
+markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 
 file <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/CNV.hg19.bypos.111213.txt"
 if(!file.exists(basename(file))) downloader::download(file, basename(file))
 commonCNV <- readr::read_tsv(basename(file), progress = TRUE)
-commonID <- apply(commonCNV,1,function(x) paste0(x[2],":",x[3]))
+commonCNV <- paste(commonCNV$Chromosome,commonCNV$Start, sep = ":")
 markersMatrix_fil <- markersMatrix[!markerID %in% commonID,]
 
 library(gaia)
