@@ -9,19 +9,19 @@
 #' @importFrom graphics abline axis legend plot points
 #' @examples 
 #' call <- data.frame("Chromossome" = rep(9,100),
-#'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
-#'            "Region Start [bp]" = 18259823:18259922,
-#'            "Region End [bp]" = 18259823:18259922,
-#'            "score"=rep(c(1,2,3,4),25))
+#'                    "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
+#'                    "Region Start [bp]" = 18259823:18259922,
+#'                    "Region End [bp]" = 18259823:18259922,
+#'                    "score" = rep(c(1,2,3,4),25))
 #'  gaiaCNVplot(call,threshold = 0.01)  
 #'  call <- data.frame("Chromossome" = rep(c(1,9),50),
-#'            "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
-#'            "Region Start [bp]" = 18259823:18259922,
-#'            "Region End [bp]" = 18259823:18259922,
-#'            "score"=rep(c(1,2,3,4),25))
+#'                     "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
+#'                     "Region Start [bp]" = 18259823:18259922,
+#'                     "Region End [bp]" = 18259823:18259922,
+#'                     "score" = rep(c(1,2,3,4),25))
 #'  gaiaCNVplot(call,threshold = 0.01)
 #'  @return A plot with all significant aberrant regions.
-gaiaCNVplot <- function (calls,  threshold=0.01) {
+gaiaCNVplot <- function (calls,  threshold = 0.01) {
   Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = TRUE)]),]
   Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]),]
   rownames(Calls) <- NULL

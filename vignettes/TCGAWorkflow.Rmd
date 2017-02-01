@@ -44,6 +44,8 @@ suppressPackageStartupMessages({
 # About
 
 This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
+Due to time and space contraints we downloaded only a subset of the data, for a real analysis please use all data available.
+The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowExampleData")`. 
 
 # Abstract
 
@@ -558,8 +560,20 @@ queried for CNV SNP6 level 3 data for 20 primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
+```{r results='hide', message=FALSE, warning=TRUE, include=FALSE}
+library(TCGAbiolinks)
+# Select common CN technology available for GBM and LGG
+#############################
+## CNV data pre-processing ##
+#############################
+query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
+                            data.category = "Copy number variation",
+                            legacy = TRUE,
+                            file.type = "nocnv_hg19.seg",
+                            sample.type = c("Primary solid Tumor"))
+```
 
-```{r results='hide', echo=FALSE, message=FALSE, warning=FALSE}
+```{r results='hide', eval=FALSE, message=FALSE, warning=TRUE, include=TRUE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################
@@ -615,6 +629,7 @@ CNV technology), that can be downloaded from broadinstitute website.
 cancer <- "GBM"
 message(paste0("Starting ", cancer))
 # Prepare CNV matrix
+library(TCGAWorkflowExampleData)
 data(GBMnocnvhg19)
 
 # Add label (0 for loss, 1 for gain)

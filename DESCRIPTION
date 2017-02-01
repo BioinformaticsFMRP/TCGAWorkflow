@@ -62,7 +62,8 @@ Imports:
     GenomeInfoDb,
     ggplot2,
     ggthemes,
-    parallel
+    parallel,
+    TCGAWorkflowExampleData
 License: Artistic-2.0
 VignetteBuilder: knitr
 biocViews: 
