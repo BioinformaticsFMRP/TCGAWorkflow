@@ -23,11 +23,12 @@
 #' @name TCGAbiolinks
 #' @import ELMER  downloader SummarizedExperiment  TCGAWorkflowExampleData
 #' @import gaia ChIPseeker ComplexHeatmap
-#' @import clusterProfiler minet c3net biomaRt pathview
+#' @import minet c3net biomaRt pathview
 #' @import BSgenome.Hsapiens.UCSC.hg19 motifStack
 #' @import circlize pbapply GenomeInfoDb ggplot2 ggthemes parallel
 #' @importFrom rGADEM GADEM nOccurrences getPWM consensus nMotifs
 #' @importFrom MotIV viewAlignments motifMatch 
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom MotifDb MotifDb
+#' @importFrom clusterProfiler bitr
 NULL

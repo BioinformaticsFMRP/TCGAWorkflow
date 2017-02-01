@@ -560,7 +560,7 @@ queried for CNV SNP6 level 3 data for 20 primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
-```{r results='hide', message=FALSE, warning=TRUE, include=FALSE}
+```{r results='hide', message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################
@@ -573,7 +573,7 @@ query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
                             sample.type = c("Primary solid Tumor"))
 ```
 
-```{r results='hide', eval=FALSE, message=FALSE, warning=TRUE, include=TRUE}
+```{r results='hide', eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
 #############################
