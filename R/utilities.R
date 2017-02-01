@@ -26,8 +26,8 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
   Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]),]
   rownames(Calls) <- NULL
   Chromo <- Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]
-  Gains <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = T)] == 1, x["score"], 0))
-  Losses <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = T)] == 0, x["score"], 0))
+  Gains <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = TRUE)] == 1, x["score"], 0))
+  Losses <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = TRUE)] == 0, x["score"], 0))
   plot(Gains, 
        ylim = c(-max(Calls[,"score"]+2), max(Calls[,"score"]+2)), 
        type = "h", 
@@ -83,13 +83,14 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 #' @param names.genes List of genes to filter from output. Default: consider all genes
 #' @return A matrix with 1 for genes that interacts, 0 for no interaction.
 #' @examples 
+#' names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
 #' tmp.biogrid <- data.frame("Official.Symbol.Interactor.A" = names.genes.de,
 #'                           "Official.Symbol.Interactor.B" = rev(names.genes.de))
 #' net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 #' \dontrun{
 #'   file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
 #'   downloader::download(file,basename(file))
-#'   unzip(basename(file),junkpaths =T)
+#'   unzip(basename(file),junkpaths =TRUE)
 #'   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
 #'   names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
 #'   net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
