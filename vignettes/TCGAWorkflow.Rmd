@@ -659,7 +659,8 @@ markersMatrix <- markersMatrix[-which(duplicated(markerID)),]
 # Filter markersMatrix for common CNV
 markerID <- apply(markersMatrix,1,function(x) paste0(x[2],":",x[3]))
 
-file <- paste0(gdac.root,"CNV.hg19.bypos.111213.txt")
+
+file <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/CNV.hg19.bypos.111213.txt"
 if(!file.exists(basename(file))) downloader::download(file, basename(file))
 commonCNV <- readr::read_tsv(basename(file), progress = TRUE)
 commonID <- apply(commonCNV,1,function(x) paste0(x[2],":",x[3]))
