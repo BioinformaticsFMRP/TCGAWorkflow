@@ -376,7 +376,7 @@ query <- GDCquery("TCGA-ACC",
 GDCDownload(query)
 data <- GDCPrepare(query)
 ```
-If a [summarizedExperiment object](http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html) was chosen, the data can be accessed
+If a [SummarizedExperiment object](http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html) was chosen, the data can be accessed
 with three different accessors: *assay* for the data information,
 *rowRanges* to gets the range of values in each row and *colData* to get
 the sample information (patient, batch, sample type, etc)
@@ -385,7 +385,7 @@ listing below.
 
 
 ```{R, eval=TRUE, include=TRUE}
-library(summarizedExperiment)
+library(SummarizedExperiment)
 
 # Load object from TCGAWorkflowData package
 # THis object will be created in the further sections,
@@ -488,7 +488,7 @@ integrated genome-wide studies of various diseases (ACC
 UCEC [@cancer2014comprehensive_gastric]) which classified them in
 different subtypes. This classification can be retrieved using the
 *TCGAquery\_subtype* function or by accessing the samples information in
-the summarizedExperiment object that created by the *GDCprepare*
+the SummarizedExperiment object that created by the *GDCprepare*
 function, which automatically incorporates it into the object.
 
 ```{R, eval=FALSE, include=TRUE}
