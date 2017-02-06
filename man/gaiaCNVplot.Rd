@@ -33,4 +33,3 @@ call <- data.frame("Chromossome" = rep(9,100),
                     "score" = rep(c(1,2,3,4),25))
  gaiaCNVplot(call,threshold = 0.01)
 }
-

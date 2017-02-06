@@ -21,4 +21,3 @@ For a given TCGA project it gets the  samples (barcode) with both DNA methylatio
 # Get ACC samples with both DNA methylation and gene expression
 samples <- matched_met_exp("TCGA-ACC")
 }
-

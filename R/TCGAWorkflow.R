@@ -31,4 +31,5 @@
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom MotifDb MotifDb
 #' @importFrom clusterProfiler bitr
+#' @import DT RTCGAToolbox
 NULL

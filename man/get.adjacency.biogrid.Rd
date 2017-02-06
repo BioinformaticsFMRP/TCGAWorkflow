@@ -32,4 +32,3 @@ net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
   net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 }
 }
-

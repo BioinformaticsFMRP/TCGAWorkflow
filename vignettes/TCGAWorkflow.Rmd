@@ -44,8 +44,30 @@ suppressPackageStartupMessages({
 # About
 
 This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
-Due to time and space contraints we downloaded only a subset of the data, for a real analysis please use all data available.
-The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
+Due to time and space contraints we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
+
+## Installation
+
+To be able to execute all the steps of this workflow please install it with the following code:
+
+```{R, eval=FALSE, include=TRUE}
+source("http://bioconductor.org/workflows.R")
+workflowInstall("TCGAWorkflow")
+```
+
+## Loading packages
+
+At the beginning of each section, the packages required to execute the code will be loaded. However the following packages are required for all sections.
+
+- TCGAWorkflowData: this package contains the data necessary to execute each of the analysis
+steps. This is a subset of the downloaded to make the example faster. For a real analysis, please
+use all the data available.
+- DT: we will use it to visualize the results
+
+```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
+library(TCGAWorkflowData)
+library(DT)
+```
 
 # Abstract
 
@@ -362,17 +384,30 @@ the sample information (patient, batch, sample type, etc)
 listing below.
 
 
-```{R, eval=FALSE, include=TRUE}
+```{R, eval=TRUE, include=TRUE}
 library(summarizedExperiment)
 
+# Load object from TCGAWorkflowData package
+# THis object will be created in the further sections,
+data(GBMIllumina_HiSeq) 
+
 # get expression matrix
-data <- assay(exp)
+data <- assay(gbm.exp)
+datatable(data[1:100,], 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+
 
 # get genes information
-genes.info <- rowRanges(exp)
+genes.info <- rowRanges(gbm.exp)
+genes.info
 
 # get sample information
-sample.info <- colData(exp)
+sample.info <- colData(gbm.exp)
+datatable(sample.info, 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+
 ```
 
 The clinical data can be obtained using TCGAbiolinks through two
@@ -491,29 +526,32 @@ example is found in listingbelow. The *getData* function
 allow users to access the downloaded data (see lines 22-24 of listing
 below as a S4Vector object.
 
-```{R, eval=FALSE, include=TRUE}
+```{R, eval=TRUE, include=TRUE}
 library(RTCGAToolbox)
+```
 
+```{R, eval=TRUE, include=TRUE}
 # Get the last run dates
 lastRunDate <- getFirehoseRunningDates()[1]
-lastAnalyseDate <- getFirehoseAnalyzeDates(1)
-
-# get DNA methylation data, RNAseq2 and clinical data for LGG
-lgg.data <- getFirehoseData(dataset = "LGG",
-                            gistic2_Date = getFirehoseAnalyzeDates(1), runDate = lastRunDate,
-                            Methylation = TRUE, RNAseq2_Gene_Norm = TRUE, Clinic = TRUE,
-                            Mutation = TRUE,
-                            fileSizeLimit = 10000)
 
 # get DNA methylation data, RNAseq2 and clinical data for GBM
 gbm.data <- getFirehoseData(dataset = "GBM",
-                            runDate = lastDate, gistic2_Date = getFirehoseAnalyzeDates(1),
-                            Methylation = TRUE, Clinic = TRUE, RNAseq2_Gene_Norm = TRUE,
+                            runDate = lastRunDate, gistic2_Date = getFirehoseAnalyzeDates(1),
+                            Methylation = FALSE, Clinic = TRUE, RNAseq2_Gene_Norm = TRUE, Mutation = TRUE,
                             fileSizeLimit = 10000)
 
 gbm.mut <- getData(gbm.data,"Mutations")
+datatable(gbm.mut[1:50,],
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+
 gbm.clin <- getData(gbm.data,"Clinical")
-gbm.gistic <- getData(gbm.data,type = "GISTIC", CN = "Thresholed")
+datatable(gbm.clin[1:50,],
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+
 ```
 
 Finnaly, [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
@@ -521,13 +559,22 @@ can access level 4 data, which can be handy when the user requires
 GISTIC results. GISTIC is used to identify genes targeted by somatic
 copy-number alterations (SCNAs) [@mermel2011gistic2].
 
-```{R, eval=FALSE, include=TRUE}
+```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 # Download GISTIC results
-gistic <- getFirehoseData("GBM",gistic2_Date ="20141017" )
+lastAnalyseDate <- getFirehoseAnalyzeDates(1)
+gistic <- getFirehoseData("GBM",gistic2_Date = lastAnalyseDate)
 
 # get GISTIC results
 gistic.allbygene <- getData(gistic,type = "GISTIC", CN = "All")
+datatable(gistic.allbygene[1:50,],
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
 gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
+datatable(gistic.thresholedbygene[1:50,],
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
 ```
 
 
@@ -628,7 +675,6 @@ cancer <- "GBM"
 message(paste0("Starting ", cancer))
 
 # get objects created above
-library(TCGAWorkflowData)
 data(GBMnocnvhg19)
 data(markersMatrix)
 
@@ -1529,7 +1575,7 @@ statistical
 significance)](LGG_GBM_metvolcano.png)
 
 To visualize the level of DNA methylation of these probes across all
-samples, we use heatmaps that can be generate by the bioconductor
+samples, we use heatmaps that can be generate by the Bioconductor
 package
 [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)
 [@ComplexHeatmap]. To create a heatmap using the
