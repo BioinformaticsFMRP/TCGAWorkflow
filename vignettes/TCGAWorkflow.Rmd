@@ -708,7 +708,7 @@ markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 file <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/CNV.hg19.bypos.111213.txt"
 if(!file.exists(basename(file))) downloader::download(file, basename(file))
 commonCNV <- readr::read_tsv(basename(file), progress = TRUE)
-commonCNV <- paste(commonCNV$Chromosome,commonCNV$Start, sep = ":")
+commonID <- paste(commonCNV$Chromosome,commonCNV$Start, sep = ":")
 markersMatrix_fil <- markersMatrix[!markerID %in% commonID,]
 
 library(gaia)
