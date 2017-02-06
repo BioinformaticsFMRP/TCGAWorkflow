@@ -404,7 +404,7 @@ genes.info
 
 # get sample information
 sample.info <- colData(gbm.exp)
-datatable(sample.info, 
+datatable(as.data.frame(sample.info), 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = FALSE)
 
