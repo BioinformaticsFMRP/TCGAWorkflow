@@ -1399,7 +1399,8 @@ for (cancertype in c("LGG", "GBM")) {
 
     legend("bottomright", legend=paste(c("aracne","mrnet","clr","c3net"), signif(res.auc,4), sep=": "),
            col=mycols[1:length(tmp.val)],lty=1, bty="n" )
-    dev.copy2pdf(width=8,height=8,device = dev1, file = paste0("roc_biogrid_",cancertype,".pdf"))
+    # Please, uncomment this line to produ the pdf files.
+    # dev.copy2pdf(width=8,height=8,device = dev1, file = paste0("roc_biogrid_",cancertype,".pdf"))
     save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_",cancertype,".RData"))
 }
 ```
