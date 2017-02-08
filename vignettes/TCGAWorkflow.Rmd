@@ -1350,7 +1350,7 @@ We start this analysis by inferring two gene regulatory networks for the GBM dat
 the LGG data.
 
 
-```{R, eval=FALSE, include=TRUE}
+```{R, eval=TRUE, include=TRUE}
 ### plot details (colors & symbols)
 mycols <- c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628')
 
@@ -1363,8 +1363,11 @@ names.genes.de <- rownames(dataDEGs)
 
 ### read biogrid info
 file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
-downloader::download(file,basename(file))
-unzip(basename(file),junkpaths =TRUE)
+if(!file.exists(gsub("zip","txt",basename(file)))){
+  downloader::download(file,basename(file))
+  unzip(basename(file),junkpaths =TRUE)
+}
+
 tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
 
 net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
@@ -1398,7 +1401,6 @@ for (cancertype in c("LGG", "GBM")) {
            col=mycols[1:length(tmp.val)],lty=1, bty="n" )
     dev.copy2pdf(width=8,height=8,device = dev1, file = paste0("roc_biogrid_",cancertype,".pdf"))
     save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_",cancertype,".RData"))
-
 }
 ```
 
@@ -2271,8 +2273,9 @@ confidence interval for Odds Ratio of 1.1. These both values are the
 default from the ELMER package.
 
 ```{r tableTF, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-library(knitr)
-kable(TF)
+datatable(as.data.frame(TF), 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
 
@@ -2350,62 +2353,8 @@ results obtained from analyzing TCGA data to identify and characterize
 candidate regulatory enhancers associated with cancer.
 
 
-# Data and software availability {#data-and-software-availability .unnumbered}
-
-This workflow depends on various packages from version 3.2 of the
-Bioconductor project, running on R version 3.2.2 or higher. It requires
-a number of software packages, including
-[AnnotationHub](http://bioconductor.org/packages/AnnotationHub/),
-[ChIPSeeker](http://bioconductor.org/packages/ChIPseeker/),
-[ELMER](http://bioconductor.org/packages/ELMER/),
-[ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/),
-[GAIA](http://bioconductor.org/packages/gaia/),
-[rGADEM](http://bioconductor.org/packages/rGADEM/),
-[MotIV](http://bioconductor.org/packages/MotIV/),
-[MINET](http://bioconductor.org/packages/minet/),
-[RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) and
-[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/). Version
-numbers for all packages used are in section "Session Information".
-Listing below shows how to install all the required packages.
-
-
-
-```{R, eval=FALSE, include=TRUE}
-source("https://bioconductor.org/biocLite.R")
-packages <- c("TCGAbiolinks","ELMER","gaia","ChIPseeker","AnnotationHub",
-              "ComplexHeatmap", "clusterProfiler", "RTCGAToolbox",
-              "minet","biomaRt","pathview", "MotifDb", "MotIV","motifStack",
-              "rGADEM","BSgenome.Hsapiens.UCSC.hg19")
-new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) biocLite(new.packages)
-if(!require("circlize")) install.packages("circlize")
-if(!require("c3net")) install.packages("c3net")
-if(!require("pbapply")) install.packages("pbapply")
-```
-
-All data used in this workflow is freely available and some of them can
-be accessed using a R/Bioconductor package. There are three main sources
-of data: [The NCI Genomic Data Commons
-(GDC)](http://cancergenome.nih.gov/), a [supplementary data
-repository](http://egg2.wustl.edu/roadmap/web_portal/) with processed
-datasets from the Roadmap Epigenomics Project and from The Encyclopedia
-of DNA Elements (ENCODE) [@kundaje2015integrative] and the
-[BioGRID](http://www.thebiogrid.org) database with physical and genetic
-interactions information. For the first, a summary of the data available
-can be seen in <https://gdc-portal.nci.nih.gov/> and its data can be
-accessed using the R/Bioconductor
-[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) package.
-For the second, a summary of the data available can be found in this
-[spread
-sheet](https://docs.google.com/spreadsheets/d/1yikGx4MsO9Ei36b64yOy9Vb6oPC5IBGlFbYEt-N6gOM/edit#gid=15)
-and the data can be accessed using the R/Bioconductor
-[AnnotationHub](http://bioconductor.org/packages/AnnotationHub/)
-package. For the third, the data should be directly download from the
-data portal.
-
-
 ```{r}
-sessionInfo()
+pander::pander(sessionInfo(), compact = FALSE)
 ```
 
 # Author contributions {#author-contributions .unnumbered}
