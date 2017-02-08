@@ -537,7 +537,8 @@ lastRunDate <- getFirehoseRunningDates()[1]
 # get DNA methylation data, RNAseq2 and clinical data for GBM
 gbm.data <- getFirehoseData(dataset = "GBM",
                             runDate = lastRunDate, gistic2_Date = getFirehoseAnalyzeDates(1),
-                            Methylation = FALSE, Clinic = TRUE, RNAseq2_Gene_Norm = TRUE, Mutation = TRUE,
+                            Methylation = FALSE, Clinic = TRUE, 
+                            RNAseq2_Gene_Norm = FALSE, Mutation = TRUE,
                             fileSizeLimit = 10000)
 
 gbm.mut <- getData(gbm.data,"Mutations")
