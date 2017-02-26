@@ -982,7 +982,6 @@ legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="M
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 detach("package:gaia", unload=TRUE)
-detach("package:circlize", unload=TRUE)
 R.utils::gcDLLs() 
 ```
 
@@ -1316,6 +1315,8 @@ known interactions from the BioGrid database.
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 detach("package:minet", unload=TRUE)
 detach("package:c3net", unload=TRUE)
+detach("package:pathview", unload=TRUE)
+detach("package:clusterProfiler", unload=TRUE)
 R.utils::gcDLLs() 
 ```
 
