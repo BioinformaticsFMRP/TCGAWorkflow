@@ -44,6 +44,12 @@ suppressPackageStartupMessages({
 })
 ```
 
+```{R, eval=TRUE, message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAWorkflowData)
+library(DT)
+library(TCGAbiolinks)
+```
+
 
 # Methods
 ## Access to the data
@@ -255,7 +261,6 @@ datatable(data[1:100,],
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = TRUE)
 
-
 # get genes information
 genes.info <- rowRanges(gbm.exp)
 genes.info
@@ -293,7 +298,7 @@ of form completion), stage event (pathologic stage, tnm categories),
 admin (batch number, project code, disease code, Biospecimen Core
 Resource).
 
-```{R, eval=FALSE, include=TRUE}
+```{R, eval=TRUE, include=TRUE}
 # get indexed clinical patient data for GBM samples
 gbm_clin <- GDCquery_clinic(project = "TCGA-GBM", type = "Clinical")
 
@@ -303,20 +308,42 @@ lgg_clin <- GDCquery_clinic(project = "TCGA-LGG", type = "Clinical")
 # Bind the results, as the columns might not be the same,
 # we will will plyr rbind.fill, to have all columns from both files
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
 
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Fetch clinical data directly from the clinical XML files.
 # if barcode is not set, it will consider all samples.
 # We only set it to make the example faster
-query.clin <- GDCquery(project = "TCGA-GBM",
+query <- GDCquery(project = "TCGA-GBM",
                    data.category = "Clinical",
                    barcode = c("TCGA-08-0516","TCGA-02-0317")) 
-GDCDownload(query.clin)
-clinical.patient <- GDCPrepare_clinic(query,"patient")
-clinical.drug <- GDCPrepare_clinic(query,"drug")
-clinical.radiation <- GDCPrepare_clinic(query,"radiation")
-clinical.admin <- GDCPrepare_clinic(query,"admin")
-clinical.followup <- GDCPrepare_clinic(query,"follow_up")
-clinical.nte <- GDCPrepare_clinic(query,"new_tumor_event")
-clinical.stage <- GDCPrepare_clinic(query,"stage_event")
+GDCdownload(query)
+clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.drug <- GDCprepare_clinic(query, clinical.info = "drug")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical.drug, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.radiation <- GDCprepare_clinic(query, clinical.info = "radiation")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical.radiation, options = list(scrollX = TRUE,  keys = TRUE), rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
 Mutation information is stored in two types of Mutation Annotation
@@ -330,7 +357,12 @@ and potential germline variants. To download Somatic MAFs data using
 *GDCquery\_maf* function is provided (see listing below).
 
 ```{R, eval=FALSE, include=TRUE}
-mutation <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect2")
+mutation <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+```
+
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+data(maf_mutect2_LGG_GBM)
+datatable(mut[1:20,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
 Finally, the Cancer Genome Atlas (TCGA) Research Network has reported
@@ -349,10 +381,14 @@ different subtypes. This classification can be retrieved using the
 the SummarizedExperiment object that created by the *GDCprepare*
 function, which automatically incorporates it into the object.
 
-```{R, eval=FALSE, include=TRUE}
+```{R, eval=TRUE, include=TRUE}
 gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
-brca.subtypes <- TCGAquery_subtype(tumor = "brca")
 ```
+
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(gbm.subtypes, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
+
 
 ### Downloading data from Broad TCGA GDAC
 
@@ -436,6 +472,10 @@ datatable(gistic.thresholedbygene[1:50,],
               rownames = FALSE)
 ```
 
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
+detach("package:RTCGAToolbox", unload=TRUE)
+R.utils::gcDLLs() 
+```
 
 ## Genomic analysis
 
@@ -940,6 +980,12 @@ legend(0.25, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick
 legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=1, cex=0.4, title.adj=0)
 ```
 
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
+detach("package:gaia", unload=TRUE)
+detach("package:circlize", unload=TRUE)
+R.utils::gcDLLs() 
+```
+
 ## Transcriptomic analysis
 
 ### Pre-Processing Data
@@ -1195,7 +1241,6 @@ expressed genes identified in Section "Transcriptomic analysis".
 
 **Retrieving known interactions**
 
-
 We obtained a set of known interactions from the [BioGrid
 database](http://thebiogrid.org/).
 
@@ -1204,9 +1249,7 @@ expressed genes.
 
 **Using differentially expressed genes from TCGAbiolinks workflow**
 
-
-We start this analysis by inferring two gene regulatory networks for the GBM data set and one gene set for
-the LGG data.
+We start this analysis by inferring one gene set for the LGG data.
 
 
 ```{R, eval=TRUE, include=TRUE}
@@ -1231,49 +1274,50 @@ tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t",
 
 net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 
-for (cancertype in c("LGG", "GBM")) {
+mydata <- dataFiltLGG[names.genes.de, ]
 
-    if(cancertype == "GBM"){
-        mydata <- dataFiltGBM[names.genes.de, ]
-    }else if(cancertype == "LGG"){
-        mydata <- dataFiltLGG[names.genes.de, ]
-    }
-    ### infer networks
-    net.aracne <- minet(t(mydata), method = "aracne")
-    net.mrnet <- minet(t(mydata))
-    net.clr <- minet(t(mydata), method = "clr")
-    net.c3net <- c3net(mydata)
+### infer networks
+net.aracne <- minet(t(mydata), method = "aracne")
+net.mrnet <- minet(t(mydata))
+net.clr <- minet(t(mydata), method = "clr")
+net.c3net <- c3net(mydata)
 
-    ### validate compared to biogrid network
-    tmp.val <- list(validate(net.aracne, net.biogrid.de), validate(net.mrnet, net.biogrid.de),
-                    validate(net.clr, net.biogrid.de), validate(net.c3net, net.biogrid.de))
+### validate compared to biogrid network
+tmp.val <- list(validate(net.aracne, net.biogrid.de), 
+                validate(net.mrnet, net.biogrid.de),
+                validate(net.clr, net.biogrid.de), 
+                validate(net.c3net, net.biogrid.de))
 
-    ### plot roc and compute auc for the different networks
-    dev1 <- show.roc(tmp.val[[1]],cex=0.3,col=mycols[1],type="l")
-    res.auc <- auc.roc(tmp.val[[1]])
-    for(count in 2:length(tmp.val)){
-        show.roc(tmp.val[[count]],device=dev1,cex=0.3,col=mycols[count],type="l")
-        res.auc <- c(res.auc, auc.roc(tmp.val[[count]]))
-    }
+### plot roc and compute auc for the different networks
+dev1 <- show.roc(tmp.val[[1]],cex=0.3,col=mycols[1],type="l")
+res.auc <- auc.roc(tmp.val[[1]])
+for(count in 2:length(tmp.val)){
+    show.roc(tmp.val[[count]],device=dev1,cex=0.3,col=mycols[count],type="l")
+    res.auc <- c(res.auc, auc.roc(tmp.val[[count]]))
+}
 
-    legend("bottomright", legend=paste(c("aracne","mrnet","clr","c3net"), signif(res.auc,4), sep=": "),
-           col=mycols[1:length(tmp.val)],lty=1, bty="n" )
+legend("bottomright", legend=paste(c("aracne","mrnet","clr","c3net"), signif(res.auc,4), sep=": "),
+       col=mycols[1:length(tmp.val)],lty=1, bty="n" )
     # Please, uncomment this line to produ the pdf files.
     # dev.copy2pdf(width=8,height=8,device = dev1, file = paste0("roc_biogrid_",cancertype,".pdf"))
-    save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_",cancertype,".RData"))
-}
+save(net.aracne, net.mrnet, net.clr, net.c3net, file=paste0("nets_LGG.RData"))
 ```
 
 
 ![ROC with corresponding AUC for inferred GBM networks compared to
     BioGrid interactions\label{fig::roc_GBM}](roc_biogrid_GBM.png)
-![ROC with corresponding AUC for inferred LGG networks compared to
-    BioGrid interactions\label{fig::roc_LGG}](roc_biogrid_LGG.png)
 
 In Figure above, the obtained ROC curve and the
 corresponding area under curve (AUC) are presented. It can be observed
 that CLR and MRNET perform best when comparing the inferred network with
 known interactions from the BioGrid database.
+
+
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
+detach("package:minet", unload=TRUE)
+detach("package:c3net", unload=TRUE)
+R.utils::gcDLLs() 
+```
 
 ## Epigenetic analysis
 
@@ -1360,7 +1404,6 @@ met <- GDCprepare(query, save = FALSE)
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
 # This data is avaliable in the package
 save("met.20.samples.GBM.LGG.chr9.rda")
-
 ```
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
@@ -1579,6 +1622,12 @@ alignment <- viewAlignments(analysis.jaspar)
 print(alignment[[1]])
 ```
 
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
+detach("package:motifStack", unload=TRUE)
+detach("package:MotIV", unload=TRUE)
+detach("package:rGADEM", unload=TRUE)
+R.utils::gcDLLs() 
+```
 
 ## Integrative (Epigenomic \& Transcriptomic) analysis
 
@@ -1872,6 +1921,7 @@ annotatePeak assigns peaks to genomic annotation in "annotation" column
 of the output, which includes whether a peak is in the TSS, Exon, 5’
 UTR, 3’ UTR, Intronic or Intergenic location.
 ```{R, eval=FALSE, include=TRUE}
+library(MotifDb)
 require(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 peakAnno <- annotatePeak(probes, tssRegion=c(-3000, 3000), TxDb=txdb, annoDb="org.Hs.eg.db",verbose = FALSE)
@@ -2183,76 +2233,5 @@ scatter.plot(mee, category="TN", save=FALSE, lm_line=TRUE,
 dev.off()
 ```
 ![](TF.png)
-
-# Conclusion
-
-This workflow outlines how one can use specific Bioconductor packages
-for the analysis of cancer genomics and epigenomics data derived from
-the TCGA. In addition, we highlight the importance of using ENCODE and
-Roadmap data to inform on the biology of the non-coding elements defined
-by functional roles in gene regulation. We introduced
-[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) and
-[RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
-Bioconductor packages in order to illustrate how one can acquire TCGA
-specific data, followed by key steps for genomics analysis using
-[GAIA](http://bioconductor.org/packages/gaia/) package, for
-transcriptomic analysis using
-[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/), 
-[pathview](http://bioconductor.org/packages/pathview/) packages and for
-DNA methylation analysis using
-[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) package.
-An inference of gene regulatory networks was also introduced by
-[MINET](http://bioconductor.org/packages/minet/) package. Finally, we
-introduced Bioconductor packages
-[AnnotationHub](http://bioconductor.org/packages/AnnotationHub/),
-[ChIPSeeker](http://bioconductor.org/packages/ChIPseeker/),
-[ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/), and
-[ELMER](http://bioconductor.org/packages/ELMER/) to illustrate how one
-can acquire ENCODE/Roadmap data and integrate these data with the
-results obtained from analyzing TCGA data to identify and characterize
-candidate regulatory enhancers associated with cancer.
-
-
-```{r}
-pander::pander(sessionInfo(), compact = FALSE)
-```
-
-# Author contributions {#author-contributions .unnumbered}
-
-HN conceived the study. HN, MC and GB provided direction on the design
-of the Transcriptomics, Genomics, master regulatory networks and DNA
-methylation workflows. TCS developed and tested sections "Experimental
-data", "DNA methylation analysis", "Motif analysis" and "Integrative
-analysis". AC developed and tested section "Transcriptomic analysis". CO
-developed and tested the section "Inference of gene regulatory
-networks". FDA developed and tested section "Genomic analysis". TCS, AC,
-CO, and FDA prepared the first draft of the manuscript. All authors were
-involved in the revision of the draft manuscript and have agreed to the
-final content. Also, AC, TS, CO, MC, GB and HN are authors of the
-TCGAbiolinks package and MC is author of the GAIA package.
-
-# Competing interests {#competing-interests .unnumbered}
-
-No competing interests were disclosed.
-
-# Grant information {#grant-information .unnumbered}
-
-The project was supported by the São Paulo Research Foundation
-([FAPESP](http://www.fapesp.br/)) (2015/02844-7 and 2016/01389-7 to
-T.C.S. & H.N. and 2015/07925-5 to H.N.), the [BridgeIRIS
-project](http://mlg.ulb.ac.be/BridgeIRIS), funded by INNOVIRIS, Region
-de Bruxelles Capitale, Brussels, Belgium, and by GENomic profiling of
-Gastrointestinal Inflammatory-Sensitive CANcers
-([GENGISCAN](http://mlg.ulb.ac.be/GENGISCAN)), Belgian FNRS PDR
-(T100914F to G.B.). Funding for open access charge: São Paulo Research
-Foundation (FAPESP) (2015/07925-5).
-
-# Acknowledgements {#acknowledgements .unnumbered}
-
-We are grateful to all the authors of the packages used in this article.
-Also, we would like to thank The GDC Support Team for the provided help,
-which was necessary in order to update the TCGAbiolinks package to use
-GDC API.
-
 
 # References
