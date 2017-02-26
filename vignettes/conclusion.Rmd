@@ -1,0 +1,116 @@
+---
+title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor
+  packages'
+author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
+  Bontempi Michele Ceccarelli , and Houtan Noushmehr
+date: "`r Sys.Date()`"
+output: 
+    BiocStyle::html_document:
+        toc: true
+        number_sections: false
+        toc_depth: 2
+        highlight: haddock
+        df_print: kable
+        code_folding: show
+bibliography: bibliography.bib
+
+vignette: >
+  %\VignetteIndexEntry{'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages'}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+  %\VignetteDepends{AnnotationHub}
+---
+
+```{r setup, include=FALSE, echo=F, warning= F, message=F}
+knitr::opts_chunk$set(message = FALSE, 
+                      warning = FALSE, 
+                      error = FALSE, 
+                      tidy = FALSE,
+                      results = 'asis',
+                      fig.align="center", 
+                      dpi = 300, 
+                      cache = FALSE,
+                      progress=FALSE, 
+                      quite = TRUE)
+```
+
+```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
+suppressPackageStartupMessages({
+  if("TCGAWorkflow" %in% installed.packages()[,1]) {
+    library(TCGAWorkflow)
+  } else {
+    devtools::load_all(".")
+  }
+})
+```
+
+# Conclusion
+
+This workflow outlines how one can use specific Bioconductor packages
+for the analysis of cancer genomics and epigenomics data derived from
+the TCGA. In addition, we highlight the importance of using ENCODE and
+Roadmap data to inform on the biology of the non-coding elements defined
+by functional roles in gene regulation. We introduced
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) and
+[RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
+Bioconductor packages in order to illustrate how one can acquire TCGA
+specific data, followed by key steps for genomics analysis using
+[GAIA](http://bioconductor.org/packages/gaia/) package, for
+transcriptomic analysis using
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/), 
+[pathview](http://bioconductor.org/packages/pathview/) packages and for
+DNA methylation analysis using
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) package.
+An inference of gene regulatory networks was also introduced by
+[MINET](http://bioconductor.org/packages/minet/) package. Finally, we
+introduced Bioconductor packages
+[AnnotationHub](http://bioconductor.org/packages/AnnotationHub/),
+[ChIPSeeker](http://bioconductor.org/packages/ChIPseeker/),
+[ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/), and
+[ELMER](http://bioconductor.org/packages/ELMER/) to illustrate how one
+can acquire ENCODE/Roadmap data and integrate these data with the
+results obtained from analyzing TCGA data to identify and characterize
+candidate regulatory enhancers associated with cancer.
+
+
+```{r}
+pander::pander(sessionInfo(), compact = FALSE)
+```
+
+# Author contributions {#author-contributions .unnumbered}
+
+HN conceived the study. HN, MC and GB provided direction on the design
+of the Transcriptomics, Genomics, master regulatory networks and DNA
+methylation workflows. TCS developed and tested sections "Experimental
+data", "DNA methylation analysis", "Motif analysis" and "Integrative
+analysis". AC developed and tested section "Transcriptomic analysis". CO
+developed and tested the section "Inference of gene regulatory
+networks". FDA developed and tested section "Genomic analysis". TCS, AC,
+CO, and FDA prepared the first draft of the manuscript. All authors were
+involved in the revision of the draft manuscript and have agreed to the
+final content. Also, AC, TS, CO, MC, GB and HN are authors of the
+TCGAbiolinks package and MC is author of the GAIA package.
+
+# Competing interests {#competing-interests .unnumbered}
+
+No competing interests were disclosed.
+
+# Grant information {#grant-information .unnumbered}
+
+The project was supported by the São Paulo Research Foundation
+([FAPESP](http://www.fapesp.br/)) (2015/02844-7 and 2016/01389-7 to
+T.C.S. & H.N. and 2015/07925-5 to H.N.), the [BridgeIRIS
+project](http://mlg.ulb.ac.be/BridgeIRIS), funded by INNOVIRIS, Region
+de Bruxelles Capitale, Brussels, Belgium, and by GENomic profiling of
+Gastrointestinal Inflammatory-Sensitive CANcers
+([GENGISCAN](http://mlg.ulb.ac.be/GENGISCAN)), Belgian FNRS PDR
+(T100914F to G.B.). Funding for open access charge: São Paulo Research
+Foundation (FAPESP) (2015/07925-5).
+
+# Acknowledgements {#acknowledgements .unnumbered}
+
+We are grateful to all the authors of the packages used in this article.
+Also, we would like to thank The GDC Support Team for the provided help,
+which was necessary in order to update the TCGAbiolinks package to use
+GDC API.
+
