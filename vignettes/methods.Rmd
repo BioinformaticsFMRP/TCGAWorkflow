@@ -716,8 +716,7 @@ remove the barplot. The final result for adding the annotation to the
 bottom is highlighted in the figure .
 
 
-```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
-library(ComplexHeatmap)
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
 LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 GBMmut <- GDCquery_Maf(tumor = "GBM", pipelines = "mutect2")
 mut <- plyr::rbind.fill(LGGmut, GBMmut)
@@ -725,6 +724,7 @@ save(mut,file ="maf_mutect2_LGG_GBM.rda")
 ```
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+library(ComplexHeatmap)
 # recovering data from TCGAWorkflowData package.
 data(maf_mutect2_LGG_GBM)
 
