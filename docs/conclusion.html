@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca Bontempi Michele Ceccarelli , and Houtan Noushmehr" />
+
+<meta name="date" content="2017-03-01" />
+
+<title>TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages</title>
+
+<script src="conclusion_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="conclusion_files/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="conclusion_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="conclusion_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="conclusion_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="conclusion_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="conclusion_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="conclusion_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="conclusion_files/navigation-1.1/tabsets.js"></script>
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 70px;
+}
+p code {
+  white-space: inherit;
+}
+.panel-heading {
+  text-align: center;
+}
+</style>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+<script src="libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap/css/flatly.min.css" rel="stylesheet" />
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap/shim/respond.min.js"></script>
+<script src="libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="libs/datatables-binding/datatables.js"></script>
+<link href="libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="libs/nouislider/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="libs/nouislider/jquery.nouislider.min.js"></script>
+<link href="libs/selectize/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="libs/selectize/selectize.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<style type="text/css">
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code > span.dt { color: #204a87; } /* DataType */
+code > span.dv { color: #0000cf; } /* DecVal */
+code > span.bn { color: #0000cf; } /* BaseN */
+code > span.fl { color: #0000cf; } /* Float */
+code > span.ch { color: #4e9a06; } /* Char */
+code > span.st { color: #4e9a06; } /* String */
+code > span.co { color: #8f5902; font-style: italic; } /* Comment */
+code > span.ot { color: #8f5902; } /* Other */
+code > span.al { color: #ef2929; } /* Alert */
+code > span.fu { color: #000000; } /* Function */
+code > span.er { color: #a40000; font-weight: bold; } /* Error */
+code > span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #000000; } /* Constant */
+code > span.sc { color: #000000; } /* SpecialChar */
+code > span.vs { color: #4e9a06; } /* VerbatimString */
+code > span.ss { color: #4e9a06; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #000000; } /* Variable */
+code > span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code > span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code > span.ex { } /* Extension */
+code > span.at { color: #c4a000; } /* Attribute */
+code > span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code > span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="include/site.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code > span.dt { color: #204a87; } /* DataType */
+code > span.dv { color: #0000cf; } /* DecVal */
+code > span.bn { color: #0000cf; } /* BaseN */
+code > span.fl { color: #0000cf; } /* Float */
+code > span.ch { color: #4e9a06; } /* Char */
+code > span.st { color: #4e9a06; } /* String */
+code > span.co { color: #8f5902; font-style: italic; } /* Comment */
+code > span.ot { color: #8f5902; } /* Other */
+code > span.al { color: #ef2929; } /* Alert */
+code > span.fu { color: #000000; } /* Function */
+code > span.er { color: #a40000; font-weight: bold; } /* Error */
+code > span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #000000; } /* Constant */
+code > span.sc { color: #000000; } /* SpecialChar */
+code > span.vs { color: #4e9a06; } /* VerbatimString */
+code > span.ss { color: #4e9a06; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #000000; } /* Variable */
+code > span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code > span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code > span.ex { } /* Extension */
+code > span.at { color: #c4a000; } /* Attribute */
+code > span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code > span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="include/site.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="./index.html">Introduction</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="methods.html">Methods</a></li>
+        <li><a href="conclusion.html">Connclusion</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="https://github.com/BioinformaticsFMRP/TCGAWorkflow" title="View Source on Github"><i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</nav><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages</h1>
+<h4 class="author"><em>Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca Bontempi Michele Ceccarelli , and Houtan Noushmehr</em></h4>
+<h4 class="date"><em>2017-03-01</em></h4>
+
+</div>
+
+
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>This workflow outlines how one can use specific Bioconductor packages for the analysis of cancer genomics and epigenomics data derived from the TCGA. In addition, we highlight the importance of using ENCODE and Roadmap data to inform on the biology of the non-coding elements defined by functional roles in gene regulation. We introduced <a href="http://bioconductor.org/packages/TCGAbiolinks/">TCGAbiolinks</a> and <a href="http://bioconductor.org/packages/RTCGAToolbox/">RTCGAToolbox</a> Bioconductor packages in order to illustrate how one can acquire TCGA specific data, followed by key steps for genomics analysis using <a href="http://bioconductor.org/packages/gaia/">GAIA</a> package, for transcriptomic analysis using <a href="http://bioconductor.org/packages/TCGAbiolinks/">TCGAbiolinks</a>, <a href="http://bioconductor.org/packages/pathview/">pathview</a> packages and for DNA methylation analysis using <a href="http://bioconductor.org/packages/TCGAbiolinks/">TCGAbiolinks</a> package. An inference of gene regulatory networks was also introduced by <a href="http://bioconductor.org/packages/minet/">MINET</a> package. Finally, we introduced Bioconductor packages <a href="http://bioconductor.org/packages/AnnotationHub/">AnnotationHub</a>, <a href="http://bioconductor.org/packages/ChIPseeker/">ChIPSeeker</a>, <a href="http://bioconductor.org/packages/ComplexHeatmap/">ComplexHeatmap</a>, and <a href="http://bioconductor.org/packages/ELMER/">ELMER</a> to illustrate how one can acquire ENCODE/Roadmap data and integrate these data with the results obtained from analyzing TCGA data to identify and characterize candidate regulatory enhancers associated with cancer.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pander::<span class="kw">pander</span>(<span class="kw">sessionInfo</span>(), <span class="dt">compact =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<p><strong>R Under development (unstable) (2017-01-23 r72020)</strong></p>
+<p>**<a href="Platform:**" class="uri">Platform:**</a> x86_64-pc-linux-gnu (64-bit)</p>
+<p><strong>locale:</strong> <em>LC_CTYPE=pt_BR.UTF-8</em>, <em>LC_NUMERIC=C</em>, <em>LC_TIME=pt_BR.UTF-8</em>, <em>LC_COLLATE=en_US.UTF-8</em>, <em>LC_MONETARY=pt_BR.UTF-8</em>, <em>LC_MESSAGES=en_US.UTF-8</em>, <em>LC_PAPER=pt_BR.UTF-8</em>, <em>LC_NAME=C</em>, <em>LC_ADDRESS=C</em>, <em>LC_TELEPHONE=C</em>, <em>LC_MEASUREMENT=pt_BR.UTF-8</em> and <em>LC_IDENTIFICATION=C</em></p>
+<p><strong>attached base packages:</strong></p>
+<ul>
+<li>stats</li>
+<li>graphics</li>
+<li>grDevices</li>
+<li>utils</li>
+<li>datasets</li>
+<li>methods</li>
+<li>base</li>
+</ul>
+<p><strong>other attached packages:</strong></p>
+<ul>
+<li>TCGAWorkflow(v.0.99.32)</li>
+</ul>
+<p><strong>loaded via a namespace (and not attached):</strong></p>
+<ul>
+<li>R.utils(v.2.5.0)</li>
+<li>RSQLite(v.1.1-2)</li>
+<li>AnnotationDbi(v.1.36.2)</li>
+<li>grid(v.3.4.0)</li>
+<li>trimcluster(v.0.1-2)</li>
+<li>BiocParallel(v.1.8.1)</li>
+<li>devtools(v.1.12.0)</li>
+<li>DESeq(v.1.26.0)</li>
+<li>munsell(v.0.4.3)</li>
+<li>codetools(v.0.2-15)</li>
+<li>preprocessCore(v.1.36.0)</li>
+<li>withr(v.1.0.2)</li>
+<li>colorspace(v.1.3-2)</li>
+<li>GOSemSim(v.2.0.4)</li>
+<li>BiocInstaller(v.1.24.0)</li>
+<li>Biobase(v.2.34.0)</li>
+<li>knitr(v.1.15.13)</li>
+<li>supraHex(v.1.12.0)</li>
+<li>stats4(v.3.4.0)</li>
+<li>robustbase(v.0.92-7)</li>
+<li>DOSE(v.3.0.10)</li>
+<li>pathview(v.1.14.0)</li>
+<li>git2r(v.0.18.0)</li>
+<li>KEGGgraph(v.1.32.0)</li>
+<li>KMsurv(v.0.1-5)</li>
+<li>mnormt(v.1.5-5)</li>
+<li>hwriter(v.1.3.2)</li>
+<li>TCGAWorkflowData(v.0.99.4)</li>
+<li>rprojroot(v.1.2)</li>
+<li>downloader(v.0.4)</li>
+<li>c3net(v.1.1.1)</li>
+<li>ggthemes(v.3.4.0)</li>
+<li>EDASeq(v.2.8.0)</li>
+<li>diptest(v.0.75-7)</li>
+<li>R6(v.2.2.0)</li>
+<li>doParallel(v.1.0.10)</li>
+<li>GenomeInfoDb(v.1.10.3)</li>
+<li>locfit(v.1.5-9.1)</li>
+<li>flexmix(v.2.3-13)</li>
+<li>bitops(v.1.0-6)</li>
+<li>fgsea(v.1.1.2)</li>
+<li>assertthat(v.0.1)</li>
+<li>scales(v.0.4.1)</li>
+<li>nnet(v.7.3-12)</li>
+<li>gtable(v.0.2.0)</li>
+<li>affy(v.1.52.0)</li>
+<li>genefilter(v.1.56.0)</li>
+<li>GlobalOptions(v.0.0.10)</li>
+<li>splines(v.3.4.0)</li>
+<li>rtracklayer(v.1.34.2)</li>
+<li>lazyeval(v.0.2.0)</li>
+<li>hexbin(v.1.27.1)</li>
+<li>selectr(v.0.3-1)</li>
+<li>broom(v.0.4.2)</li>
+<li>yaml(v.2.1.14)</li>
+<li>reshape2(v.1.4.2)</li>
+<li>GenomicFeatures(v.1.26.3)</li>
+<li>backports(v.1.0.5)</li>
+<li>qvalue(v.2.6.0)</li>
+<li>clusterProfiler(v.3.2.11)</li>
+<li>tools(v.3.4.0)</li>
+<li>psych(v.1.6.12)</li>
+<li>gridBase(v.0.4-7)</li>
+<li>ggplot2(v.2.2.1)</li>
+<li>affyio(v.1.44.0)</li>
+<li>gplots(v.3.0.1)</li>
+<li>RColorBrewer(v.1.1-2)</li>
+<li>BiocGenerics(v.0.20.0)</li>
+<li>Rcpp(v.0.12.9.2)</li>
+<li>plyr(v.1.8.4)</li>
+<li>zlibbioc(v.1.20.0)</li>
+<li>RCurl(v.1.95-4.8)</li>
+<li>ggpubr(v.0.1.1.999)</li>
+<li>GetoptLong(v.0.1.5)</li>
+<li>viridis(v.0.3.4)</li>
+<li>zoo(v.1.7-14)</li>
+<li>S4Vectors(v.0.12.1)</li>
+<li>SummarizedExperiment(v.1.4.0)</li>
+<li>ggrepel(v.0.6.5)</li>
+<li>cluster(v.2.0.5)</li>
+<li>magrittr(v.1.5)</li>
+<li>data.table(v.1.10.4)</li>
+<li>dnet(v.1.0.11)</li>
+<li>DO.db(v.2.9)</li>
+<li>circlize(v.0.3.9)</li>
+<li>survminer(v.0.3.0)</li>
+<li>mvtnorm(v.1.0-5)</li>
+<li>whisker(v.0.3-2)</li>
+<li>matrixStats(v.0.51.0)</li>
+<li>aroma.light(v.3.4.0)</li>
+<li>evaluate(v.0.10)</li>
+<li>xtable(v.1.8-2)</li>
+<li>minet(v.3.32.0)</li>
+<li>XML(v.3.98-1.5)</li>
+<li>mclust(v.5.2.2)</li>
+<li>IRanges(v.2.8.1)</li>
+<li>gridExtra(v.2.2.1)</li>
+<li>shape(v.1.4.2)</li>
+<li>compiler(v.3.4.0)</li>
+<li>biomaRt(v.2.30.0)</li>
+<li>tibble(v.1.2)</li>
+<li>KernSmooth(v.2.23-15)</li>
+<li>R.oo(v.1.21.0)</li>
+<li>htmltools(v.0.3.5)</li>
+<li>tidyr(v.0.6.1)</li>
+<li>geneplotter(v.1.52.0)</li>
+<li>DBI(v.0.5-1)</li>
+<li>ChIPseeker(v.1.10.3)</li>
+<li>matlab(v.1.0.2)</li>
+<li>ComplexHeatmap(v.1.12.0)</li>
+<li>MASS(v.7.3-45)</li>
+<li>fpc(v.2.1-10)</li>
+<li>boot(v.1.3-18)</li>
+<li>ShortRead(v.1.32.0)</li>
+<li>Matrix(v.1.2-8)</li>
+<li>readr(v.1.0.0)</li>
+<li>parmigene(v.1.0.2)</li>
+<li>R.methodsS3(v.1.7.1)</li>
+<li>gdata(v.2.17.0)</li>
+<li>parallel(v.3.4.0)</li>
+<li>igraph(v.1.0.1)</li>
+<li>km.ci(v.0.5-2)</li>
+<li>GenomicRanges(v.1.26.3)</li>
+<li>TxDb.Hsapiens.UCSC.hg19.knownGene(v.3.2.2)</li>
+<li>GenomicAlignments(v.1.10.0)</li>
+<li>foreign(v.0.8-67)</li>
+<li>xml2(v.1.1.1)</li>
+<li>foreach(v.1.4.3)</li>
+<li>annotate(v.1.52.1)</li>
+<li>XVector(v.0.14.0)</li>
+<li>rvest(v.0.3.2)</li>
+<li>stringr(v.1.2.0)</li>
+<li>digest(v.0.6.12)</li>
+<li>ConsensusClusterPlus(v.1.38.0)</li>
+<li>graph(v.1.52.0)</li>
+<li>Biostrings(v.2.42.1)</li>
+<li>rmarkdown(v.1.3)</li>
+<li>fastmatch(v.1.1-0)</li>
+<li>survMisc(v.0.5.4)</li>
+<li>TCGAbiolinks(v.2.3.18)</li>
+<li>dendextend(v.1.4.0)</li>
+<li>edgeR(v.3.16.5)</li>
+<li>kernlab(v.0.9-25)</li>
+<li>Rsamtools(v.1.26.1)</li>
+<li>gtools(v.3.5.0)</li>
+<li>modeltools(v.0.2-21)</li>
+<li>rjson(v.0.2.15)</li>
+<li>nlme(v.3.1-131)</li>
+<li>jsonlite(v.1.2)</li>
+<li>limma(v.3.30.11)</li>
+<li>lattice(v.0.20-34)</li>
+<li>KEGGREST(v.1.14.0)</li>
+<li>httr(v.1.2.1)</li>
+<li>plotrix(v.3.6-4)</li>
+<li>DEoptimR(v.1.0-8)</li>
+<li>survival(v.2.40-1)</li>
+<li>GO.db(v.3.4.0)</li>
+<li>UpSetR(v.1.3.2)</li>
+<li>png(v.0.1-7)</li>
+<li>prabclus(v.2.2-6)</li>
+<li>iterators(v.1.0.8)</li>
+<li>pander(v.0.6.0)</li>
+<li>Rgraphviz(v.2.18.0)</li>
+<li>class(v.7.3-14)</li>
+<li>stringi(v.1.1.2)</li>
+<li>latticeExtra(v.0.6-28)</li>
+<li>caTools(v.1.17.1)</li>
+<li>memoise(v.1.0.0)</li>
+<li>dplyr(v.0.5.0)</li>
+<li>ape(v.4.1)</li>
+</ul>
+</div>
+<div id="author-contributions" class="section level1 unnumbered">
+<h1>Author contributions</h1>
+<p>HN conceived the study. HN, MC and GB provided direction on the design of the Transcriptomics, Genomics, master regulatory networks and DNA methylation workflows. TCS developed and tested sections “Experimental data”, “DNA methylation analysis”, “Motif analysis” and “Integrative analysis”. AC developed and tested section “Transcriptomic analysis”. CO developed and tested the section “Inference of gene regulatory networks”. FDA developed and tested section “Genomic analysis”. TCS, AC, CO, and FDA prepared the first draft of the manuscript. All authors were involved in the revision of the draft manuscript and have agreed to the final content. Also, AC, TS, CO, MC, GB and HN are authors of the TCGAbiolinks package and MC is author of the GAIA package.</p>
+</div>
+<div id="competing-interests" class="section level1 unnumbered">
+<h1>Competing interests</h1>
+<p>No competing interests were disclosed.</p>
+</div>
+<div id="grant-information" class="section level1 unnumbered">
+<h1>Grant information</h1>
+<p>The project was supported by the São Paulo Research Foundation (<a href="http://www.fapesp.br/">FAPESP</a>) (2015/02844-7 and 2016/01389-7 to T.C.S. &amp; H.N. and 2015/07925-5 to H.N.), the <a href="http://mlg.ulb.ac.be/BridgeIRIS">BridgeIRIS project</a>, funded by INNOVIRIS, Region de Bruxelles Capitale, Brussels, Belgium, and by GENomic profiling of Gastrointestinal Inflammatory-Sensitive CANcers (<a href="http://mlg.ulb.ac.be/GENGISCAN">GENGISCAN</a>), Belgian FNRS PDR (T100914F to G.B.). Funding for open access charge: São Paulo Research Foundation (FAPESP) (2015/07925-5).</p>
+</div>
+<div id="acknowledgements" class="section level1 unnumbered">
+<h1>Acknowledgements</h1>
+<p>We are grateful to all the authors of the packages used in this article. Also, we would like to thank The GDC Support Team for the provided help, which was necessary in order to update the TCGAbiolinks package to use GDC API.</p>
+<div id="refs" class="references">
+
+</div>
+</div>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+    // active menu
+    var href = window.location.pathname;
+    href = href.substr(href.lastIndexOf('/') + 1);
+    if (href === '') href = './';
+    $('a[href="' + href + '"]').parent().addClass('active');
+});
+</script>
+<script>
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+
+</body>
+</html>

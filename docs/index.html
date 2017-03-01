@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca Bontempi Michele Ceccarelli , and Houtan Noushmehr" />
+
+<meta name="date" content="2017-03-01" />
+
+<title>TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages</title>
+
+<script src="index_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="index_files/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="index_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="index_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="index_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="index_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="index_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="index_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="index_files/navigation-1.1/tabsets.js"></script>
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 70px;
+}
+p code {
+  white-space: inherit;
+}
+.panel-heading {
+  text-align: center;
+}
+</style>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+<script src="libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap/css/flatly.min.css" rel="stylesheet" />
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap/shim/respond.min.js"></script>
+<script src="libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="libs/datatables-binding/datatables.js"></script>
+<link href="libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="libs/nouislider/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="libs/nouislider/jquery.nouislider.min.js"></script>
+<link href="libs/selectize/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="libs/selectize/selectize.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<style type="text/css">
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code > span.dt { color: #204a87; } /* DataType */
+code > span.dv { color: #0000cf; } /* DecVal */
+code > span.bn { color: #0000cf; } /* BaseN */
+code > span.fl { color: #0000cf; } /* Float */
+code > span.ch { color: #4e9a06; } /* Char */
+code > span.st { color: #4e9a06; } /* String */
+code > span.co { color: #8f5902; font-style: italic; } /* Comment */
+code > span.ot { color: #8f5902; } /* Other */
+code > span.al { color: #ef2929; } /* Alert */
+code > span.fu { color: #000000; } /* Function */
+code > span.er { color: #a40000; font-weight: bold; } /* Error */
+code > span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #000000; } /* Constant */
+code > span.sc { color: #000000; } /* SpecialChar */
+code > span.vs { color: #4e9a06; } /* VerbatimString */
+code > span.ss { color: #4e9a06; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #000000; } /* Variable */
+code > span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code > span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code > span.ex { } /* Extension */
+code > span.at { color: #c4a000; } /* Attribute */
+code > span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code > span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="include/site.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code > span.dt { color: #204a87; } /* DataType */
+code > span.dv { color: #0000cf; } /* DecVal */
+code > span.bn { color: #0000cf; } /* BaseN */
+code > span.fl { color: #0000cf; } /* Float */
+code > span.ch { color: #4e9a06; } /* Char */
+code > span.st { color: #4e9a06; } /* String */
+code > span.co { color: #8f5902; font-style: italic; } /* Comment */
+code > span.ot { color: #8f5902; } /* Other */
+code > span.al { color: #ef2929; } /* Alert */
+code > span.fu { color: #000000; } /* Function */
+code > span.er { color: #a40000; font-weight: bold; } /* Error */
+code > span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #000000; } /* Constant */
+code > span.sc { color: #000000; } /* SpecialChar */
+code > span.vs { color: #4e9a06; } /* VerbatimString */
+code > span.ss { color: #4e9a06; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #000000; } /* Variable */
+code > span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code > span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code > span.ex { } /* Extension */
+code > span.at { color: #c4a000; } /* Attribute */
+code > span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code > span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="include/site.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="./index.html">Introduction</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="methods.html">Methods</a></li>
+        <li><a href="conclusion.html">Connclusion</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="https://github.com/BioinformaticsFMRP/TCGAWorkflow" title="View Source on Github"><i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</nav><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages</h1>
+<h4 class="author"><em>Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca Bontempi Michele Ceccarelli , and Houtan Noushmehr</em></h4>
+<h4 class="date"><em>2017-03-01</em></h4>
+
+</div>
+
+
+<div id="about" class="section level1">
+<h1>About</h1>
+<p>This workflow is based on the article: <a href="https://f1000research.com/articles/5-1542/v2">TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages</a> <span class="citation">(Silva et al. 2016)</span>. Due to time and space contraints we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package <em><a href="http://bioconductor.org/packages/TCGAWorkflowData">TCGAWorkflowData</a></em>.</p>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>To be able to execute all the steps of this workflow please install it with the following code:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;https://bioconductor.org/biocLite.R&quot;</span>)
+deps &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;pathview&quot;</span>,<span class="st">&quot;clusterProfiler&quot;</span>,<span class="st">&quot;ELMER&quot;</span>, <span class="st">&quot;DO.db&quot;</span>,<span class="st">&quot;GO.db&quot;</span>, <span class="st">&quot;ComplexHeatmap&quot;</span>,<span class="st">&quot;EDASeq&quot;</span>, <span class="st">&quot;TCGAbiolinks&quot;</span>,<span class="st">&quot;AnnotationHub&quot;</span>,
+          <span class="st">&quot;gaia&quot;</span>,<span class="st">&quot;ChIPseeker&quot;</span>,<span class="st">&quot;minet&quot;</span>,<span class="st">&quot;BSgenome.Hsapiens.UCSC.hg19&quot;</span>,<span class="st">&quot;MotifDb&quot;</span>,<span class="st">&quot;MotIV&quot;</span>, <span class="st">&quot;rGADEM&quot;</span>, <span class="st">&quot;motifStack&quot;</span>,<span class="st">&quot;RTCGAToolbox&quot;</span>)
+for(pkg in deps)  if (!pkg %in%<span class="st"> </span><span class="kw">installed.packages</span>()) <span class="kw">biocLite</span>(pkg, <span class="dt">dependencies =</span> <span class="ot">TRUE</span>)
+deps &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;devtools&quot;</span>,<span class="st">&quot;DT&quot;</span>,<span class="st">&quot;pbapply&quot;</span>,<span class="st">&quot;readr&quot;</span>,<span class="st">&quot;circlize&quot;</span>)
+for(pkg in deps)  if (!pkg %in%<span class="st"> </span><span class="kw">installed.packages</span>())  <span class="kw">install.packages</span>(pkg,<span class="dt">dependencies =</span> <span class="ot">TRUE</span>)
+devtools::<span class="kw">install_github</span>(<span class="st">&quot;BioinformaticsFMRP/TCGAWorkflowData&quot;</span>)
+devtools::<span class="kw">install_github</span>(<span class="st">&quot;BioinformaticsFMRP/TCGAWorkflow&quot;</span>, <span class="dt">dependencies =</span> <span class="ot">TRUE</span>)</code></pre></div>
+</div>
+<div id="loading-packages" class="section level2">
+<h2>Loading packages</h2>
+<p>At the beginning of each section, the packages required to execute the code will be loaded. However the following packages are required for all sections.</p>
+<ul>
+<li>TCGAWorkflowData: this package contains the data necessary to execute each of the analysis steps. This is a subset of the downloaded to make the example faster. For a real analysis, please use all the data available.</li>
+<li>DT: we will use it to visualize the results</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(TCGAWorkflowData)
+<span class="kw">library</span>(DT)</code></pre></div>
+</div>
+</div>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>Biotechnological advances in sequencing have led to an explosion of publicly available data via large international consortia such as <a href="http://cancergenome.nih.gov/">The Cancer Genome Atlas (TCGA)</a>, <a href="http://www.encodeproject.org/">The Encyclopedia of DNA Elements (ENCODE)</a>, and <a href="http://www.roadmapepigenomics.org/">The NIH Roadmap Epigenomics Mapping Consortium (Roadmap)</a>. These projects have provided unprecedented opportunities to interrogate the epigenome of cultured cancer cell lines as well as normal and tumor tissues with high genomic resolution. The <a href="http://www.bioconductor.org/">Bioconductor</a> project offers more than 1,000 open-source software and statistical packages to analyze high-throughput genomic data. However, most packages are designed for specific data types (e.g. expression, epigenetics, genomics) and there is no one comprehensive tool that provides a complete integrative analysis of the resources and data provided by all three public projects. A need to create an integration of these different analyses was recently proposed. In this workflow, we provide a series of biologically focused integrative analyses of different molecular data. We describe how to download, process and prepare TCGA data and by harnessing several key Bioconductor packages, we describe how to extract biologically meaningful genomic and epigenomic data. Using Roadmap and ENCODE data, we provide a work plan to identify biologically relevant functional epigenomic elements associated with cancer.</p>
+<p>To illustrate our workflow, we analyzed two types of brain tumors: low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM).</p>
+<p>All the package landing pages used in this workflow can be found through the <a href="http://www.bioconductor.org/packages/release/BiocViews.html#___Software">biocViews interface</a>.</p>
+<p><strong>Keywords:</strong> Epigenomics, Genomics, Cancer, non-coding, TCGA, ENCODE, Roadmap, Bioinformatics.</p>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Cancer is a complex genetic disease spanning multiple molecular events such as point mutations, structural variations, translocations and activation of epigenetic and transcriptional signatures and networks. The effects of these events take place at different spatial and temporal scales with interlayer communications and feedback mechanisms creating a highly complex dynamic system. To gain insight into the biology of tumours most of the research in cancer genomics is aimed at the integration of the observations at multiple molecular scales and the analysis of their interplay. Even if many tumors share similar recurrent genomic events, their relationships with the observed phenotype are often not understood. For example, although we know that the majority of the most aggressive form of brain tumours such as glioma harbour the mutation of a single gene (IDH), the mechanistic explanation of the activation of its characteristic epigenetic and transcriptional signatures are still far to be well characterized. Moreover, network-based strategies have recently emerged as an effective framework for the discovery functional disease drivers that act as main regulators of cancer phenotypes. Here we describe a comprehensice workflow that integrates many Bioconductor packages in order to analyze and integrate the molteplicity of molecular observation layers in large scale cancer dataset.</p>
+<p>Indeed, recent technological developments allowed the deposition of large amounts of genomic and epigenomic data, such as gene expression, DNA methylation, and genomic localization of transcription factors, into freely available public international consortia like The Cancer Genome Atlas (<a href="http://cancergenome.nih.gov/">TCGA</a>), The Encyclopedia of DNA Elements (<a href="http://www.encodeproject.org/">ENCODE</a>), and The NIH Roadmap Epigenomics Mapping Consortium (<a href="http://www.roadmapepigenomics.org/">Roadmap</a>) <span class="citation">(Hawkins, Hon, and Ren 2010)</span>. An overview of the three consortia is described below:</p>
+<ul>
+<li><p><strong>The Cancer Genome Atlas (TCGA):</strong> The TCGA consortium, which is a National Institute of Health (NIH) initiative, makes publicly available molecular and clinical information for more than 30 types of human cancers including exome (variant analysis), single nucleotide polymorphism (SNP), DNA methylation, transcriptome (mRNA), microRNA (miRNA) and proteome . Sample types available at TCGA are: primary solid tumors, recurrent solid tumors, blood derived normal and tumor, metastatic, and solid tissue normal <span class="citation">(Weinstein et al. 2013)</span>.</p></li>
+<li><p><strong>The Encyclopedia of DNA Elements (ENCODE):</strong> Found in 2003 by the National Human Genome Research Institute (NHGRI), the project aims to build a comprehensive list of functional elements that have an active role in the genome, including regulatory elements that govern gene expression. Biosamples includes immortalized cell lines, tissues, primary cells and stem cells <span class="citation">(Consortium and others 2011)</span>.</p></li>
+<li><p><strong>The NIH Roadmap Epigenomics Mapping Consortium:</strong> This was launched with the goal of producing a public resource of human epigenomic data in order to analyze biology and disease-oriented research. Roadmap maps DNA methylation, histone modifications, chromatin accessibility, and small RNA transcripts in stem cells and primary ex vivo tissues <span class="citation">(Fingerman et al. 2011; Bernstein et al. 2010)</span>.</p></li>
+</ul>
+<p>Briefly, these three consortia provide large scale epigenomic data onto a variety of microarrays and next-generation sequencing (NGS) platforms. Each consortium encompasses specific types of biological information on specific type of tissue or cell and when analyzed together, it provides an invaluable opportunity for research laboratories to better understand the developmental progression of normal cells to cancer state at the molecular level and importantly, correlate these phenotypes with tissue of origins.</p>
+<p>Although there exists a wealth of possibilities <span class="citation">(Kannan et al. 2015)</span> in accessing cancer associated data, <a href="http://www.bioconductor.org/">Bioconductor</a> represent the most comprehensive set of open source, updated and integrated professional tools for the statistical analysis of large scale genomic data. Thus, we propose our workflow within Bioconductor to describe how to download, process, analyze and integrate cancer data to understand specific cancer-related specific questions. However, there is no tool that solves the issue of integration in a comprehensive sequence and mutation information, epigenomic state and gene expression within the context of gene regulatory networks to identify oncogenic drivers and characterize altered pathways during cancer progression. Therefore, our workflow presents several <a href="http://www.bioconductor.org/">Bioconductor</a> packages to work with genomic and epigenomics data.</p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Bernstein">
+<p>Bernstein, B. E., J. A. Stamatoyannopoulos, J. F. Costello, B. Ren, A. Milosavljevic, A. Meissner, M. Kellis, et al. 2010. “The NIH Roadmap Epigenomics Mapping Consortium.” <em>Nat. Biotechnol.</em> 28 (10): 1045–8.</p>
+</div>
+<div id="ref-encode2011user">
+<p>Consortium, ENCODE Project, and others. 2011. “A User’s Guide to the Encyclopedia of DNA Elements (ENCODE).” <em>PLoS Biol</em> 9 (4): e1001046.</p>
+</div>
+<div id="ref-Fingerman">
+<p>Fingerman, I. M., L. McDaniel, X. Zhang, W. Ratzat, T. Hassan, Z. Jiang, R. F. Cohen, and G. D. Schuler. 2011. “NCBI Epigenomics: a new public resource for exploring epigenomic data sets.” <em>Nucleic Acids Res.</em> 39 (Database issue): D908–912.</p>
+</div>
+<div id="ref-Hawkins">
+<p>Hawkins, R. D., G. C. Hon, and B. Ren. 2010. “Next-generation genomics: an integrative approach.” <em>Nat. Rev. Genet.</em> 11 (7): 476–86.</p>
+</div>
+<div id="ref-kannan2015public">
+<p>Kannan, Lavanya, Marcel Ramos, Angela Re, Nehme El-Hachem, Zhaleh Safikhani, Deena MA Gendoo, Sean Davis, et al. 2015. “Public Data and Open Source Tools for Multi-Assay Genomic Investigation of Disease.” <em>Briefings in Bioinformatics</em>. Oxford Univ Press, bbv080.</p>
+</div>
+<div id="ref-10.12688/f1000research.8923.2">
+<p>Silva, TC, A Colaprico, C Olsen, F D’Angelo, G Bontempi, M Ceccarelli, and H Noushmehr. 2016. “TCGA Workflow: Analyze Cancer Genomics and Epigenomics Data Using Bioconductor Packages [Version 2; Referees: 1 Approved, 1 Approved with Reservations].” <em>F1000Research</em> 5 (1542). doi:<a href="https://doi.org/10.12688/f1000research.8923.2">10.12688/f1000research.8923.2</a>.</p>
+</div>
+<div id="ref-weinstein2013cancer">
+<p>Weinstein, John N, Eric A Collisson, Gordon B Mills, Kenna R Mills Shaw, Brad A Ozenberger, Kyle Ellrott, Ilya Shmulevich, et al. 2013. “The Cancer Genome Atlas Pan-Cancer Analysis Project.” <em>Nature Genetics</em> 45 (10). Nature Publishing Group: 1113–20.</p>
+</div>
+</div>
+</div>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+    // active menu
+    var href = window.location.pathname;
+    href = href.substr(href.lastIndexOf('/') + 1);
+    if (href === '') href = './';
+    $('a[href="' + href + '"]').parent().addClass('active');
+});
+</script>
+<script>
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+
+</body>
+</html>
