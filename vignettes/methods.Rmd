@@ -1701,6 +1701,7 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
 ```
 
 ![](starburst.png)
+
 ### ChIP-seq analysis
 
 ChIP-seq is used primarily to determine how transcription factors and
