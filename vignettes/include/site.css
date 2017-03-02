@@ -8,3 +8,6 @@ h1 .header-section-number::after {
 body {
   text-align: justify;
 }
+pre code {
+  font-size: small;
+}

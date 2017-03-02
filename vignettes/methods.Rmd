@@ -1005,7 +1005,10 @@ query <- GDCquery(project = "TCGA-GBM",
 # We will use only 20 samples to make the example faster
 query$results[[1]] <-  query$results[[1]][1:20,]                  
 GDCdownload(query)
-gbm.exp <- GDCprepare(query, save = TRUE, summarizedExperiment = TRUE, save.filename = "GBMIllumina_HiSeq.rda")
+gbm.exp <- GDCprepare(query, 
+                      save = TRUE, 
+                      summarizedExperiment = TRUE, 
+                      save.filename = "GBMIllumina_HiSeq.rda")
 
 query <- GDCquery(project = "TCGA-LGG",
                   data.category = "Gene expression",
@@ -1017,7 +1020,10 @@ query <- GDCquery(project = "TCGA-LGG",
 # We will use only 20 samples to make the example faster
 query$results[[1]] <-  query$results[[1]][1:20,]
 GDCdownload(query)
-lgg.exp <- GDCprepare(query, save = TRUE, summarizedExperiment = TRUE, save.filename = "LGGIllumina_HiSeq.rda")
+lgg.exp <- GDCprepare(query, 
+                      save = TRUE, 
+                      summarizedExperiment = TRUE, 
+                      save.filename = "LGGIllumina_HiSeq.rda")
 ```
 To pre-process the data, first, we searched for possible outliers using
 the *TCGAanalyze\_Preprocessing* function, which performs an Array Array
