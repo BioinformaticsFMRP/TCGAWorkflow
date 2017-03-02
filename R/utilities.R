@@ -88,10 +88,12 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 #'                           "Official.Symbol.Interactor.B" = rev(names.genes.de))
 #' net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 #' \dontrun{
-#'   file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
+#'   file <- paste0("http://thebiogrid.org/downloads/archives/",
+#'                  "Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip")
 #'   downloader::download(file,basename(file))
 #'   unzip(basename(file),junkpaths =TRUE)
-#'   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
+#'   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), 
+#'                           header=TRUE, sep="\t", stringsAsFactors=FALSE)
 #'   names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
 #'   net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
 #' }
