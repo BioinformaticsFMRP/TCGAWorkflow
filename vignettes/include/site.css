@@ -5,3 +5,6 @@ h1 .header-section-number::after {
   content: ".";
 }
 
+body {
+  text-align: justify;
+}
