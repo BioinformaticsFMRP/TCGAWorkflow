@@ -4,14 +4,6 @@ title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Biocon
 author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
   Bontempi Michele Ceccarelli , and Houtan Noushmehr
 date: "`r Sys.Date()`"
-output: 
-    BiocStyle::html_document:
-        toc: true
-        number_sections: false
-        toc_depth: 2
-        highlight: haddock
-        df_print: kable
-        code_folding: show
 bibliography: bibliography.bib
 
 vignette: >
@@ -26,7 +18,6 @@ knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE, 
                       error = FALSE, 
                       tidy = FALSE,
-                      results = 'asis',
                       fig.align="center", 
                       dpi = 300, 
                       cache = FALSE,
@@ -1407,7 +1398,7 @@ met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
 save("met.20.samples.GBM.LGG.chr9.rda")
 ```
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{r echo=TRUE, message=FALSE,warning=FALSE}
 data("met.20.samples.GBM.LGG.chr9")
 #----------------------------
 # Mean methylation
@@ -1431,7 +1422,7 @@ each sample in the LGG group. Genome-wide view of the data highlights a
 difference between the groups of tumors.
 
 ![Boxplot of mean DNA methylation of each sample (black
-dots)](mean_lgg_gbm.png){width="50.00000%"}
+dots)](mean_lgg_gbm.png)
 
 
 ### Searching for differentially methylated CpG sites {#searching-for-differentially-methylated-cpg-sites .unnumbered}
