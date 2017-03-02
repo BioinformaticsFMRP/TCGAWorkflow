@@ -1260,7 +1260,8 @@ library(c3net)
 names.genes.de <- rownames(dataDEGs)
 
 ### read biogrid info
-file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip"
+### Check last version in https://thebiogrid.org/download.php 
+file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.146/BIOGRID-ALL-3.4.146.tab2.zip"
 if(!file.exists(gsub("zip","txt",basename(file)))){
   downloader::download(file,basename(file))
   unzip(basename(file),junkpaths =TRUE)
@@ -1490,7 +1491,7 @@ additional metadata description. The listing below shows
 the code to produce the heatmap of a DNA methylation datum.
 
 
-```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 #--------------------------
 # DNA Methylation heatmap
 #-------------------------
@@ -1768,27 +1769,7 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{R, eval=FALSE, include=TRUE}
-library(ChIPseeker)
-library(SummarizedExperiment)
-library(ggplot2)
-library(AnnotationHub)
-
-#------------------ Working with ChipSeq data ---------------
-# Step 1: download histone marks for a brain and non-brain samples.
-#------------------------------------------------------------
-# loading annotation hub database
-ah = AnnotationHub()
-
-# Searching for brain consolidated epigenomes in the roadmap database
-bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","brain","E068"))
-
-# Get chip-seq data
-histone.marks <- pbapply::pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
-names(histone.marks) <- names(bpChipEpi_brain)
-```
-
-```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='hide', echo=FALSE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(AnnotationHub)
 library(pbapply)
@@ -2162,6 +2143,7 @@ for (j in direction){
     }
 }
 ```
+
 When ELMER Identifies the enriched motifs for the distal enhancer probes
 which are significantly differentially methylated and linked to putative
 target gene, it will plot the Odds Ratio (x axis) for the each motifs

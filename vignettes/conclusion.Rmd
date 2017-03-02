@@ -4,14 +4,6 @@ title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Biocon
 author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
   Bontempi Michele Ceccarelli , and Houtan Noushmehr
 date: "`r Sys.Date()`"
-output: 
-    BiocStyle::html_document:
-        toc: true
-        number_sections: false
-        toc_depth: 2
-        highlight: haddock
-        df_print: kable
-        code_folding: show
 bibliography: bibliography.bib
 
 vignette: >
@@ -26,7 +18,6 @@ knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE, 
                       error = FALSE, 
                       tidy = FALSE,
-                      results = 'asis',
                       fig.align="center", 
                       dpi = 300, 
                       cache = FALSE,
