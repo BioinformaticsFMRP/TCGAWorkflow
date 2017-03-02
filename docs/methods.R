@@ -80,15 +80,15 @@ library(TCGAbiolinks)
 #                    data.category = "Copy Number Variation",
 #                    data.type = "Copy Number Segment",
 #                    barcode = c( "TCGA-OR-A5KU-01A-11D-A29H-01", "TCGA-OR-A5JK-01A-11D-A29H-01"))
-#  GDCDownload(query)
-#  data <- GDCPrepare(query)
+#  GDCdownload(query)
+#  data <- GDCprepare(query)
 #  
 #  query <- GDCquery("TCGA-ACC",
 #                    "Copy Number Variation",
 #                    data.type = "Masked Copy Number Segment",
 #                    sample.type = c("Primary solid Tumor")) # see the barcodes with getResults(query)$cases
-#  GDCDownload(query)
-#  data <- GDCPrepare(query)
+#  GDCdownload(query)
+#  data <- GDCprepare(query)
 
 ## ---- eval=TRUE, include=TRUE--------------------------------------------
 library(SummarizedExperiment)
