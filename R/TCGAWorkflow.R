@@ -23,5 +23,15 @@
 #'  low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM). 
 #' @docType package
 #' @name TCGAWorkflow
-#' @import TCGAWorkflowData
+#' @import ELMER  downloader SummarizedExperiment  TCGAWorkflowData
+#' @import gaia ChIPseeker ComplexHeatmap
+#' @import minet c3net biomaRt pathview
+#' @import BSgenome.Hsapiens.UCSC.hg19 motifStack
+#' @import circlize pbapply GenomeInfoDb ggplot2 ggthemes parallel
+#' @importFrom rGADEM GADEM nOccurrences getPWM consensus nMotifs
+#' @importFrom MotIV viewAlignments motifMatch 
+#' @importFrom AnnotationHub query AnnotationHub
+#' @importFrom MotifDb MotifDb
+#' @importFrom clusterProfiler bitr
+#' @import DT RTCGAToolbox
 NULL

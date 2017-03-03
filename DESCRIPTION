@@ -37,15 +37,7 @@ Depends:
     R (>= 3.3.0)
 Imports:
     TCGAbiolinks,
-    TCGAWorkflowData
-License: Artistic-2.0
-VignetteBuilder: knitr
-biocViews: 
-  WorkflowStep,
-  Sequencing, 
-  Epigenetics, 
-  FunctionalGenomics
-Suggests:
+    TCGAWorkflowData,
     knitr,
     knitcitations,
     ELMER,
@@ -74,6 +66,13 @@ Suggests:
     parallel,
     RTCGAToolbox,
     DT
+License: Artistic-2.0
+VignetteBuilder: knitr
+biocViews: 
+  WorkflowStep,
+  Sequencing, 
+  Epigenetics, 
+  FunctionalGenomics
 NeedsCompilation: no
 URL: https://f1000research.com/articles/5-1542/v2
 BugReports: https://github.com/BioinformaticsFMRP/TCGAWorkflow/issues

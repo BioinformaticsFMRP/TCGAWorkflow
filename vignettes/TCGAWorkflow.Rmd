@@ -648,19 +648,6 @@ queried for CNV SNP6 level 3 data for 20 primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
 
-```{r results='hide', message=FALSE, warning=FALSE, include=FALSE}
-library(TCGAbiolinks)
-# Select common CN technology available for GBM and LGG
-#############################
-## CNV data pre-processing ##
-#############################
-query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
-                            data.category = "Copy number variation",
-                            legacy = TRUE,
-                            file.type = "nocnv_hg19.seg",
-                            sample.type = c("Primary solid Tumor"))
-```
-
 ```{r results='hide', eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(TCGAbiolinks)
 # Select common CN technology available for GBM and LGG
@@ -909,21 +896,25 @@ from TCGA that are identified in at least two tumor samples) in LGG.
 Circos plot can illustrate molecular alterations genome-wide or only in
 one or more selected chromosomes. 
 
+```{r results='hide', eval = FALSE, echo=TRUE, message=FALSE,warning=FALSE}
+LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+```
+
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 ###############################################
 ## Genomic aberration overview - Circos plot ## 
 ###############################################
 # Retrieve curated mutations for selected cancer (e.g. "LGG") 
-mut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+data(maf_mutect2_LGG_GBM)
 # Select only potentially damaging mutations
-mut <- mut[mut$Variant_Classification %in% c("Missense_Mutation",
+LGGmut <- LGGmut[LGGmut$Variant_Classification %in% c("Missense_Mutation",
                                              "Nonsense_Mutation",
                                              "Nonstop_Mutation",
                                              "Frame_Shift_Del",
                                              "Frame_Shift_Ins"),]
 # Select recurrent mutations (identified in at least two samples)
-mut.id <- paste0(mut$Chromosome,":",mut$Start_Position,"-",mut$End_Position,"|",mut$Reference_Allele)
-mut <- cbind(mut.id, mut)
+mut.id <- paste0(LGGmut$Chromosome,":",LGGmut$Start_Position,"-",LGGmut$End_Position,"|",LGGmut$Reference_Allele)
+mut <- cbind(mut.id, LGGmut)
 numSamples <- table(mut.id)
 s.mut <- names(which(numSamples >= 2))
 # Prepare selected mutations data for circos plot
@@ -1832,7 +1823,7 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{r results='hide', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='hide', eval=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(AnnotationHub)
 library(pbapply)
@@ -1848,7 +1839,8 @@ bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "conso
 
 # Get chip-seq data
 histone.marks <- pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
-names(histone.marks) <- names(bpChipEpi_brain)
+names(histone.marks) <- names(bpChipEpi_brain) 
+# OBS: histone.marks is available in TCGAWorkflowData package
 ```
 
 
@@ -1881,6 +1873,7 @@ library(SummarizedExperiment)
 library(ggplot2)
 library(AnnotationHub)
 
+data("histonemarks")
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met)[values(met)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
