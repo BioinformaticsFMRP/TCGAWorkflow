@@ -513,7 +513,7 @@ mutation <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 ```
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-data(maf_mutect2_LGG_GBM)
+data(mafMutect2LGGGBM)
 datatable(mut[1:20,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
@@ -607,7 +607,7 @@ gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
 ```
 
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
-data("GBM_gistic")
+data(GBMGistic)
 datatable(gistic.allbygene,
               filter = 'top',
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
@@ -856,7 +856,7 @@ save(mut,file ="maf_mutect2_LGG_GBM.rda")
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(ComplexHeatmap)
 # recovering data from TCGAWorkflowData package.
-data(maf_mutect2_LGG_GBM)
+data(mafMutect2LGGGBM)
 
 # Filtering mutations in gliomas
 EA_pathways <- TCGAbiolinks:::listEA_pathways
@@ -905,7 +905,7 @@ LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 ## Genomic aberration overview - Circos plot ## 
 ###############################################
 # Retrieve curated mutations for selected cancer (e.g. "LGG") 
-data(maf_mutect2_LGG_GBM)
+data(mafMutect2LGGGBM)
 # Select only potentially damaging mutations
 LGGmut <- LGGmut[LGGmut$Variant_Classification %in% c("Missense_Mutation",
                                              "Nonsense_Mutation",
@@ -1334,7 +1334,7 @@ library(c3net)
 # we will use only a subset (first 50 genes) of it to make the example faster
 names.genes.de <- rownames(dataDEGs)[1:50]
 
-data("biogrid")
+data(biogrid)
 net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 
 mydata <- dataFiltLGG[names.genes.de, ]
@@ -1461,11 +1461,11 @@ met <- GDCprepare(query, save = FALSE)
 # We will use only chr9 to make the example faster
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
 # This data is avaliable in the package
-save("met.20.samples.GBM.LGG.chr9.rda")
+save("met20SamplesGBMLGGchr9")
 ```
 
 ```{r echo=TRUE, message=FALSE,warning=FALSE}
-data("met.20.samples.GBM.LGG.chr9")
+data(met20SamplesGBMLGGchr9)
 #----------------------------
 # Mean methylation
 #----------------------------
@@ -1873,7 +1873,7 @@ library(SummarizedExperiment)
 library(ggplot2)
 library(AnnotationHub)
 
-data("histonemarks")
+data("histoneMarks")
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met)[values(met)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
@@ -1883,7 +1883,7 @@ probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@r
 # First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
 # prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
 # Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pblapply(histone.marks, function(x) {
+tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
     getTagMatrix(GenomeInfoDb::keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
@@ -2088,7 +2088,7 @@ geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
 probe <- get.feature.probe()
 
 # Recover the data created in the last step
-data(elmer.example)
+data(elmerExample)
 
 # create mee object, use @ to access the matrices inside the object
 mee <- fetch.mee(meth = met.elmer, 
