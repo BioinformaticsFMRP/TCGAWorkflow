@@ -53,6 +53,27 @@ devtools::install_github("BioinformaticsFMRP/TCGAWorkflowData")
 devtools::install_github("BioinformaticsFMRP/TCGAWorkflow", dependencies = TRUE)
 ```
 
+# Docker image
+
+A complete enviroment with all packages installed is available as Docker image, which can be easily run on Mac OS, Windows and Linux systems. The image can be obtained from Docker Hub: https://hub.docker.com/r/tiagochst/tcgabiolinksgui/
+
+Download image:
+```{bash, eval = FALSE}
+docker pull tiagochst/tcgabiolinksgui
+```
+
+To run R from the command line:
+```{bash, eval = FALSE}
+docker run -ti tiagochst/tcgabiolinksgui R
+```
+
+To run RStudio Server (user: rstudio, password: rstudio): 
+```{bash, eval = FALSE}
+docker run -p 8787:8787 tiagochst/tcgabiolinksgui
+```
+
+For more information please check: https://docs.docker.com/
+
 # Loading packages
 
 At the beginning of each section, the packages required to execute the code will be loaded. However the following packages are required for all sections.
