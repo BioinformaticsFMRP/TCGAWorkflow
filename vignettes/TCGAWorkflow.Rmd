@@ -1376,7 +1376,6 @@ that CLR and MRNET perform best when comparing the inferred network with
 known interactions from the BioGrid database.
 
 
-
 ## Epigenetic analysis
 
 The DNA methylation is an important component in numerous cellular
@@ -1461,7 +1460,7 @@ met <- GDCprepare(query, save = FALSE)
 # We will use only chr9 to make the example faster
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
 # This data is avaliable in the package
-save("met20SamplesGBMLGGchr9")
+save(met, file = "met20SamplesGBMLGGchr9.rda")
 ```
 
 ```{r echo=TRUE, message=FALSE,warning=FALSE}
@@ -1902,7 +1901,7 @@ ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start
 # First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
 # prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
 # Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pblapply(histone.marks, function(x) {
+tagMatrixList <- pblapply::pblapply(histone.marks, function(x) {
     getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
