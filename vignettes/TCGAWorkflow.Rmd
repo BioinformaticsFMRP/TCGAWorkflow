@@ -1518,6 +1518,7 @@ met <- TCGAanalyze_DMR(met,
                        group2 = "Brain Lower Grade Glioma", # a type of the disease column
                        p.cut = 0.05,
                        diffmean.cut = 0.15,
+                       save = FALSE,
                        legend = "State",
                        plot.filename = "LGG_GBM_metvolcano.png",
                        cores = 1 # if set to 1 there will be a progress bar
