@@ -2114,15 +2114,13 @@ for (j in direction){
                      dir.out=dir.out,
                      cores=cores,
                      label= j,
-                     permu.size=100, # For significant results use 10000
-                     Pe = 0.01) # For significant results use 0.001
+                     permu.size=10, # For significant results use 10000
+                     Pe = 0.1) # For significant results use 0.001
 
     Sig.probes.paired <- fetch.pair(pair=pair,
                                     probeInfo = getProbeInfo(mee),
                                     geneInfo = getGeneInfo(mee))
-    Sig.probes.paired <-read.csv(paste0(dir.out,
-                                        "/getPair.",j,
-					".pairs.significant.csv"),
+    Sig.probes.paired <-read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
                                  stringsAsFactors=FALSE)[,1]
 
 
@@ -2141,9 +2139,7 @@ for (j in direction){
                                              min.incidence = 2, 
                                              label=j,
                                              background.probes = probe$name)
-        motif.enrichment <- read.csv(paste0(dir.out,
-	                                    "/getMotif.",j,
-					    ".motif.enrichment.csv"),
+        motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",j, ".motif.enrichment.csv"),
                                      stringsAsFactors=FALSE)
         if(length(enriched.motif) > 0){
             #-------------------------------------------------------------
@@ -2155,9 +2151,7 @@ for (j in direction){
                           enriched.motif = enriched.motif,
                           dir.out = dir.out,
                           cores = cores, label = j)
-            TF.meth.cor <- get(load(paste0(dir.out,
-	                                   "/getTF.",j,
-					   ".TFs.with.motif.pvalue.rda")))
+            TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",j,".TFs.with.motif.pvalue.rda")))
             save(TF, enriched.motif, Sig.probes.paired,
                  pair, nearGenes, Sig.probes, 
                  motif.enrichment, TF.meth.cor,
