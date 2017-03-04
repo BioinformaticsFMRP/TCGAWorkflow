@@ -1822,7 +1822,7 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{r results='hide', eval=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='hide', eval=TRUE, echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(AnnotationHub)
 library(pbapply)
@@ -1835,7 +1835,9 @@ ah = AnnotationHub()
 
 # Searching for brain consolidated epigenomes in the roadmap database
 bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","brain","E068"))
+```
 
+```{r results='hide', eval=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
 # Get chip-seq data
 histone.marks <- pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
 names(histone.marks) <- names(bpChipEpi_brain) 
@@ -1867,12 +1869,7 @@ enrichment heatmap and the average profile of peaks binding to those
 regions.
 
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
-library(ChIPseeker)
-library(SummarizedExperiment)
-library(ggplot2)
-library(AnnotationHub)
-
-data("histoneMarks")
+data(histoneMarks)
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- keepStandardChromosomes(rowRanges(met)[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
