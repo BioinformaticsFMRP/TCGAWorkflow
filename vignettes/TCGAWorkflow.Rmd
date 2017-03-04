@@ -1866,32 +1866,13 @@ hypermethylated regions, (listing below). The
 enrichment heatmap and the average profile of peaks binding to those
 regions.
 
-```{R, eval=FALSE, include=TRUE}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(SummarizedExperiment)
 library(ggplot2)
 library(AnnotationHub)
 
 data("histoneMarks")
-# Create a GR object based on the hypo/hypermethylated probes.
-probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met)[values(met)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
-# Defining a window of 3kbp - 3kbp_probe_3kbp
-probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@ranges@start + 3000))
-
-### Profile of ChIP peaks binding to TSS regions
-# First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
-# prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
-# Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
-    getTagMatrix(GenomeInfoDb::keepStandardChromosomes(x), windows = probes, weightCol = "score")
-})
-names(tagMatrixList) <- basename(bpChipEpi_brain$title)
-names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
-names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
-```
-
-```{r results='hide', echo=FALSE, message=FALSE,warning=FALSE}
-library(GenomeInfoDb)
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- keepStandardChromosomes(rowRanges(met)[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
@@ -1907,7 +1888,6 @@ tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
 names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
 names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
-
 ```
 
 To plot the enrichment heatmap use the function `tagHeatmap`
