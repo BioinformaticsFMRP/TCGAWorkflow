@@ -1901,7 +1901,7 @@ ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start
 # First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
 # prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
 # Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pblapply::pblapply(histone.marks, function(x) {
+tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
     getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
