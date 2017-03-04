@@ -862,7 +862,7 @@ data(mafMutect2LGGGBM)
 EA_pathways <- TCGAbiolinks:::listEA_pathways
 Glioma_pathways <- EA_pathways[grep("glioma", tolower(EA_pathways$Pathway)),]
 Glioma_signaling <- Glioma_pathways[Glioma_pathways$Pathway == "Glioma Signaling",]
-Glioma_signaling_genes <- unlist(strsplit(as.character(Glioma_signaling$Molecules),","))
+Glioma_signaling_genes <- unlist(strsplit(as.character(Glioma_signaling$Molecules),","))[1:10]
 
 mut <- mut[mut$Hugo_Symbol %in% Glioma_signaling_genes,]
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
@@ -1818,7 +1818,7 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{r results='hide', eval=TRUE, echo=TRUE, message=FALSE,warning=FALSE}
+```{r results='hide', eval=FALSE, echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(AnnotationHub)
 library(pbapply)
@@ -1878,9 +1878,6 @@ ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start
 tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
     getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
-names(tagMatrixList) <- basename(bpChipEpi_brain$title)
-names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
-names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
 ```
 
 To plot the enrichment heatmap use the function `tagHeatmap`
@@ -2084,7 +2081,7 @@ are identified is found in the
 vignette.
 
 ```{r, warning=FALSE} 
-cores <- ifelse(requireNamespace("parallel", quietly = TRUE), parallel::detectCores(), 1)
+cores <- 1
 
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
