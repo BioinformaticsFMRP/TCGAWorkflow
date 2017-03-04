@@ -509,12 +509,12 @@ and potential germline variants. To download Somatic MAFs data using
 *GDCquery\_maf* function is provided (see listing below).
 
 ```{R, eval=FALSE, include=TRUE}
-mutation <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 ```
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 data(mafMutect2LGGGBM)
-datatable(mut[1:20,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+datatable(LGGmut[1:20,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
 Finally, the Cancer Genome Atlas (TCGA) Research Network has reported
@@ -865,10 +865,7 @@ Glioma_signaling <- Glioma_pathways[Glioma_pathways$Pathway == "Glioma Signaling
 Glioma_signaling_genes <- unlist(strsplit(as.character(Glioma_signaling$Molecules),","))
 
 mut <- mut[mut$Hugo_Symbol %in% Glioma_signaling_genes,]
-
-clin.gbm <- GDCquery_clinic("TCGA-GBM", "Clinical")
-clin.lgg <- GDCquery_clinic("TCGA-LGG", "Clinical")
-clinical <- plyr::rbind.fill(clin.lgg,clin.gbm)
+clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 ```
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 TCGAvisualize_oncoprint(mut = mut,
@@ -1112,16 +1109,13 @@ depth): global-scaling and full-quantile normalization
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 data("LGGIllumina_HiSeq")
 data("GBMIllumina_HiSeq")
-dataClin_LGG <- GDCquery_clinic("TCGA-LGG", "Clinical")
 
-dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp,
+dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp[1:100,],
                                       cor.cut = 0.6,    
                                       datatype = "raw_count",
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
-dataClin_GBM <- GDCquery_clinic("TCGA-GBM", "Clinical")
-
-dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp,
+dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp[1:100,],
                                           cor.cut = 0.6, 
                                           datatype = "raw_count",
                                           filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
@@ -1136,8 +1130,8 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
 
 save(dataFilt, file = paste0("LGG_GBM_Norm_IlluminaHiSeq.rda"))
 
-dataFiltLGG <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_LGG$bcr_patient_barcode)
-dataFiltGBM <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% dataClin_GBM$bcr_patient_barcode)
+dataFiltLGG <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% lgg_clin$bcr_patient_barcode)
+dataFiltGBM <- subset(dataFilt, select = substr(colnames(dataFilt),1,12) %in% gbm_clin$bcr_patient_barcode)
 
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFiltLGG,
                             mat2 = dataFiltGBM,
@@ -1554,10 +1548,7 @@ the code to produce the heatmap of a DNA methylation datum.
 # DNA Methylation heatmap
 #-------------------------
 library(ComplexHeatmap)
-
-clin.gbm <- GDCquery_clinic("TCGA-GBM", "Clinical")
-clin.lgg <- GDCquery_clinic("TCGA-LGG", "Clinical")
-clinical <- plyr::rbind.fill(clin.lgg,clin.gbm)
+clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
