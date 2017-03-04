@@ -95,9 +95,9 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 #'   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), 
 #'                           header=TRUE, sep="\t", stringsAsFactors=FALSE)
 #'   names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
-#'   net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+#'   net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 #' }
-get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
+getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL){
   it.a <- "Official.Symbol.Interactor.A"
   it.b <- "Official.Symbol.Interactor.B"
   
@@ -132,8 +132,8 @@ get.adjacency.biogrid <- function(tmp.biogrid, names.genes = NULL){
 #' @export
 #' @examples 
 #' # Get ACC samples with both DNA methylation and gene expression
-#' samples <- matched_met_exp("TCGA-ACC")
-matched_met_exp <- function(project, n = NULL){
+#' samples <- matchedMetExp("TCGA-ACC")
+matchedMetExp <- function(project, n = NULL){
   # get primary solid tumor samples: DNA methylation
   message("Download DNA methylation information")
   met450k <- GDCquery(project = project,

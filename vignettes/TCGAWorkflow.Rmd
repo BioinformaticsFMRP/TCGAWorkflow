@@ -4,6 +4,14 @@ title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Biocon
 author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
   Bontempi Michele Ceccarelli , and Houtan Noushmehr
 date: "`r Sys.Date()`"
+output: 
+    BiocStyle::html_document:
+        toc: true
+        number_sections: false
+        toc_depth: 2
+        highlight: haddock
+        df_print: kable
+        code_folding: show
 bibliography: bibliography.bib
 
 vignette: >
@@ -40,6 +48,159 @@ library(TCGAWorkflowData)
 library(DT)
 library(TCGAbiolinks)
 ```
+
+
+# About
+
+This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
+Due to time and space contraints we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
+
+## Installation
+
+To be able to execute all the steps of this workflow please install it with the following code:
+
+```{R, eval=FALSE, include=TRUE}
+source("https://bioconductor.org/biocLite.R")
+deps <- c("pathview","clusterProfiler","ELMER", "DO.db","GO.db", 
+          "ComplexHeatmap","EDASeq", "TCGAbiolinks","AnnotationHub",
+          "gaia","ChIPseeker","minet","BSgenome.Hsapiens.UCSC.hg19",
+          "MotifDb","MotIV", "rGADEM", "motifStack","RTCGAToolbox")
+for(pkg in deps)  if (!pkg %in% installed.packages()) biocLite(pkg, dependencies = TRUE)
+deps <- c("devtools","DT","pbapply","readr","circlize")
+for(pkg in deps)  if (!pkg %in% installed.packages())  install.packages(pkg,dependencies = TRUE)
+devtools::install_github("BioinformaticsFMRP/TCGAWorkflowData")
+devtools::install_github("BioinformaticsFMRP/TCGAWorkflow", dependencies = TRUE)
+```
+
+## Loading packages
+
+At the beginning of each section, the packages required to execute the code will be loaded. However the following packages are required for all sections.
+
+- TCGAWorkflowData: this package contains the data necessary to execute each of the analysis
+steps. This is a subset of the downloaded to make the example faster. For a real analysis, please
+use all the data available.
+- DT: we will use it to visualize the results
+
+```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
+library(TCGAWorkflowData)
+library(DT)
+```
+
+# Abstract
+
+Biotechnological advances in sequencing have led to an explosion of
+    publicly available data via large international consortia such as [The
+    Cancer Genome Atlas (TCGA)](http://cancergenome.nih.gov/), [The
+    Encyclopedia of DNA Elements (ENCODE)](http://www.encodeproject.org/),
+    and [The NIH Roadmap Epigenomics Mapping Consortium
+    (Roadmap)](http://www.roadmapepigenomics.org/). These projects have
+    provided unprecedented opportunities to interrogate the epigenome of
+    cultured cancer cell lines as well as normal and tumor tissues with high
+    genomic resolution. The [Bioconductor](http://www.bioconductor.org/)
+    project offers more than 1,000 open-source software and statistical
+    packages to analyze high-throughput genomic data. However, most packages
+    are designed for specific data types (e.g. expression, epigenetics,
+    genomics) and there is no one comprehensive tool that provides a
+    complete integrative analysis of the resources and data provided by all
+    three public projects. A need to create an integration of these
+    different analyses was recently proposed. In this workflow, we provide a
+    series of biologically focused integrative analyses of different
+    molecular data. We describe how to download, process and prepare TCGA
+    data and by harnessing several key Bioconductor packages, we describe
+    how to extract biologically meaningful genomic and epigenomic data.
+    Using Roadmap and ENCODE data, we provide a work plan to identify
+    biologically relevant functional epigenomic elements associated with
+    cancer. 
+    
+To illustrate our workflow, we analyzed two types of brain
+tumors: low-grade glioma (LGG) versus high-grade glioma (glioblastoma
+multiform or GBM). 
+
+All the  package landing pages used in this workflow can be found through the [biocViews interface](http://www.bioconductor.org/packages/release/BiocViews.html#___Software).
+    
+**Keywords:** Epigenomics, Genomics, Cancer, non-coding, TCGA, ENCODE, Roadmap, Bioinformatics.
+
+# Introduction
+
+Cancer is a complex genetic disease spanning multiple molecular events
+such as point mutations, structural variations, translocations and
+activation of epigenetic and transcriptional signatures and networks.
+The effects of these events take place at different spatial and temporal
+scales with interlayer communications and feedback mechanisms creating a
+highly complex dynamic system. To gain insight into the biology of
+tumours most of the research in cancer genomics is aimed at the
+integration of the observations at multiple molecular scales and the
+analysis of their interplay. Even if many tumors share similar recurrent
+genomic events, their relationships with the observed phenotype are
+often not understood. For example, although we know that the majority of
+the most aggressive form of brain tumours such as glioma harbour the
+mutation of a single gene (IDH), the mechanistic explanation of the
+activation of its characteristic epigenetic and transcriptional
+signatures are still far to be well characterized. Moreover,
+network-based strategies have recently emerged as an effective framework
+for the discovery functional disease drivers that act as main regulators
+of cancer phenotypes. Here we describe a comprehensice workflow that
+integrates many Bioconductor packages in order to analyze and integrate
+the molteplicity of molecular observation layers in large scale cancer
+dataset.
+
+Indeed, recent technological developments allowed the deposition of
+large amounts of genomic and epigenomic data, such as gene expression,
+DNA methylation, and genomic localization of transcription factors, into
+freely available public international consortia like The Cancer Genome
+Atlas ([TCGA](http://cancergenome.nih.gov/)), The Encyclopedia of DNA
+Elements ([ENCODE](http://www.encodeproject.org/)), and The NIH Roadmap
+Epigenomics Mapping Consortium
+([Roadmap](http://www.roadmapepigenomics.org/)) [@Hawkins]. An overview
+of the three consortia is described below:
+
+-   **The Cancer Genome Atlas (TCGA):** The TCGA consortium, which is a
+    National Institute of Health (NIH) initiative, makes publicly
+    available molecular and clinical information for more than 30 types
+    of human cancers including exome (variant analysis), single
+    nucleotide polymorphism (SNP), DNA methylation, transcriptome
+    (mRNA), microRNA (miRNA) and proteome . Sample types available at
+    TCGA are: primary solid tumors, recurrent solid tumors, blood
+    derived normal and tumor, metastatic, and solid tissue normal
+    [@weinstein2013cancer].
+
+-   **The Encyclopedia of DNA Elements (ENCODE):** Found in 2003 by the
+    National Human Genome Research Institute (NHGRI), the project aims
+    to build a comprehensive list of functional elements that have an
+    active role in the genome, including regulatory elements that govern
+    gene expression. Biosamples includes immortalized cell lines,
+    tissues, primary cells and stem cells [@encode2011user].
+
+-   **The NIH Roadmap Epigenomics Mapping Consortium:** This was
+    launched with the goal of producing a public resource of human
+    epigenomic data in order to analyze biology and disease-oriented
+    research. Roadmap maps DNA methylation, histone modifications,
+    chromatin accessibility, and small RNA transcripts in stem cells and
+    primary ex vivo tissues [@Fingerman; @Bernstein].
+
+Briefly, these three consortia provide large scale epigenomic data onto
+a variety of microarrays and next-generation sequencing (NGS) platforms.
+Each consortium encompasses specific types of biological information on
+specific type of tissue or cell and when analyzed together, it provides
+an invaluable opportunity for research laboratories to better understand
+the developmental progression of normal cells to cancer state at the
+molecular level and importantly, correlate these phenotypes with tissue
+of origins.
+
+Although there exists a wealth of possibilities [@kannan2015public] in
+accessing cancer associated data,
+[Bioconductor](http://www.bioconductor.org/) represent the most
+comprehensive set of open source, updated and integrated professional
+tools for the statistical analysis of large scale genomic data. Thus, we
+propose our workflow within Bioconductor to describe how to download,
+process, analyze and integrate cancer data to understand specific
+cancer-related specific questions. However, there is no tool that solves
+the issue of integration in a comprehensive sequence and mutation
+information, epigenomic state and gene expression within the context of
+gene regulatory networks to identify oncogenic drivers and characterize
+altered pathways during cancer progression. Therefore, our workflow
+presents several [Bioconductor](http://www.bioconductor.org/) packages
+to work with genomic and epigenomics data.
 
 
 # Methods
@@ -301,7 +462,7 @@ lgg_clin <- GDCquery_clinic(project = "TCGA-LGG", type = "Clinical")
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+datatable(clinical[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
 
@@ -352,7 +513,7 @@ mutation <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 ```
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-data(maf_mutect2_LGG_GBM)
+data(mafMutect2LGGGBM)
 datatable(mut[1:20,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
@@ -377,7 +538,7 @@ gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
 ```
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(gbm.subtypes, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+datatable(gbm.subtypes[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
 
@@ -411,11 +572,11 @@ example is found in listingbelow. The *getData* function
 allow users to access the downloaded data (see lines 22-24 of listing
 below as a S4Vector object.
 
-```{R, eval=TRUE, include=TRUE}
+```{R, eval=FALSE, include=TRUE}
 library(RTCGAToolbox)
 ```
 
-```{R, eval=TRUE, include=TRUE}
+```{R, eval=FALSE, include=TRUE}
 # Get the last run dates
 lastRunDate <- getFirehoseRunningDates()[1]
 
@@ -427,17 +588,7 @@ gbm.data <- getFirehoseData(dataset = "GBM",
                             fileSizeLimit = 10000)
 
 gbm.mut <- getData(gbm.data,"Mutations")
-datatable(gbm.mut[1:50,],
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
-
 gbm.clin <- getData(gbm.data,"Clinical")
-datatable(gbm.clin[1:50,],
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
-
 ```
 
 Finnaly, [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
@@ -445,28 +596,28 @@ can access level 4 data, which can be handy when the user requires
 GISTIC results. GISTIC is used to identify genes targeted by somatic
 copy-number alterations (SCNAs) [@mermel2011gistic2].
 
-```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
+```{R, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 # Download GISTIC results
 lastAnalyseDate <- getFirehoseAnalyzeDates(1)
 gistic <- getFirehoseData("GBM",gistic2_Date = lastAnalyseDate)
 
 # get GISTIC results
 gistic.allbygene <- getData(gistic,type = "GISTIC", CN = "All")
-datatable(gistic.allbygene[1:50,],
+gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
+```
+
+```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
+data(GBMGistic)
+datatable(gistic.allbygene,
               filter = 'top',
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)
-gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
-datatable(gistic.thresholedbygene[1:50,],
+datatable(gistic.thresholedbygene,
               filter = 'top',
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)
 ```
 
-```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
-detach("package:RTCGAToolbox", unload=TRUE)
-R.utils::gcDLLs() 
-```
 
 ## Genomic analysis
 
@@ -496,19 +647,6 @@ The only CNV platform available for GBM in TCGA is
 queried for CNV SNP6 level 3 data for 20 primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
 in a rse objects (RangedSummarizedExperiment).
-
-```{r results='hide', message=FALSE, warning=FALSE, include=FALSE}
-library(TCGAbiolinks)
-# Select common CN technology available for GBM and LGG
-#############################
-## CNV data pre-processing ##
-#############################
-query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
-                            data.category = "Copy number variation",
-                            legacy = TRUE,
-                            file.type = "nocnv_hg19.seg",
-                            sample.type = c("Primary solid Tumor"))
-```
 
 ```{r results='hide', eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(TCGAbiolinks)
@@ -718,7 +856,7 @@ save(mut,file ="maf_mutect2_LGG_GBM.rda")
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(ComplexHeatmap)
 # recovering data from TCGAWorkflowData package.
-data(maf_mutect2_LGG_GBM)
+data(mafMutect2LGGGBM)
 
 # Filtering mutations in gliomas
 EA_pathways <- TCGAbiolinks:::listEA_pathways
@@ -728,97 +866,17 @@ Glioma_signaling_genes <- unlist(strsplit(as.character(Glioma_signaling$Molecule
 
 mut <- mut[mut$Hugo_Symbol %in% Glioma_signaling_genes,]
 
-samples <- unique(mut$Tumor_Sample_Barcode)
-genes <- unique(mut$Hugo_Symbol)
-mat <- matrix(0,length(genes),length(samples))
-colnames(mat) <- samples
-rownames(mat) <- genes
-
-pb <- txtProgressBar(min = 0, max = nrow(mat), style = 3)
-
-for (i in 1:nrow(mat)) {
-    curGene <- rownames(mat)[i]
-    setTxtProgressBar(pb, i)
-    for (j in 1:ncol(mat)) {
-        curSample <- colnames(mat)[j]
-
-        if (length(intersect(mut$Tumor_Sample_Barcode, curSample))==1){
-            mat1 <- mut[mut$Tumor_Sample_Barcode == curSample,]
-            if (length(intersect(mat1$Hugo_Symbol, curGene))==1){
-                mat3 <- mat1[mat1$Hugo_Symbol == curGene,]
-                mat[curGene,curSample]<- as.character(mat3$Variant_Type)[1]
-            }
-        }
-    }
-}
-close(pb)
-
-mat[mat == 0] <- ""
-colnames(mat) <- substr(colnames(mat),1,12)
-
-mat[is.na(mat)] = ""
-```
-```{r, echo=TRUE, message=FALSE, warning=FALSE}
-mat[1:3, 1:3]
-
-alter_fun = list(
-    background = function(x, y, w, h) {
-        grid.rect(x, y, w-unit(0.5, "mm"), h-unit(0.5, "mm"), gp = gpar(fill = "#CCCCCC", col = NA))
-    },
-    SNP = function(x, y, w, h) {
-        grid.rect(x, y, w-unit(0.5, "mm"), h-unit(0.5, "mm"), gp = gpar(fill = "blue", col = NA))
-    },
-    DEL = function(x, y, w, h) {
-        grid.rect(x, y, w-unit(0.5, "mm"), h-unit(0.5, "mm"), gp = gpar(fill = "red", col = NA))
-    },
-    INS = function(x, y, w, h) {
-        grid.rect(x, y, w-unit(0.5, "mm"), h*0.33, gp = gpar(fill = "#008000", col = NA))
-    }
-)
-
-col = c("INS" = "#008000", "DEL" = "red", "SNP" = "blue")
-
 clin.gbm <- GDCquery_clinic("TCGA-GBM", "Clinical")
 clin.lgg <- GDCquery_clinic("TCGA-LGG", "Clinical")
 clinical <- plyr::rbind.fill(clin.lgg,clin.gbm)
-annotation <- clinical[match(colnames(mat),clinical$bcr_patient_barcode),
-                      c("disease","vital_status","ethnicity")]
-annotation <- HeatmapAnnotation(annotation_height = rep(unit(0.3, "cm"),ncol(annotation)),
-                                df = annotation,
-                                col = list(disease = c("LGG"="green",
-				                       "GBM"="orange"),
-                                           vital_status = c("alive"="blue",
-					                    "dead"="red",
-					                    "not reported"="grey"),
-					   ethnicity = c("hispanic or latino"="purple",
-					                 "not hispanic or latino"="black",
-							 "not reported" = "grey")),
-                                annotation_legend_param = list(title_gp = gpar(fontsize = 8, fontface = "bold"),
-                                                               labels_gp = gpar(fontsize = 8), # size labels
-                                                               grid_height = unit(8, "mm")))
-
-png("LGG_GBM_oncoprint.png",width = 800,height = 1000)
-p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
-          remove_empty_columns = FALSE,
-          column_order = NULL, # Do not sort the columns
-          alter_fun = alter_fun, col = col,
-          row_names_gp = gpar(fontsize = 8),  # set size for row names
-          pct_gp = gpar(fontsize = 8), # set size for percentage labels
-          axis_gp = gpar(fontsize = 8),# size of axis
-          column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-          column_title_gp = gpar(fontsize = 8),
-          pct_digits = 2,
-          row_barplot_width = unit(4, "cm"), #size barplot
-          bottom_annotation = annotation,
-          heatmap_legend_param = list(title = "Mutations", at = c("DEL", "INS", "SNP"),
-                                      labels = c("DEL", "INS", "SNP"),
-                                      title_gp = gpar(fontsize = 8, fontface = "bold"),
-                                      labels_gp = gpar(fontsize = 8), # size labels
-                                      grid_height = unit(8, "mm")
-          )
-)
-draw(p, annotation_legend_side =  "bottom")
-dev.off()
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+TCGAvisualize_oncoprint(mut = mut,
+                        gene = Glioma_signaling_genes,
+                        filename = "LGG_GBM_oncoprint.png",
+                        annotation = clinical[, c("bcr_patient_barcode","disease","vital_status","ethnicity")],
+                        annotation.position = "bottom",
+                        rm.empty.columns = FALSE)
 ```
 
 ![Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
@@ -838,21 +896,25 @@ from TCGA that are identified in at least two tumor samples) in LGG.
 Circos plot can illustrate molecular alterations genome-wide or only in
 one or more selected chromosomes. 
 
+```{r results='hide', eval = FALSE, echo=TRUE, message=FALSE,warning=FALSE}
+LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+```
+
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 ###############################################
 ## Genomic aberration overview - Circos plot ## 
 ###############################################
 # Retrieve curated mutations for selected cancer (e.g. "LGG") 
-mut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
+data(mafMutect2LGGGBM)
 # Select only potentially damaging mutations
-mut <- mut[mut$Variant_Classification %in% c("Missense_Mutation",
+LGGmut <- LGGmut[LGGmut$Variant_Classification %in% c("Missense_Mutation",
                                              "Nonsense_Mutation",
                                              "Nonstop_Mutation",
                                              "Frame_Shift_Del",
                                              "Frame_Shift_Ins"),]
 # Select recurrent mutations (identified in at least two samples)
-mut.id <- paste0(mut$Chromosome,":",mut$Start_Position,"-",mut$End_Position,"|",mut$Reference_Allele)
-mut <- cbind(mut.id, mut)
+mut.id <- paste0(LGGmut$Chromosome,":",LGGmut$Start_Position,"-",LGGmut$End_Position,"|",LGGmut$Reference_Allele)
+mut <- cbind(mut.id, LGGmut)
 numSamples <- table(mut.id)
 s.mut <- names(which(numSamples >= 2))
 # Prepare selected mutations data for circos plot
@@ -976,10 +1038,6 @@ legend(0.25, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, col=c("firebrick
 legend(0, 0.2, bty="n", y.intersp=1, names(colors), pch=16, col=colors, title="Mutations", text.font=1, cex=0.4, title.adj=0)
 ```
 
-```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
-detach("package:gaia", unload=TRUE)
-R.utils::gcDLLs() 
-```
 
 ## Transcriptomic analysis
 
@@ -1252,6 +1310,17 @@ expressed genes.
 
 We start this analysis by inferring one gene set for the LGG data.
 
+```{R, eval=FALSE, include=TRUE}
+### read biogrid info (available in TCGAWorkflowData as "biogrid")
+### Check last version in https://thebiogrid.org/download.php 
+file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.146/BIOGRID-ALL-3.4.146.tab2.zip"
+if(!file.exists(gsub("zip","txt",basename(file)))){
+  downloader::download(file,basename(file))
+  unzip(basename(file),junkpaths =TRUE)
+}
+
+tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
+```
 
 ```{R, eval=TRUE, include=TRUE}
 ### plot details (colors & symbols)
@@ -1262,19 +1331,11 @@ library(minet)
 library(c3net)
 
 ### deferentially identified genes using TCGAbiolinks
-names.genes.de <- rownames(dataDEGs)
+# we will use only a subset (first 50 genes) of it to make the example faster
+names.genes.de <- rownames(dataDEGs)[1:50]
 
-### read biogrid info
-### Check last version in https://thebiogrid.org/download.php 
-file <- "http://thebiogrid.org/downloads/archives/Release%20Archive/BIOGRID-3.4.146/BIOGRID-ALL-3.4.146.tab2.zip"
-if(!file.exists(gsub("zip","txt",basename(file)))){
-  downloader::download(file,basename(file))
-  unzip(basename(file),junkpaths =TRUE)
-}
-
-tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)), header=TRUE, sep="\t", stringsAsFactors=FALSE)
-
-net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+data(biogrid)
+net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 
 mydata <- dataFiltLGG[names.genes.de, ]
 
@@ -1314,14 +1375,6 @@ corresponding area under curve (AUC) are presented. It can be observed
 that CLR and MRNET perform best when comparing the inferred network with
 known interactions from the BioGrid database.
 
-
-```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
-detach("package:minet", unload=TRUE)
-detach("package:c3net", unload=TRUE)
-detach("package:pathview", unload=TRUE)
-detach("package:clusterProfiler", unload=TRUE)
-R.utils::gcDLLs() 
-```
 
 ## Epigenetic analysis
 
@@ -1387,8 +1440,8 @@ the sample information matrix of the *SummarizedExperiment* object
 # Obtaining DNA methylation
 #----------------------------
 # Samples
-lgg.samples <- matched_met_exp("TCGA-LGG", n = 10)
-gbm.samples <- matched_met_exp("TCGA-GBM", n = 10)
+lgg.samples <- matchedMetExp("TCGA-LGG", n = 10)
+gbm.samples <- matchedMetExp("TCGA-GBM", n = 10)
 samples <- c(lgg.samples,gbm.samples)
 
 #-----------------------------------
@@ -1407,11 +1460,11 @@ met <- GDCprepare(query, save = FALSE)
 # We will use only chr9 to make the example faster
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
 # This data is avaliable in the package
-save("met.20.samples.GBM.LGG.chr9.rda")
+save(met, file = "met20SamplesGBMLGGchr9.rda")
 ```
 
 ```{r echo=TRUE, message=FALSE,warning=FALSE}
-data("met.20.samples.GBM.LGG.chr9")
+data(met20SamplesGBMLGGchr9)
 #----------------------------
 # Mean methylation
 #----------------------------
@@ -1626,12 +1679,6 @@ alignment <- viewAlignments(analysis.jaspar)
 print(alignment[[1]])
 ```
 
-```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
-detach("package:motifStack", unload=TRUE)
-detach("package:MotIV", unload=TRUE)
-detach("package:rGADEM", unload=TRUE)
-R.utils::gcDLLs() 
-```
 
 ## Integrative (Epigenomic \& Transcriptomic) analysis
 
@@ -1775,7 +1822,7 @@ processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
 
-```{r results='hide', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='hide', eval=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(AnnotationHub)
 library(pbapply)
@@ -1791,7 +1838,8 @@ bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "conso
 
 # Get chip-seq data
 histone.marks <- pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
-names(histone.marks) <- names(bpChipEpi_brain)
+names(histone.marks) <- names(bpChipEpi_brain) 
+# OBS: histone.marks is available in TCGAWorkflowData package
 ```
 
 
@@ -1818,31 +1866,13 @@ hypermethylated regions, (listing below). The
 enrichment heatmap and the average profile of peaks binding to those
 regions.
 
-```{R, eval=FALSE, include=TRUE}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(SummarizedExperiment)
 library(ggplot2)
 library(AnnotationHub)
 
-# Create a GR object based on the hypo/hypermethylated probes.
-probes <- GenomeInfoDb::keepStandardChromosomes(rowRanges(met)[values(met)[,"status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"] %in% c("Hypermethylated","Hypomethylated"),])
-# Defining a window of 3kbp - 3kbp_probe_3kbp
-probes@ranges <- IRanges(start = c(probes@ranges@start - 3000), end = c(probes@ranges@start + 3000))
-
-### Profile of ChIP peaks binding to TSS regions
-# First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
-# prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
-# Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pblapply(histone.marks, function(x) {
-    getTagMatrix(GenomeInfoDb::keepStandardChromosomes(x), windows = probes, weightCol = "score")
-})
-names(tagMatrixList) <- basename(bpChipEpi_brain$title)
-names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
-names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
-```
-
-```{r results='hide', echo=FALSE, message=FALSE,warning=FALSE}
-library(GenomeInfoDb)
+data("histoneMarks")
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- keepStandardChromosomes(rowRanges(met)[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
@@ -1852,13 +1882,12 @@ ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start
 # First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
 # prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
 # Then align the peaks that are mapping to these regions, and generate the tagMatrix.
-tagMatrixList <- pblapply(histone.marks, function(x) {
+tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
     getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
 names(tagMatrixList) <- basename(bpChipEpi_brain$title)
 names(tagMatrixList) <- gsub(".narrowPeak.gz","",names(tagMatrixList)) # remove file type from name
 names(tagMatrixList) <- gsub("E068-","",names(tagMatrixList)) # remove file type from name
-
 ```
 
 To plot the enrichment heatmap use the function `tagHeatmap`
@@ -1983,8 +2012,8 @@ expression data. This samples are the same used in the previous steps.
 #----------- 8.3 Identification of Regulatory Enhancers   -------
 library(TCGAbiolinks)
 # Samples: primary solid tumor w/ DNA methylation and gene expression
-lgg.samples <- matched_met_exp("TCGA-LGG", n = 10)
-gbm.samples <- matched_met_exp("TCGA-GBM", n = 10)
+lgg.samples <- matchedMetExp("TCGA-LGG", n = 10)
+gbm.samples <- matchedMetExp("TCGA-GBM", n = 10)
 samples <- c(lgg.samples,gbm.samples)
 
 #-----------------------------------
@@ -2038,7 +2067,7 @@ geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
 probe <- get.feature.probe()
 
 # Recover the data created in the last step
-data(elmer.example)
+data(elmerExample)
 
 # create mee object, use @ to access the matrices inside the object
 mee <- fetch.mee(meth = met.elmer, 
@@ -2220,4 +2249,75 @@ dev.off()
 ```
 ![](TF.png)
 
+
+
+# Conclusion
+
+This workflow outlines how one can use specific Bioconductor packages
+for the analysis of cancer genomics and epigenomics data derived from
+the TCGA. In addition, we highlight the importance of using ENCODE and
+Roadmap data to inform on the biology of the non-coding elements defined
+by functional roles in gene regulation. We introduced
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) and
+[RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
+Bioconductor packages in order to illustrate how one can acquire TCGA
+specific data, followed by key steps for genomics analysis using
+[GAIA](http://bioconductor.org/packages/gaia/) package, for
+transcriptomic analysis using
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/), 
+[pathview](http://bioconductor.org/packages/pathview/) packages and for
+DNA methylation analysis using
+[TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) package.
+An inference of gene regulatory networks was also introduced by
+[MINET](http://bioconductor.org/packages/minet/) package. Finally, we
+introduced Bioconductor packages
+[AnnotationHub](http://bioconductor.org/packages/AnnotationHub/),
+[ChIPSeeker](http://bioconductor.org/packages/ChIPseeker/),
+[ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/), and
+[ELMER](http://bioconductor.org/packages/ELMER/) to illustrate how one
+can acquire ENCODE/Roadmap data and integrate these data with the
+results obtained from analyzing TCGA data to identify and characterize
+candidate regulatory enhancers associated with cancer.
+
+
+```{r}
+pander::pander(sessionInfo(), compact = FALSE)
+```
+
+# Author contributions {#author-contributions .unnumbered}
+
+HN conceived the study. HN, MC and GB provided direction on the design
+of the Transcriptomics, Genomics, master regulatory networks and DNA
+methylation workflows. TCS developed and tested sections "Experimental
+data", "DNA methylation analysis", "Motif analysis" and "Integrative
+analysis". AC developed and tested section "Transcriptomic analysis". CO
+developed and tested the section "Inference of gene regulatory
+networks". FDA developed and tested section "Genomic analysis". TCS, AC,
+CO, and FDA prepared the first draft of the manuscript. All authors were
+involved in the revision of the draft manuscript and have agreed to the
+final content. Also, AC, TS, CO, MC, GB and HN are authors of the
+TCGAbiolinks package and MC is author of the GAIA package.
+
+# Competing interests {#competing-interests .unnumbered}
+
+No competing interests were disclosed.
+
+# Grant information {#grant-information .unnumbered}
+
+The project was supported by the São Paulo Research Foundation
+([FAPESP](http://www.fapesp.br/)) (2015/02844-7 and 2016/01389-7 to
+T.C.S. & H.N. and 2015/07925-5 to H.N.), the [BridgeIRIS
+project](http://mlg.ulb.ac.be/BridgeIRIS), funded by INNOVIRIS, Region
+de Bruxelles Capitale, Brussels, Belgium, and by GENomic profiling of
+Gastrointestinal Inflammatory-Sensitive CANcers
+([GENGISCAN](http://mlg.ulb.ac.be/GENGISCAN)), Belgian FNRS PDR
+(T100914F to G.B.). Funding for open access charge: São Paulo Research
+Foundation (FAPESP) (2015/07925-5).
+
+# Acknowledgements {#acknowledgements .unnumbered}
+
+We are grateful to all the authors of the packages used in this article.
+Also, we would like to thank The GDC Support Team for the provided help,
+which was necessary in order to update the TCGAbiolinks package to use
+GDC API.
 # References

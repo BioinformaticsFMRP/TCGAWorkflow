@@ -2,7 +2,6 @@ Package: TCGAWorkflow
 Title: TCGA Workflow Analyze cancer genomics and epigenomics data using
     Bioconductor packages
 Version: 0.99.34
-Date: 2017-02-25
 Author: Tiago Chedraoui Silva  <tiagochst@usp.br>,
     Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
     Catharina Olsen <colsen@ulb.ac.be>,
@@ -38,15 +37,7 @@ Depends:
     R (>= 3.3.0)
 Imports:
     TCGAbiolinks,
-    TCGAWorkflowData
-License: Artistic-2.0
-VignetteBuilder: knitr
-biocViews: 
-  WorkflowStep,
-  Sequencing, 
-  Epigenetics, 
-  FunctionalGenomics
-Suggests:
+    TCGAWorkflowData,
     knitr,
     knitcitations,
     ELMER,
@@ -75,6 +66,13 @@ Suggests:
     parallel,
     RTCGAToolbox,
     DT
+License: Artistic-2.0
+VignetteBuilder: knitr
+biocViews: 
+  WorkflowStep,
+  Sequencing, 
+  Epigenetics, 
+  FunctionalGenomics
 NeedsCompilation: no
 URL: https://f1000research.com/articles/5-1542/v2
 BugReports: https://github.com/BioinformaticsFMRP/TCGAWorkflow/issues
