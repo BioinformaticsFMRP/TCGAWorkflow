@@ -22,7 +22,7 @@ If columns A and row B has value 1, it means the gene A and gene B interatcs.
 names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
 tmp.biogrid <- data.frame("Official.Symbol.Interactor.A" = names.genes.de,
                           "Official.Symbol.Interactor.B" = rev(names.genes.de))
-net.biogrid.de <- get.adjacency.biogrid(tmp.biogrid, names.genes.de)
+net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 \dontrun{
   file <- paste0("http://thebiogrid.org/downloads/archives/",
                  "Release\%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip")
