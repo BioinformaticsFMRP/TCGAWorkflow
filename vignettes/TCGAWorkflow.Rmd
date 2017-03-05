@@ -729,7 +729,7 @@ markersMatrix[markersMatrix$Chromosome == "Y","Chromosome"] <- 24
 markersMatrix$Chromosome <- as.integer(markersMatrix$Chromosome)
 markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 # Removed duplicates
-markersMatrix <- markersMatrix[-which(duplicated(markerID)),]
+markersMatrix <- markersMatrix[!duplicated(markerID),]
 # Filter markersMatrix for common CNV
 markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 
@@ -870,16 +870,14 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 TCGAvisualize_oncoprint(mut = mut,
                         gene = Glioma_signaling_genes,
-                        filename = "LGG_GBM_oncoprint.png",
                         annotation = clinical[, c("bcr_patient_barcode","disease","vital_status","ethnicity")],
                         annotation.position = "bottom",
-                        rm.empty.columns = FALSE)
+                        rm.empty.columns = TRUE)
 ```
 
-![Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
+Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
   The upper barplot shows the number of these genetic mutation for each patient,
-  while the right barplot shows the number of genetic mutations for each gene. The bottom bar shows the group of each sample.\label{oncoprint}](LGG_GBM_oncoprint.png)
-
+  while the right barplot shows the number of genetic mutations for each gene. The bottom bar shows the group of each sample.
 
 **Overview of genomic alterations by circos plot**
 
@@ -2093,9 +2091,10 @@ for (j in direction){
     # Step 3.1: Get diff methylated probes |
     #--------------------------------------
     Sig.probes <- get.diff.meth(mee, 
-                                cores=cores,
-                                dir.out =dir.out,
-                                diff.dir=j,
+                                cores = cores,
+                                dir.out = dir.out,
+                                diff.dir = j,
+                                save = FALSE,
                                 pvalue = 0.1) # Please a more strigent pvalue
 
     #-------------------------------------------------------------
@@ -2116,12 +2115,7 @@ for (j in direction){
                      permu.size=10, # For significant results use 10000
                      Pe = 0.1) # For significant results use 0.001
 
-    Sig.probes.paired <- fetch.pair(pair=pair,
-                                    probeInfo = getProbeInfo(mee),
-                                    geneInfo = getGeneInfo(mee))
-    Sig.probes.paired <- read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
-                                  stringsAsFactors=FALSE)[,1]
-
+    Sig.probes.paired <- pair$Probe
 
     #-------------------------------------------------------------
     # Step 3.3: Motif enrichment analysis on the selected probes |
