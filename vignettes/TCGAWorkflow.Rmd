@@ -1114,12 +1114,12 @@ depth): global-scaling and full-quantile normalization
 data("LGGIllumina_HiSeq")
 data("GBMIllumina_HiSeq")
 
-dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp[1:50,],
+dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp[1:100,],
                                       cor.cut = 0.6,    
                                       datatype = "raw_count",
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
-dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp[1:50,],
+dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp[1:100,],
                                           cor.cut = 0.6, 
                                           datatype = "raw_count",
                                           filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
@@ -2119,8 +2119,8 @@ for (j in direction){
     Sig.probes.paired <- fetch.pair(pair=pair,
                                     probeInfo = getProbeInfo(mee),
                                     geneInfo = getGeneInfo(mee))
-    Sig.probes.paired <-read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
-                                 stringsAsFactors=FALSE)[,1]
+    Sig.probes.paired <- read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
+                                  stringsAsFactors=FALSE)[,1]
 
 
     #-------------------------------------------------------------
