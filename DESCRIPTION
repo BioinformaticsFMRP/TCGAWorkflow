@@ -52,8 +52,6 @@ Imports:
     c3net,
     biomaRt,
     pathview,
-    BSgenome.Hsapiens.UCSC.hg19,
-    MotifDb,
     MotIV,
     rGADEM,
     motifStack,
