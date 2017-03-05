@@ -1817,12 +1817,14 @@ and narrowPeak is selecting the type of file. The data downloaded is a
 processed data from an integrative Analysis of 111 reference human
 epigenomes [@kundaje2015integrative].
 
-
-```{r results='hide', eval=FALSE, echo=TRUE, message=FALSE,warning=FALSE}
+```{r results='hide', eval=TRUE, echo=TRUE, message=FALSE,warning=FALSE}
 library(ChIPseeker)
 library(AnnotationHub)
 library(pbapply)
 library(ggplot2)
+```
+
+```{r results='hide', eval=FALSE, echo=TRUE, message=FALSE,warning=FALSE}
 #------------------ Working with ChipSeq data ---------------
 # Step 1: download histone marks for a brain and non-brain samples.
 #------------------------------------------------------------
@@ -1831,9 +1833,6 @@ ah = AnnotationHub()
 
 # Searching for brain consolidated epigenomes in the roadmap database
 bpChipEpi_brain <- query(ah , c("EpigenomeRoadMap", "narrowPeak", "chip", "consolidated","brain","E068"))
-```
-
-```{r results='hide', eval=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
 # Get chip-seq data
 histone.marks <- pblapply(names(bpChipEpi_brain), function(x) {ah[[x]]})
 names(histone.marks) <- names(bpChipEpi_brain) 
