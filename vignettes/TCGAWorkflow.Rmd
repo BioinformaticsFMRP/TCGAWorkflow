@@ -27,7 +27,7 @@ knitr::opts_chunk$set(message = FALSE,
                       error = FALSE, 
                       tidy = FALSE,
                       fig.align="center", 
-                      dpi = 300, 
+                      dpi = 150, 
                       cache = FALSE,
                       progress=FALSE, 
                       quite = TRUE)
@@ -43,11 +43,6 @@ suppressPackageStartupMessages({
 })
 ```
 
-```{R, eval=TRUE, message=FALSE, warning=FALSE, include=FALSE}
-library(TCGAWorkflowData)
-library(DT)
-library(TCGAbiolinks)
-```
 
 
 # About
@@ -84,6 +79,10 @@ use all the data available.
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 library(TCGAWorkflowData)
 library(DT)
+```
+
+```{R, eval=TRUE, message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAbiolinks)
 ```
 
 # Abstract
@@ -514,7 +513,7 @@ LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 data(mafMutect2LGGGBM)
-datatable(LGGmut[1:20,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+datatable(LGGmut[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
 Finally, the Cancer Genome Atlas (TCGA) Research Network has reported
@@ -609,15 +608,14 @@ gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 data(GBMGistic)
 datatable(gistic.allbygene,
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 datatable(gistic.thresholedbygene,
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
-
 
 ## Genomic analysis
 
@@ -1329,9 +1327,10 @@ net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 mydata <- dataFiltLGG[names.genes.de, ]
 
 ### infer networks
-net.aracne <- minet(t(mydata), method = "aracne")
-net.mrnet <- minet(t(mydata))
-net.clr <- minet(t(mydata), method = "clr")
+t.mydata <- t(mydata)
+net.aracne <- minet(t.mydata, method = "aracne")
+net.mrnet <- minet(t.mydata)
+net.clr <- minet(t.mydata, method = "clr")
 net.c3net <- c3net(mydata)
 
 ### validate compared to biogrid network

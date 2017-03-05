@@ -98,8 +98,8 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 #'   net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 #' }
 getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL){
-  it.a <- "Official.Symbol.Interactor.A"
-  it.b <- "Official.Symbol.Interactor.B"
+  it.a <- grep("Symbol",colnames(tmp.biogrid),value = T)[1]
+  it.b <- grep("Symbol",colnames(tmp.biogrid),value = T)[2]
   
   if(is.null(names.genes)){
     names.genes <- sort(union(unique(tmp.biogrid[,it.a]), unique(tmp.biogrid[,it.b])))
@@ -107,7 +107,7 @@ getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL){
   } else {
     ind.A <- which(tmp.biogrid[,it.a] %in% names.genes)
     ind.B <- which(tmp.biogrid[,it.b] %in% names.genes)
-    ind <- intersect(ind.A, ind.B)
+    ind <- intersect(ind.A,ind.B)
   }
   
   mat.biogrid <- matrix(0, nrow=length(names.genes), 
@@ -153,7 +153,6 @@ matchedMetExp <- function(project, n = NULL){
                   sample.type = c("Primary solid Tumor"),
                   legacy = TRUE)
   exp.tp <-  exp$results[[1]]$cases
-  print(exp.tp[1:10])
   # Get patients with samples in both platforms
   patients <- unique(substr(exp.tp,1,15)[substr(exp.tp,1,12) %in% substr(met450k.tp,1,12)] )
   if(!is.null(n)) patients <- patients[1:n] # get only n samples
