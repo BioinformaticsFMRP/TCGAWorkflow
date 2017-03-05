@@ -1461,7 +1461,7 @@ data(met20SamplesGBMLGGchr9)
 
 # remove probes with NA (similar to na.omit)
 met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
-met <- met[1:1000,]
+met <- met[1:3000,]
 TCGAvisualize_meanMethylation(met,
                               groupCol = "disease_type",
                               group.legend  = "Groups",
