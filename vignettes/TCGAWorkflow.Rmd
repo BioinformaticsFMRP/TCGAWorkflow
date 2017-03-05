@@ -1467,7 +1467,7 @@ data(met20SamplesGBMLGGchr9)
 
 # remove probes with NA (similar to na.omit)
 met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
-
+met <- met[1:1000,]
 TCGAvisualize_meanMethylation(met,
                               groupCol = "disease_type",
                               group.legend  = "Groups",
@@ -1556,13 +1556,11 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 status.col <- "status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"
 sig.met <- met[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),]
 
-# To speed up the example, let take a look on the first 100 probes
-sig.met.100 <- sig.met[1:100,]
 
 # top annotation, which sampples are LGG and GBM
 # We will add clinical data as annotation of the samples
 # we will sort the clinical data to have the same order of the DNA methylation matrix
-clinical.order <- clinical[match(substr(colnames(sig.met.100),1,12),clinical$bcr_patient_barcode),]
+clinical.order <- clinical[match(substr(colnames(sig.met),1,12),clinical$bcr_patient_barcode),]
 ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status","race")],
                        col = list(disease = c("LGG" = "grey", "GBM" = "black"),
                                   gender = c("male" = "blue","female" = "pink")))
@@ -1571,13 +1569,13 @@ ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status",
 # For exmaple: status.gbm.lgg Hypomethyated means that the
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
-ra = rowAnnotation(df = values(sig.met.100)[status.col],
+ra = rowAnnotation(df = values(sig.met0)[status.col],
                    col = list("status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma" = 
                                 c("Hypomethylated" = "orange",
                                   "Hypermethylated" = "darkgreen")),
                    width = unit(1, "cm"))
 
-heatmap  <- Heatmap(assay(sig.met.100),
+heatmap  <- Heatmap(assay(sig.met),
                     name = "DNA methylation",
                     col = matlab::jet.colors(200),
                     show_row_names = FALSE,
