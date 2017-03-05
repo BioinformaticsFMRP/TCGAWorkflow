@@ -34,12 +34,11 @@ Description:
     cancer. 
     To illustrate our workflow, we analyzed two types of brain tumors: low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM). 
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.4.0)
 Imports:
     TCGAbiolinks,
     TCGAWorkflowData,
     knitr,
-    knitcitations,
     ELMER,
     graphics,
     AnnotationHub,

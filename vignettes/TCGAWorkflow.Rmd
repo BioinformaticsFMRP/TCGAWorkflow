@@ -409,7 +409,7 @@ data(GBMIllumina_HiSeq)
 
 # get expression matrix
 data <- assay(gbm.exp)
-datatable(data[1:100,], 
+datatable(data[1:10,], 
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = TRUE)
 
@@ -850,7 +850,7 @@ bottom is highlighted in the figure .
 LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 GBMmut <- GDCquery_Maf(tumor = "GBM", pipelines = "mutect2")
 mut <- plyr::rbind.fill(LGGmut, GBMmut)
-save(mut,file ="maf_mutect2_LGG_GBM.rda")
+save(mut,file ="mafMutect2LGGGBM.rda")
 ```
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -1114,12 +1114,12 @@ depth): global-scaling and full-quantile normalization
 data("LGGIllumina_HiSeq")
 data("GBMIllumina_HiSeq")
 
-dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp[1:100,],
+dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp[1:50,],
                                       cor.cut = 0.6,    
                                       datatype = "raw_count",
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
-dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp[1:100,],
+dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp[1:50,],
                                           cor.cut = 0.6, 
                                           datatype = "raw_count",
                                           filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
@@ -1189,8 +1189,6 @@ significant canonical pathways identified in the DEGs are ranked
 according to their p-value corrected FDR (-Log10) (colored bars) and the
 ratio of list genes found in each pathway over the total number of genes
 in that pathway (ratio, red line).
-
-
 
 
 ### PEA: Pathways enrichment analysis
@@ -2059,7 +2057,7 @@ probe <- get.feature.probe()
 data(elmerExample)
 
 # create mee object, use @ to access the matrices inside the object
-mee <- fetch.mee(meth = met.elmer[1:1000,], 
+mee <- fetch.mee(meth = met.elmer[1:800,], 
                  exp = exp.elmer, 
                  TCGA = TRUE, 
                  probeInfo = probe, 
