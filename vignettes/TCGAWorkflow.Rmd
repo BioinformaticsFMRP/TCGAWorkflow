@@ -1464,20 +1464,16 @@ met <- met[1:3000,]
 TCGAvisualize_meanMethylation(met,
                               groupCol = "disease_type",
                               group.legend  = "Groups",
-                              filename = "mean_lgg_gbm.png",
+                              filename = NULL,
                               print.pvalue = TRUE)
 ```
 
-The figure below illustrates a mean DNA methylation plot for each
+The figure above illustrates a mean DNA methylation plot for each
 sample in the GBM group (140 samples) and a mean DNA methylation for
 each sample in the LGG group. Genome-wide view of the data highlights a
 difference between the groups of tumors.
 
-![Boxplot of mean DNA methylation of each sample (black
-dots)](mean_lgg_gbm.png)
-
-
-### Searching for differentially methylated CpG sites {#searching-for-differentially-methylated-cpg-sites .unnumbered}
+### Searching for differentially methylated CpG sites
 
 The next step is to define differentially methylated CpG sites between
 the two groups. This can be done using the *TCGAanalyze\_DMR* function
@@ -1510,7 +1506,7 @@ met <- TCGAanalyze_DMR(met,
                        save = FALSE,
                        legend = "State",
                        plot.filename = "LGG_GBM_metvolcano.png",
-                       cores = 1 # if set to 1 there will be a progress bar
+                       cores =  parallel::detectCores()/2 # if set to 1 there will be a progress bar
 )
 ```
 
