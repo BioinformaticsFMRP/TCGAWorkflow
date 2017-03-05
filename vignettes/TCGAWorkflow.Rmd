@@ -872,7 +872,7 @@ TCGAvisualize_oncoprint(mut = mut,
                         gene = Glioma_signaling_genes,
                         annotation = clinical[, c("bcr_patient_barcode","disease","vital_status","ethnicity")],
                         annotation.position = "bottom",
-                        rm.empty.columns = TRUE)
+                        rm.empty.columns = FALSE)
 ```
 
 Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
