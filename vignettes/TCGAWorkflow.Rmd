@@ -733,7 +733,7 @@ markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 
 file <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/CNV.hg19.bypos.111213.txt"
 if(!file.exists(basename(file))) downloader::download(file, basename(file))
-commonCNV <- readr::read_tsv(basename(file), progress = TRUE)
+commonCNV <- readr::read_tsv(basename(file), progress = FALSE)
 commonID <- paste(commonCNV$Chromosome,commonCNV$Start, sep = ":")
 markersMatrix_fil <- markersMatrix[!markerID %in% commonID,]
 
@@ -769,7 +769,6 @@ RecCNV[RecCNV[,"q-value"] == as.numeric(minval),]
 
 gaiaCNVplot(RecCNV,threshold)
 save(results, RecCNV, threshold, file = paste0(cancer,"_CNV_results.rda"))
-message(paste0("Results saved as:", cancer,"_CNV_results.rda"))
 ```
 
 Recurrent amplifications and deletions were identified for GBM, and
@@ -787,11 +786,12 @@ or deleted. Using biomaRt we retrieved the genomic ranges of all human
 genes and we compared them with significant aberrant regions to select
 full length genes.
 
-```{r , echo=TRUE, message=FALSE,warning=FALSE, include=TRUE}
+```{r , eval = TRUE, message=FALSE,warning=FALSE, include=FALSE}
 library(GenomicRanges)
-##############################
-## Recurrent CNV annotation ## 
-##############################
+```
+
+```{r , eval = FALSE, message=FALSE,warning=FALSE, include=TRUE}
+library(GenomicRanges)
 # Get gene information from GENCODE using biomart
 genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = "hg19") 
 genes <- genes[genes$external_gene_id != "" & genes$chromosome_name %in% c(1:22,"X","Y"),]
@@ -803,6 +803,16 @@ genes <- genes[order(genes$chromosome_name),]
 genes <- genes[,c("external_gene_id", "chromosome_name", "start_position","end_position")]
 colnames(genes) <- c("GeneSymbol","Chr","Start","End")
 genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
+save(genes_GR,file = "genes_GR.rda", compress = "xz")
+```
+
+
+```{r , echo=TRUE, message=FALSE,warning=FALSE, include=TRUE}
+##############################
+## Recurrent CNV annotation ## 
+##############################
+# Get gene information from GENCODE using biomart
+data(genes_GR) # downloaded in the previous step (available in TCGAWorkflowData)
 
 load(paste0(cancer,"_CNV_results.rda"))
 sCNV <- RecCNV[RecCNV[,"q-value"] <= threshold,c(1:4,6)]
