@@ -803,7 +803,7 @@ genes <- genes[order(genes$chromosome_name),]
 genes <- genes[,c("external_gene_id", "chromosome_name", "start_position","end_position")]
 colnames(genes) <- c("GeneSymbol","Chr","Start","End")
 genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
-save(genes_GR,file = "genes_GR.rda", compress = "xz")
+save(genes_GR,genes,file = "genes_GR.rda", compress = "xz")
 ```
 
 
