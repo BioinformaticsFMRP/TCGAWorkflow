@@ -98,8 +98,8 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 #'   net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 #' }
 getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL){
-  it.a <- grep("Symbol",colnames(tmp.biogrid),value = T)[1]
-  it.b <- grep("Symbol",colnames(tmp.biogrid),value = T)[2]
+  it.a <- grep("Symbol",colnames(tmp.biogrid),value = TRUE)[1]
+  it.b <- grep("Symbol",colnames(tmp.biogrid),value = TRUE)[2]
   
   if(is.null(names.genes)){
     names.genes <- sort(union(unique(tmp.biogrid[,it.a]), unique(tmp.biogrid[,it.b])))
