@@ -742,15 +742,16 @@ set.seed(200)
 markers_obj <- load_markers(as.data.frame(markersMatrix_fil))
 nbsamples <- length(unique(cnvMatrix$Sample))
 cnv_obj <- load_cnv(cnvMatrix, markers_obj, nbsamples)
-results <- runGAIA(cnv_obj,
-                   markers_obj,
-                   output_file_name = paste0("GAIA_",cancer,"_flt.txt"),
-                   aberrations = -1,  # -1 to all aberrations
-                   chromosomes = 9, # -1 to all chromosomes
-                   approximation = TRUE, # Set to TRUE to speed up the time requirements
-                   num_iterations = 5000, # Reduced to speed up the time requirements
-                   threshold = 0.25)
-
+suppressWarnings({
+  results <- runGAIA(cnv_obj,
+                     markers_obj,
+                     output_file_name = paste0("GAIA_",cancer,"_flt.txt"),
+                     aberrations = -1,  # -1 to all aberrations
+                     chromosomes = 9, # -1 to all chromosomes
+                     approximation = TRUE, # Set to TRUE to speed up the time requirements
+                     num_iterations = 5000, # Reduced to speed up the time requirements
+                     threshold = 0.25)
+})
 # Set q-value threshold
 # Use a smalled value for your analysis. We set this as high values
 # due to the small number of samples which did not reproduced
