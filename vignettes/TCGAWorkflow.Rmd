@@ -1684,7 +1684,7 @@ sections with important epigenomic data derived from both the
 [ENCODE](http://www.encodeproject.org/) and
 [Roadmap](http://www.roadmapepigenomics.org/).
 
-### Integration of DNA methylation & gene expression data {#sssec:starburst .unnumbered}
+### Integration of DNA methylation & gene expression data 
 
 After finding differentially methylated CpG sites, one might ask whether
 nearby genes also undergo a change in expression either an increase or a
@@ -1717,8 +1717,8 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      group1 = "Glioblastoma Multiforme", 
                                      group2 = "Brain Lower Grade Glioma", 
                                      filename = "starburst.png",
-                                     met.p.cut = 10^-1,
-                                     exp.p.cut = 10^-1,
+                                     met.p.cut = 10^-2,
+                                     exp.p.cut = 10^-2,
                                      diffmean.cut = 0.25,
                                      logFC.cut = 1,width = 15,height = 10,
                                      names = TRUE)
@@ -1739,6 +1739,10 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
 ```
 
 ![](starburst.png)
+
+Due to the time constraints, with the reduced number of samples, genes and probes,
+the result showed previously might not be very descriptive. A results with a 
+large data set can be found in [TCGAbiolinks vignette](https://bioconductor.org/packages/release/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html#tcgavisualize_starburst:_integration_of_gene_expression_and_dna_methylation_data).
 
 ### ChIP-seq analysis
 
@@ -1871,6 +1875,8 @@ ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start
 tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
     getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
+# change nanmes retrieved with the following command: basename(bpChipEpi_brain$title)
+names(tagMatrixList) <- c("H3K4me1","H3K4me3", "H3K9ac", "H3K9me3", "H3K27ac",  "H3K27me3", "H3K36me3")
 ```
 
 To plot the enrichment heatmap use the function `tagHeatmap`
