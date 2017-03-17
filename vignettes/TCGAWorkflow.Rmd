@@ -1116,12 +1116,12 @@ depth): global-scaling and full-quantile normalization
 data("LGGIllumina_HiSeq")
 data("GBMIllumina_HiSeq")
 
-dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp[1:100,],
+dataPrep_LGG <- TCGAanalyze_Preprocessing(object = lgg.exp,
                                       cor.cut = 0.6,    
                                       datatype = "raw_count",
                                       filename = "LGG_IlluminaHiSeq_RNASeqV2.png")
 
-dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp[1:100,],
+dataPrep_GBM <- TCGAanalyze_Preprocessing(object = gbm.exp,
                                           cor.cut = 0.6, 
                                           datatype = "raw_count",
                                           filename = "GBM_IlluminaHiSeq_RNASeqV2.png")
@@ -1330,7 +1330,7 @@ library(c3net)
 
 ### deferentially identified genes using TCGAbiolinks
 # we will use only a subset (first 50 genes) of it to make the example faster
-names.genes.de <- rownames(dataDEGs)
+names.genes.de <- rownames(dataDEGs)[1:50]
 
 data(biogrid)
 net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
@@ -1471,7 +1471,7 @@ data(met20SamplesGBMLGGchr9)
 
 # remove probes with NA (similar to na.omit)
 met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
-met <- met[1:3000,]
+
 TCGAvisualize_meanMethylation(met,
                               groupCol = "disease_type",
                               group.legend  = "Groups",
@@ -1717,10 +1717,11 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      group1 = "Glioblastoma Multiforme", 
                                      group2 = "Brain Lower Grade Glioma", 
                                      filename = "starburst.png",
-                                     met.p.cut = 10^-2,
+                                     met.p.cut = 0.05,
                                      exp.p.cut = 10^-2,
-                                     diffmean.cut = 0.25,
-                                     logFC.cut = 1,width = 15,height = 10,
+                                     diffmean.cut = 0.15,
+                                     logFC.cut = 1,
+                                     width = 15,height = 10,
                                      names = TRUE)
 ```
 
@@ -1731,10 +1732,11 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      group1 = "Glioblastoma Multiforme", 
                                      group2 = "Brain Lower Grade Glioma", 
                                      filename = "starburst.png",
-                                     met.p.cut = 10^-2,
+                                     met.p.cut = 0.05,
                                      exp.p.cut = 10^-2,
-                                     diffmean.cut = 0.25,
-                                     logFC.cut = 1,width = 15,height = 10,
+                                     diffmean.cut = 0.15,
+                                     logFC.cut = 1,
+                                     width = 15,height = 10,
                                      names = TRUE)
 ```
 
