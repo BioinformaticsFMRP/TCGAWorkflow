@@ -1330,7 +1330,7 @@ library(c3net)
 
 ### deferentially identified genes using TCGAbiolinks
 # we will use only a subset (first 50 genes) of it to make the example faster
-names.genes.de <- rownames(dataDEGs)[1:50]
+names.genes.de <- rownames(dataDEGs)[1:30]
 
 data(biogrid)
 net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
@@ -2063,7 +2063,7 @@ are identified is found in the
 vignette.
 
 ```{r, warning=FALSE} 
-cores <- parallel::detectCores()/2
+cores <- parallel::detectCores()
 
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
