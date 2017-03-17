@@ -2063,20 +2063,21 @@ are identified is found in the
 vignette.
 
 ```{r, warning=FALSE} 
-cores <- parallel::detectCores()
+cores <- 1 # you can use more cores if you want
 
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
 direction <- c("hyper")
 for (j in direction){
-    print(j)
+    message(j)
     dir.out <- paste0("elmer/",j)
-    dir.create(dir.out, recursive = TRUE)
+    dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
     #--------------------------------------
     # STEP 3: Analysis                     |
     #--------------------------------------
     # Step 3.1: Get diff methylated probes |
     #--------------------------------------
+    message("Get diff methylated probes")
     Sig.probes <- get.diff.meth(mee, 
                                 cores = cores,
                                 dir.out = dir.out,
@@ -2088,19 +2089,22 @@ for (j in direction){
     # Step 3.2: Identify significant probe-gene pairs            |
     #-------------------------------------------------------------
     # Collect nearby 20 genes for Sig.probes
+    message("Get nearby genes")
     nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
                               cores=cores,
+                              geneNum = 4, # defaul is 20
                               geneAnnot=getGeneInfo(mee))
 
-    pair <- get.pair(mee=mee,
-                     probes=na.omit(Sig.probes$probe),
-                     nearGenes=nearGenes,
-                     permu.dir=paste0(dir.out,"/permu"),
-                     dir.out=dir.out,
-                     cores=cores,
-                     label= j,
-                     permu.size=5, # For significant results use 10000
-                     Pe = 0.2) # For significant results use 0.001
+    message("Get anti correlated probes-genes")
+    pair <- get.pair(mee = mee,
+                     probes = na.omit(Sig.probes$probe),
+                     nearGenes = nearGenes,
+                     permu.dir = paste0(dir.out,"/permu"),
+                     dir.out = dir.out,
+                     cores = cores,
+                     label = j,
+                     permu.size = 5, # For significant results use 10000
+                     Pe = 0.5) # For significant results use 0.001
 
     Sig.probes.paired <- pair$Probe
 
@@ -2114,18 +2118,17 @@ for (j in direction){
         enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
                                              dir.out=dir.out, 
                                              # Default value for min.incidence is 10
-                                             # we set 2 because we have only a subset
+                                             # we set 6 because we have only a subset
                                              # of probes (only chr 9)
-                                             min.incidence = 2, 
+                                             min.incidence = 5, 
                                              label=j,
                                              background.probes = probe$name)
-        motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",j, ".motif.enrichment.csv"),
-                                     stringsAsFactors=FALSE)
+
         if(length(enriched.motif) > 0){
             #-------------------------------------------------------------
             # Step 3.4: Identifying regulatory TFs                        |
             #-------------------------------------------------------------
-            print("get.TFs")
+            message("get.TFs")
 
             TF <- get.TFs(mee = mee,
                           enriched.motif = enriched.motif,
