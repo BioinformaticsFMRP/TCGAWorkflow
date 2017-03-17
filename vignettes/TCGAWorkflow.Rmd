@@ -2068,75 +2068,81 @@ cores <- 1 # you can use more cores if you want
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
 direction <- c("hyper")
-for (j in direction){
-    message(j)
-    dir.out <- paste0("elmer/",j)
-    dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
-    #--------------------------------------
-    # STEP 3: Analysis                     |
-    #--------------------------------------
-    # Step 3.1: Get diff methylated probes |
-    #--------------------------------------
-    message("Get diff methylated probes")
-    Sig.probes <- get.diff.meth(mee, 
-                                cores = cores,
-                                dir.out = dir.out,
-                                diff.dir = j,
-                                save = FALSE,
-                                pvalue = 0.1) # Please a more strigent pvalue
+dir.out <- paste0("elmer/",direction)
+dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
+#--------------------------------------
+# STEP 3: Analysis                     |
+#--------------------------------------
+# Step 3.1: Get diff methylated probes |
+#--------------------------------------
+message("Get diff methylated probes")
+Sig.probes <- get.diff.meth(mee, 
+                            cores = cores,
+                            dir.out = dir.out,
+                            diff.dir = direction,
+                            save = FALSE,
+                            pvalue = 0.1) # Please a more strigent pvalue
 
+#-------------------------------------------------------------
+# Step 3.2: Identify significant probe-gene pairs            |
+#-------------------------------------------------------------
+# Collect nearby 20 genes for Sig.probes
+message("Get nearby genes")
+nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
+                          cores=cores,
+                          geneNum = 4, # defaul is 20
+                          geneAnnot=getGeneInfo(mee))
+
+message("Get anti correlated probes-genes")
+pair <- get.pair(mee = mee,
+                 probes = na.omit(Sig.probes$probe),
+                 nearGenes = nearGenes,
+                 permu.dir = paste0(dir.out,"/permu"),
+                 dir.out = dir.out,
+                 cores = cores,
+                 label = direction,
+                 permu.size = 5, # For significant results use 10000
+                 Pe = 0.5) # For significant results use 0.001
+
+Sig.probes.paired <- pair$Probe
+
+#-------------------------------------------------------------
+# Step 3.3: Motif enrichment analysis on the selected probes |
+#-------------------------------------------------------------
+if(length(Sig.probes.paired) > 0 ){
+  #-------------------------------------------------------------
+  # Step 3.3: Motif enrichment analysis on the selected probes |
+  #-------------------------------------------------------------
+  enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
+                                       dir.out=dir.out, 
+                                       # Default value for min.incidence is 10
+                                       # we set 6 because we have only a subset
+                                       # of probes (only chr 9)
+                                       min.incidence = 5, 
+                                       label=direction,
+                                       background.probes = probe$name)
+  # One of the output from the  previous function is a file with the motif, OR and Number of probes
+  # It will be used for plotting purposes
+  motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",direction, ".motif.enrichment.csv"))
+  
+  if(length(enriched.motif) > 0){
     #-------------------------------------------------------------
-    # Step 3.2: Identify significant probe-gene pairs            |
+    # Step 3.4: Identifying regulatory TFs                        |
     #-------------------------------------------------------------
-    # Collect nearby 20 genes for Sig.probes
-    message("Get nearby genes")
-    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
-                              cores=cores,
-                              geneNum = 4, # defaul is 20
-                              geneAnnot=getGeneInfo(mee))
-
-    message("Get anti correlated probes-genes")
-    pair <- get.pair(mee = mee,
-                     probes = na.omit(Sig.probes$probe),
-                     nearGenes = nearGenes,
-                     permu.dir = paste0(dir.out,"/permu"),
-                     dir.out = dir.out,
-                     cores = cores,
-                     label = j,
-                     permu.size = 5, # For significant results use 10000
-                     Pe = 0.5) # For significant results use 0.001
-
-    Sig.probes.paired <- pair$Probe
-
-    #-------------------------------------------------------------
-    # Step 3.3: Motif enrichment analysis on the selected probes |
-    #-------------------------------------------------------------
-    if(length(Sig.probes.paired) > 0 ){
-        #-------------------------------------------------------------
-        # Step 3.3: Motif enrichment analysis on the selected probes |
-        #-------------------------------------------------------------
-        enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
-                                             dir.out=dir.out, 
-                                             # Default value for min.incidence is 10
-                                             # we set 6 because we have only a subset
-                                             # of probes (only chr 9)
-                                             min.incidence = 5, 
-                                             label=j,
-                                             background.probes = probe$name)
-
-        if(length(enriched.motif) > 0){
-            #-------------------------------------------------------------
-            # Step 3.4: Identifying regulatory TFs                        |
-            #-------------------------------------------------------------
-            message("get.TFs")
-
-            TF <- get.TFs(mee = mee,
-                          enriched.motif = enriched.motif,
-                          dir.out = dir.out,
-                          cores = cores, label = j)
-            TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",j,".TFs.with.motif.pvalue.rda")))
-        }
-    }
+    message("get.TFs")
+    
+    TF <- get.TFs(mee = mee,
+                  enriched.motif = enriched.motif,
+                  dir.out = dir.out,
+                  cores = cores, 
+                  label = direction)
+    
+    # One of the output from the previous function is a file with the raking of TF,
+    # for each motif. It will be used for plotting purposes
+    TF.meth.cor <- get(load(
+      paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pvalue.rda")
+    ))
+  }
 }
 ```
 
