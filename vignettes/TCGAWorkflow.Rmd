@@ -839,14 +839,20 @@ knitr::kable(head(AmpDel_genes), caption = "Chromosome 9 recurrent deleted genes
 
 ### Visualizing multiple genomic alteration events
 
-In order to summarize, analyze and visualize MAF files multiple genomic alteration events we recommend
-using the Bioconductor package [maftools](http://bioconductor.org/packages/maftools/)
-[@mayakonda2016maftools]. The listing below shows how to download
-mutation data using *GDCquery\_maf* and visualize a summary of the data 
-and the *oncoPlot* of the top 10 mutated genes, in which the upper barplot 
-indicates the number of genetic
+In order to visualize multiple genomic alteration events we recommend
+using OncoPrint plot which is provided by Bioconductor package
+[complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)
+[@ComplexHeatmap]. The listing below shows how to download
+mutation data using *GDCquery\_maf* (line 4), then we filtered the genes
+to obtain genes with mutations found among glioma specific pathways
+(lines 6 - 12). The following steps prepared the data into a matrix to
+fit *oncoPrint* function. We defined SNPs as blue, insertions as green
+and deletions as red. The upper barplot indicates the number of genetic
 mutation per patient, while the right barplot shows the number of
-genetic mutations per gene.
+genetic mutations per gene. Also, it is possible to add annotations to
+rows or columns. For the columns, an insertion made at the top will
+remove the barplot. The final result for adding the annotation to the
+bottom is highlighted in the figure .
 
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
@@ -858,15 +864,29 @@ save(mut,file ="mafMutect2LGGGBM.rda")
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(ComplexHeatmap)
-library(maftools)
 # recovering data from TCGAWorkflowData package.
 data(mafMutect2LGGGBM)
-mut <- read.maf(maf = mut, removeSilent = TRUE, useAll = FALSE)
+
+# Filtering mutations in gliomas
+EA_pathways <- TCGAbiolinks:::listEA_pathways
+Glioma_pathways <- EA_pathways[grep("glioma", tolower(EA_pathways$Pathway)),]
+Glioma_signaling <- Glioma_pathways[Glioma_pathways$Pathway == "Glioma Signaling",]
+Glioma_signaling_genes <- unlist(strsplit(as.character(Glioma_signaling$Molecules),","))[1:10]
+
+mut <- mut[mut$Hugo_Symbol %in% Glioma_signaling_genes,]
+clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 ```
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-plotmafSummary(maf = mut, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE)
-oncoplot(maf = mut, top = 10, removeNonMutated = TRUE)
+TCGAvisualize_oncoprint(mut = mut,
+                        gene = Glioma_signaling_genes,
+                        annotation = clinical[, c("bcr_patient_barcode","disease","vital_status","ethnicity")],
+                        annotation.position = "bottom",
+                        rm.empty.columns = FALSE)
 ```
+
+Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
+  The upper barplot shows the number of these genetic mutation for each patient,
+  while the right barplot shows the number of genetic mutations for each gene. The bottom bar shows the group of each sample.
 
 **Overview of genomic alterations by circos plot**
 

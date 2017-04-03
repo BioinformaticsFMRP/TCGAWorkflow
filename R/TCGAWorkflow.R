@@ -32,5 +32,5 @@
 #' @importFrom MotIV viewAlignments motifMatch 
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom clusterProfiler bitr
-#' @import DT maftools
+#' @import DT 
 NULL
