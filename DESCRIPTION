@@ -1,7 +1,7 @@
 Package: TCGAWorkflow
 Title: TCGA Workflow Analyze cancer genomics and epigenomics data using
     Bioconductor packages
-Version: 0.99.69
+Version: 0.99.70
 Workflow: True
 Author: Tiago Chedraoui Silva  <tiagochst@usp.br>,
     Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
@@ -37,31 +37,34 @@ Description:
 Depends:
     R (>= 3.4.0)
 Imports:
-    TCGAbiolinks,
-    TCGAWorkflowData,
+    AnnotationHub,
     knitr,
     ELMER,
-    graphics,
-    AnnotationHub,
-    downloader (>= 0.4),
-    SummarizedExperiment,
-    gaia,
+    biomaRt,
+    BSgenome.Hsapiens.UCSC.hg19,
+    circlize,
+    c3net,
     ChIPseeker,
     ComplexHeatmap,
     clusterProfiler,
-    minet,
-    c3net,
-    biomaRt,
-    pathview,
-    MotIV,
-    rGADEM,
-    motifStack,
-    circlize,
-    pbapply,
+    downloader (>= 0.4),
+    gaia,
+    GenomicRanges,
     GenomeInfoDb,
     ggplot2,
     ggthemes,
+    graphics,
+    minet,
+    MotIV,
+    motifStack,
+    pathview,
+    pbapply,
     parallel,
+    rGADEM,
+    RTCGAToolbox,
+    SummarizedExperiment,
+    TCGAbiolinks,
+    TCGAWorkflowData,
     DT
 License: Artistic-2.0
 VignetteBuilder: knitr
