@@ -1,7 +1,7 @@
 Package: TCGAWorkflow
 Title: TCGA Workflow Analyze cancer genomics and epigenomics data using
     Bioconductor packages
-Version: 0.99.72
+Version: 0.99.73
 Workflow: True
 Author: Tiago Chedraoui Silva  <tiagochst@usp.br>,
     Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
@@ -35,7 +35,7 @@ Description:
     cancer. 
     To illustrate our workflow, we analyzed two types of brain tumors: low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM). 
 Depends:
-    R (>= 3.4.0)
+    R (>= 3.3.0)
 Imports:
     AnnotationHub,
     knitr,

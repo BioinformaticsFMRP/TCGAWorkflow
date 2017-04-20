@@ -1517,7 +1517,7 @@ met <- TCGAanalyze_DMR(met,
                        save = FALSE,
                        legend = "State",
                        plot.filename = "LGG_GBM_metvolcano.png",
-                       cores =  parallel::detectCores()/2 # if set to 1 there will be a progress bar
+                       cores =  1 
 )
 ```
 
@@ -2248,7 +2248,7 @@ candidate regulatory enhancers associated with cancer.
 
 
 ```{r}
-pander::pander(sessionInfo(), compact = FALSE)
+sessionInfo()
 ```
 
 # Author contributions {#author-contributions .unnumbered}
