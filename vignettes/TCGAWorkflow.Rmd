@@ -13,7 +13,7 @@ output:
         df_print: kable
         code_folding: show
 bibliography: bibliography.bib
-
+always_allow_html: yes
 vignette: >
   %\VignetteIndexEntry{'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages'}
   %\VignetteEngine{knitr::rmarkdown}

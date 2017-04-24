@@ -66,6 +66,7 @@ Imports:
     TCGAbiolinks,
     TCGAWorkflowData,
     DT
+Suggests: roxygen2 (>= 5.0.0)
 License: Artistic-2.0
 VignetteBuilder: knitr
 biocViews: 
