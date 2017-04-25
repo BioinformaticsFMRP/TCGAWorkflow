@@ -407,9 +407,8 @@ data(GBMIllumina_HiSeq)
 
 # get expression matrix
 data <- assay(gbm.exp)
-datatable(data[1:10,], 
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = TRUE)
+head(data)
+  
 
 # get genes information
 genes.info <- rowRanges(gbm.exp)
@@ -417,10 +416,7 @@ genes.info
 
 # get sample information
 sample.info <- colData(gbm.exp)
-datatable(as.data.frame(sample.info), 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
-
+head(as.data.frame(sample.info)) 
 ```
 
 The clinical data can be obtained using TCGAbiolinks through two
@@ -460,7 +456,7 @@ lgg_clin <- GDCquery_clinic(project = "TCGA-LGG", type = "Clinical")
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+head(clinical) 
 ```
 
 
@@ -475,25 +471,25 @@ GDCdownload(query)
 clinical <- GDCprepare_clinic(query, clinical.info = "patient")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+head(clinical) 
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.drug <- GDCprepare_clinic(query, clinical.info = "drug")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical.drug, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+head(clinical.drug)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.radiation <- GDCprepare_clinic(query, clinical.info = "radiation")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical.radiation, options = list(scrollX = TRUE,  keys = TRUE), rownames = FALSE)
+head(clinical.radiation)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+head(clinical.admin)
 ```
 
 Mutation information is stored in two types of Mutation Annotation
@@ -512,7 +508,7 @@ LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "mutect2")
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 data(mafMutect2LGGGBM)
-datatable(LGGmut[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+head(LGGmut)
 ```
 
 Finally, the Cancer Genome Atlas (TCGA) Research Network has reported
@@ -536,7 +532,7 @@ gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
 ```
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(gbm.subtypes[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+head(gbm.subtypes)
 ```
 
 
@@ -606,14 +602,8 @@ gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
 
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 data(GBMGistic)
-datatable(gistic.allbygene,
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
-datatable(gistic.thresholedbygene,
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+head(gistic.allbygene)
+head(gistic.thresholedbygene)
 ```
 
 ## Genomic analysis
@@ -2165,9 +2155,7 @@ confidence interval for Odds Ratio of 1.1. These both values are the
 default from the ELMER package.
 
 ```{r tableTF, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-datatable(as.data.frame(TF), 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+as.data.frame(TF) 
 ```
 
 
