@@ -407,7 +407,7 @@ data(GBMIllumina_HiSeq)
 
 # get expression matrix
 data <- assay(gbm.exp)
-head(data)
+data[1:5,1:5]
   
 
 # get genes information
@@ -416,7 +416,7 @@ genes.info
 
 # get sample information
 sample.info <- colData(gbm.exp)
-head(as.data.frame(sample.info)) 
+head(sample.info) 
 ```
 
 The clinical data can be obtained using TCGAbiolinks through two
@@ -602,8 +602,8 @@ gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
 
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 data(GBMGistic)
-head(gistic.allbygene)
-head(gistic.thresholedbygene)
+gistic.allbygene[1:5,1:5]
+gistic.thresholedbygene[1:5,1:5]
 ```
 
 ## Genomic analysis
@@ -1172,8 +1172,8 @@ pathway over the total number of genes in that pathway (ratio, red line).]
 
 *TCGAanalyze\_EAbarplot* outputs a bar chart as shown in figure
 \ref{eabarplot} with the number of genes for the main categories of three
-ontologies (i.e., GO:biological process, GO:cellular component, and
-GO:molecular function).
+ontologies (i.e., GO biological process, GO cellular component, and
+GO molecular function).
 
 The Figure  shows canonical pathways significantly
 overrepresented (enriched) by the DEGs. The most statistically
