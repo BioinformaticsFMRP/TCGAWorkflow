@@ -659,7 +659,7 @@ query.gbm.nocnv <- GDCquery(project = "TCGA-GBM",
 # to reduce time we will select only 20 samples
 query.gbm.nocnv$results[[1]] <- query.gbm.nocnv$results[[1]][1:20,]
 
-GDCdownload(query.gbm.nocnv, chunks.per.download = 100)
+GDCdownload(query.gbm.nocnv, files.per.chunk = 100)
 
 gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvhg19.rda")
 ```
