@@ -2151,6 +2151,7 @@ if(length(pair$Probe) > 0 ){
                   enriched.motif = enriched.motif,
                   dir.out = dir.out, 
                   cores = cores, 
+                  diff.dir = direction,
                   label = direction)
     
     # One of the output from the previous function is a file with the raking of TF,
