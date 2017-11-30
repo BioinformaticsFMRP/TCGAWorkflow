@@ -1455,12 +1455,12 @@ met <- GDCprepare(query, save = FALSE)
 
 # We will use only chr9 to make the example faster
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
-# This data is avaliable in the package
-save(met, file = "met20SamplesGBMLGGchr9.rda")
+# This data is avaliable in the package in the elmerExample 
 ```
 
 ```{r echo=TRUE, message=FALSE,warning=FALSE}
-data(met20SamplesGBMLGGchr9)
+data(elmerExample, package = "TCGAWorkflowData")
+
 #----------------------------
 # Mean methylation
 #----------------------------
@@ -1923,56 +1923,47 @@ repression as the H3K36me3 and H3K27me3 heatmaps does not show an
 enrichment nearby the position 0, and the average profile also does not
 show a peak at position 0.
 
-Recently, many studies suggest that enhancers play a major role as
+## Enhancer Linking by Methylation/Expression Relationship
+
+Recent studies indicate that DNA methylation can be used to identify changes at 
+transcriptional enhancers and other cis-regulatory elements in primary human samples. 
+Many studies suggest that enhancers play a major role as
 regulators of cell-specific phenotypes leading to alteration in
 transcriptomes realated to diseases
 [@giorgio2015large; @groschel2014single; @sur2012mice; @yao2015demystifying].
-In order to investigate regulatory enhancers that can be located at long
-distances upstream or downstream of target genes Bioconductor offer the
-[Enhancer Linking by Methylation/Expression Relationship
-(ELMER)](http://bioconductor.org/packages/ELMER/) package. This package
-is designed to combine DNA methylation and gene expression data from
-human tissues to infer multi-level cis-regulatory networks. It uses DNA
-methylation to identify enhancers and correlates their state with
-expression of nearby genes to identify one or more transcriptional
-targets. Transcription factor (TF) binding site analysis of enhancers is
-coupled with expression analysis of all TFs to infer upstream
-regulators. This package can be easily applied to TCGA public available
+A systematic approach to inferring gene regulatory networks has been provided by the 
+R/Bioconductor package [Enhancer Linking by Methylation/Expression Relationship
+(ELMER)](http://bioconductor.org/packages/ELMER/), which first identifies DNA methylation changes in 
+distal regulatory elements and correlates these with expression of nearby genes to identify direct transcriptional targets.
+Next, ELMER performs a transcription factor binding motif analysis and integrates with expression profiling of all human transcription factors, to identify master regulatory TFs and place each differentially methylated regulatory element into the context of an altered gene regulatory network (GRN). This package can be easily applied to TCGA public available
 cancer data sets and custom DNA methylation and gene expression data
-sets [@yao2015inferring].
+sets [@yao2015inferring; @ELMER2].
 
 [ELMER](http://bioconductor.org/packages/ELMER/) analysis have 5 main
 steps:
 
-1.  Identify distal enhancer probes on HM450K.
+1.  Identify distal probes.
 
-2.  Identify distal enhancer probes with significantly different DNA
+2.  Identify distal probes with significantly different DNA
 methyaltion level in control group and experiment group.
 
-3.  Identify putative target genes for differentially methylated distal
-enhancer probes.
+3.  Identify putative target genes for differentially methylated distal probes.
 
-4.  Identify enriched motifs for the distal enhancer probes which are
+4.  Identify enriched motifs for the distal probes which are
 significantly differentially methylated and linked to putative
 target gene.
 
 5.  Identify regulatory TFs whose expression associate with DNA
 methylation at motifs.
 
-This section shows how to use ELMER to analyze TCGA data using as
+This section shows how to use ELMER (version 2) to analyze TCGA data using as
 example LGG and GBM samples.
 
 ### Preparing the data for ELMER package {#preparing-the-data-for-elmer-package .unnumbered}
 
 After downloading the data with TCGAbiolinks package, some steps are
 still required to use TCGA data with
-[ELMER](http://bioconductor.org/packages/ELMER/). These steps can be
-done with the function *TCGAprepare\_elmer*. This function for the DNA
-methylation data will remove probes with NA values in more than 20%
-samples and remove the annotation data, for RNA expression data it will
-take the log2(expression + 1) of the expression matrix in order to
-linearize the relation between DNA methylation and expression. Also, it
-will prepare the row names of the matrix as required by the package.
+[ELMER](http://bioconductor.org/packages/ELMER/). 
 
 The listing below shows how to use
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/)
@@ -2018,18 +2009,13 @@ save(exp, met, gbm.samples, lgg.samples, file = "elmerExample.rda", compress = "
 ```
 
 Finally, the [ELMER](http://bioconductor.org/packages/ELMER/) input is a
-mee object that contains a DNA methylation matrix, an gene expression
-matrix, a probe information GRanges, the gene information GRanges and a
-data frame summarizing the data. It should be highlighted that samples
-without both the gene expression and DNA methylation data will be
-removed from the mee object.
-
-By default the function *fetch.mee* that is used to create the mee
-object will separate the samples into two groups, the control group
-(normal samples) and the experiment group (tumor samples), but the user
-can relabel the samples to compare different groups. For the next
-sections, we will work with both the experimental group (LGG) and
-control group (GBM).
+MAE (MutiAssayExperiment) object that contains a DNA methylation Summarized Experiment object, an gene expression
+ Summarized Experiment object, a data frame mapping for each sample its DNA methylation data and its gene expression data,
+and a metadata data frame. It should be highlighted that samples
+without both the gene expression and DNA methylation data are
+removed from the MAE object. This object can be created using the function *createMAE*.
+In this function we use `distal.probes` object is to filter the DNA methylation probes used in the analysis which are
+ probes at least 2kb from the TSS,and we set `linearize.exp` to TRUE to take the log2(expression + 1) of the expression matrix in order to linearize the relation between DNA methylation and expression.
 
 ```{r, message=FALSE,warning=FALSE}
 library(ELMER)
@@ -2052,13 +2038,23 @@ mae <- createMAE(exp = exp,
 ```
 
 ## ELMER analysis
+
 After preparing the data into a MAE object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for the 
-distal enhancer probes hypermethylated in the LGG group direction. The
-code is shown below. A description of how these distal enhacer probes
-are identified is found in the
-[ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf)
-vignette.
+distal probes hypermethylated in the LGG group direction.
+Some important ELMER arguments are `minSubgroupFrac`,`diff.dir` and `mode`.
+`minSubgroupFrac` controls the percentage of samples used in the analysis, in
+our example we will use all samples. `diff.dir` is used in the first step to identify the 
+probes differently methylated in group1 vs group2, if set to "hypo" it will select the hypomethylated
+probes in group 1, if set to "hyper" it will select the hypermethylated ones. The `mode` argument can be set to
+"supervised" or "unsupervised" and they control how the groups of Methylated and Methylated Samples are selected 
+in steps 3 and 5. If it is set to "supervised", if `diff.dir` is set to "hypo" Unmethylated group will be the group 1 and the Methylated will be the group 2 (if `diff.dir` is set to "hyper" the groups are inversed), but if it is set to "supervised"
+the algorithm will actually put all the data togther sort by DNA methylation level and the split between Unmethylated and Methylated group
+there might be cases in which samples of both group1 and group2 are in one of the Unmethylated and Methylated groups.
+It is advised to use "supervised" mode if you are dealing with known molecular subtypes, if not, the `mode` should be set to "unsupervised" [@ELMER2].
+An example of analysis using the "unsupervised" would be Tumor vs Normal, while the  "supervised" would be molecular subtype 1 vs molecular subtype 2.
+In our example we will set our mode to "supervised".
+
 
 ```{r, warning=FALSE} 
 cores <- 1 # you can use more cores if you want
@@ -2085,9 +2081,8 @@ Sig.probes <- get.diff.meth(data = mae,
                             sig.dif = 0.2,
                             diff.dir = direction, # Search for hypomethylated probes in group 1
                             cores = 1, 
-                            dir.out =dir.out,
+                            dir.out = dir.out,
                             pvalue = 0.1)
-
 
 #-------------------------------------------------------------
 # Step 3.2: Identify significant probe-gene pairs            |
@@ -2161,15 +2156,12 @@ if(length(pair$Probe) > 0 ){
 }
 ```
 
-When ELMER Identifies the enriched motifs for the distal enhancer probes
+When ELMER Identifies the enriched motifs for the distal probes
 which are significantly differentially methylated and linked to putative
 target gene, it will plot the Odds Ratio (x axis) for the each motifs
 found.
 
-The list of motifs for the hyper direction (probes hypermethylated in
-LGG group compared to the GBM group) is found in the Figure
-below. 
-
+The list of motifs for the  hypermethylated probes in the LGG group is found in the Figure below. 
 
 ```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
 motif.enrichment.plot(motif.enrichment = motif.enrichment, save = FALSE)
@@ -2194,7 +2186,9 @@ automatically creates a TF ranking plot for each enriched motif. This
 plot shows the TF ranking plots based on the association score
 $(-log(P value))$ between TF expression and DNA methylation of the
 motif. We can see in Figure below that the top three TFs that are
-associated with a motif found.
+associated with a motif found. Also, using the TFClass database,
+which classifies TF in to families and subfamilies, for a given motif,
+the TF within the same family of the motif is highlighted.
 
 ```{R, eval=FALSE, include=TRUE}
 grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif="AP1", save=FALSE)
@@ -2208,11 +2202,19 @@ The output of this step is a data frame with the following columns:
 
 1.  motif: the names of motif.
 
-2.  top.potential.TF: the highest ranking upstream TFs which are known
-recognized the motif.
+2.  top.potential.TF.family: the highest ranking upstream TFs which are known
+recognized the motif (considering the TFClass family classificaiton).
 
-3.  potential.TFs: TFs which are within top 5% list and are known
-recognized the motif. top5percent: all TFs which are within top 5%
+3.  potential.TFs.family: TFs which are within top 5% list and are known
+recognized the motif (considering the TFClass family classificaiton).
+
+4.  top.potential.TF.subfamily: the highest ranking upstream TFs which are known
+recognized the motif (considering the TFClass subfamily classificaiton). 
+
+5.  potential.TFs.family: TFs which are within top 5% list and are known
+recognized the motif (considering the TFClass subfamily classificaiton).
+
+6. top5percent: all TFs which are within top 5%
 list considered candidate upstream regulators
 
 Also, for each motif we can take a look at the three most relevant TFs.
