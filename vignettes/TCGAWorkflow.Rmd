@@ -1507,9 +1507,9 @@ with the results in the rowRanges.
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 #------- Searching for differentially methylated CpG sites     ----------
 met <- TCGAanalyze_DMR(met,
-                       groupCol = "disease_type", # a column in the colData matrix
-                       group1 = "Glioblastoma Multiforme", # a type of the disease type column
-                       group2 = "Brain Lower Grade Glioma", # a type of the disease column
+                       groupCol = "project_id", # a column in the colData matrix
+                       group1 = "TCGA-GBM", # a type of the disease type column
+                       group2 = "TCGA-LGG", # a type of the disease column
                        p.cut = 0.05,
                        diffmean.cut = 0.15,
                        save = FALSE,
@@ -1551,7 +1551,7 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
-status.col <- "status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"
+status.col <- "status.TCGA.GBM.TCGA.LGG"
 sig.met <- met[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),]
 
 
@@ -1568,7 +1568,7 @@ ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status",
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
 ra = rowAnnotation(df = values(sig.met)[status.col],
-                   col = list("status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma" = 
+                   col = list("status.TCGA.GBM.TCGA.LGG" = 
                                 c("Hypomethylated" = "orange",
                                   "Hypermethylated" = "darkgreen")),
                    width = unit(1, "cm"))
@@ -1712,8 +1712,8 @@ use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      dataDEGs,    # DEG results
-                                     group1 = "Glioblastoma Multiforme", 
-                                     group2 = "Brain Lower Grade Glioma", 
+                                     group1 = "TCGA-GBM", 
+                                     group2 = "TCGA-LGG", 
                                      filename = "starburst.png",
                                      genome = "hg19",
                                      met.platform = "450K",
@@ -1729,8 +1729,8 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      dataDEGs,    # DEG results
-                                     group1 = "Glioblastoma Multiforme", 
-                                     group2 = "Brain Lower Grade Glioma", 
+                                     group1 = "TCGA-GBM", 
+                                     group2 = "TCGA-LGG", 
                                      filename = "starburst.png",
                                      genome = "hg19",
                                      met.platform = "450K",
