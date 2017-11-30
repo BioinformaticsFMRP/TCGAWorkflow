@@ -2056,7 +2056,7 @@ An example of analysis using the "unsupervised" would be Tumor vs Normal, while 
 In our example we will set our mode to "supervised".
 
 
-```{r, warning=FALSE} 
+```{r, warning=FALSE, results="hide"} 
 cores <- 1 # you can use more cores if you want
 group.col <- "project_id"
 group1 <-  "TCGA-LGG"
@@ -2164,7 +2164,7 @@ found.
 The list of motifs for the  hypermethylated probes in the LGG group is found in the Figure below. 
 
 ```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
-motif.enrichment.plot(motif.enrichment = motif.enrichment, save = FALSE)
+motif.enrichment.plot(motif.enrichment = motif.enrichment, save = FALSE,significant = list(lowerOR = 1.3, NumOfProbes = 10))
 ```
 We selected motifs that had a minimum incidence of 10
 in the given probes set and the smallest lower boundary of 95%
