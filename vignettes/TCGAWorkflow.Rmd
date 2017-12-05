@@ -2163,8 +2163,8 @@ found.
 
 The list of motifs for the  hypermethylated probes in the LGG group is found in the Figure below. 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
-motif.enrichment.plot(motif.enrichment = motif.enrichment, save = FALSE,significant = list(lowerOR = 1.3, NumOfProbes = 10))
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=4}
+motif.enrichment.plot(motif.enrichment = motif.enrichment, save = FALSE,significant = list(lowerOR = 1.1, NumOfProbes = 10))
 ```
 We selected motifs that had a minimum incidence of 10
 in the given probes set and the smallest lower boundary of 95%

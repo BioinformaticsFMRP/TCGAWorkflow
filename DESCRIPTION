@@ -39,7 +39,7 @@ Depends:
 Imports:
     AnnotationHub,
     knitr,
-    ELMER (>=2.0),
+    ELMER (>= 2.0),
     biomaRt,
     BSgenome.Hsapiens.UCSC.hg19,
     circlize,
@@ -63,8 +63,8 @@ Imports:
     rGADEM,
     RTCGAToolbox,
     SummarizedExperiment,
-    TCGAbiolinks (>=2.0),
-    TCGAWorkflowData (>=1.3.1),
+    TCGAbiolinks (>= 2.0),
+    TCGAWorkflowData (>= 1.3.1),
     DT
 License: Artistic-2.0
 VignetteBuilder: knitr
