@@ -1455,12 +1455,11 @@ met <- GDCprepare(query, save = FALSE)
 
 # We will use only chr9 to make the example faster
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
-# This data is avaliable in the package
-save(met, file = "met20SamplesGBMLGGchr9.rda")
+# This data is avaliable in the package (object elmerExample)
 ```
 
 ```{r echo=TRUE, message=FALSE,warning=FALSE}
-data(met20SamplesGBMLGGchr9)
+data(elmerExample)
 #----------------------------
 # Mean methylation
 #----------------------------
@@ -1471,7 +1470,7 @@ data(met20SamplesGBMLGGchr9)
 met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
 
 TCGAvisualize_meanMethylation(met,
-                              groupCol = "disease_type",
+                              groupCol = "project_id",
                               group.legend  = "Groups",
                               filename = NULL,
                               print.pvalue = TRUE)
@@ -1507,9 +1506,9 @@ with the results in the rowRanges.
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 #------- Searching for differentially methylated CpG sites     ----------
 met <- TCGAanalyze_DMR(met,
-                       groupCol = "disease_type", # a column in the colData matrix
-                       group1 = "Glioblastoma Multiforme", # a type of the disease type column
-                       group2 = "Brain Lower Grade Glioma", # a type of the disease column
+                       groupCol = "project_id", # a column in the colData matrix
+                       group1 = "TCGA-GBM", # a type of the disease type column
+                       group2 = "TCGA-LGG", # a type of the disease column
                        p.cut = 0.05,
                        diffmean.cut = 0.15,
                        save = FALSE,
@@ -1551,7 +1550,7 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
-status.col <- "status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"
+status.col <- "status.TCGA.GBM.TCGA.LGG"
 sig.met <- met[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),]
 
 
@@ -1568,7 +1567,7 @@ ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status",
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
 ra = rowAnnotation(df = values(sig.met)[status.col],
-                   col = list("status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma" = 
+                   col = list("status.TCGA.GBM.TCGA.LGG" = 
                                 c("Hypomethylated" = "orange",
                                   "Hypermethylated" = "darkgreen")),
                    width = unit(1, "cm"))
@@ -1729,8 +1728,8 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      dataDEGs,    # DEG results
-                                     group1 = "Glioblastoma Multiforme", 
-                                     group2 = "Brain Lower Grade Glioma", 
+                                     group1 = "TCGA-GBM", 
+                                     group2 = "TCGA-LGG", 
                                      filename = "starburst.png",
                                      genome = "hg19",
                                      met.platform = "450K",
@@ -2220,14 +2219,16 @@ list considered candidate upstream regulators
 Also, for each motif we can take a look at the three most relevant TFs.
 For example, Figure below shows the average DNA methylation level
 of sites with the first motif plotted against the expression of some top TFs
-associated with it. We can see that the experiment
-group (LGG samples) has a lower average methylation level of sites with
+associated with it. We can see that the GBM samples has a lower average methylation level of sites with
 the motif plotted and a higher average expression of the TFs.
 
 ```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
 png("TF.png",width = 800, height = 400)
-scatter.plot(mee, category="TN", save=FALSE, lm_line=TRUE,
-             byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent"],";"))[1:4], 
+scatter.plot(mae, 
+             category = group.col, 
+             save = FALSE, 
+             lm_line = TRUE,
+             byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent_TFs"],";"))[1:4], 
                        probe=enriched.motif[[TF$motif[1]]]))
 dev.off()
 ```
