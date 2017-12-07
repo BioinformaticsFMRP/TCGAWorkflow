@@ -1470,7 +1470,7 @@ data(elmerExample)
 met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
 
 TCGAvisualize_meanMethylation(met,
-                              groupCol = "disease_type",
+                              groupCol = "project_id",
                               group.legend  = "Groups",
                               filename = NULL,
                               print.pvalue = TRUE)
@@ -1506,9 +1506,9 @@ with the results in the rowRanges.
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 #------- Searching for differentially methylated CpG sites     ----------
 met <- TCGAanalyze_DMR(met,
-                       groupCol = "disease_type", # a column in the colData matrix
-                       group1 = "Glioblastoma Multiforme", # a type of the disease type column
-                       group2 = "Brain Lower Grade Glioma", # a type of the disease column
+                       groupCol = "project_id", # a column in the colData matrix
+                       group1 = "TCGA-GBM", # a type of the disease type column
+                       group2 = "TCGA-LGG", # a type of the disease column
                        p.cut = 0.05,
                        diffmean.cut = 0.15,
                        save = FALSE,
