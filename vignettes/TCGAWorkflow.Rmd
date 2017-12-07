@@ -2061,7 +2061,7 @@ are identified is found in the
 [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf)
 vignette.
 
-```{r, warning=FALSE} 
+```{r, warning=FALSE, results="hide"} 
 cores <- 1 # you can use more cores if you want
 group.col <- "project_id"
 group1 <- "TCGA-GBM"
@@ -2172,8 +2172,10 @@ LGG group compared to the GBM group) is found in the Figure
 below. 
 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=10}
-motif.enrichment.plot(motif.enrichment = motif.enrichment, save = FALSE)
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=20}
+motif.enrichment.plot(motif.enrichment = motif.enrichment, 
+                      save = FALSE,
+                      significant = list(lowerOR = 1.3)) # Filter motifs in the plot lowerOR > 1.3
 ```
 We selected motifs that had a minimum incidence of 10
 in the given probes set and the smallest lower boundary of 95%
