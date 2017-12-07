@@ -1728,8 +1728,8 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
 #------------------- Starburst plot ------------------------------
 starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
                                      dataDEGs,    # DEG results
-                                     group1 = "Glioblastoma Multiforme", 
-                                     group2 = "Brain Lower Grade Glioma", 
+                                     group1 = "TCGA-GBM", 
+                                     group2 = "TCGA-LGG", 
                                      filename = "starburst.png",
                                      genome = "hg19",
                                      met.platform = "450K",
@@ -2219,14 +2219,16 @@ list considered candidate upstream regulators
 Also, for each motif we can take a look at the three most relevant TFs.
 For example, Figure below shows the average DNA methylation level
 of sites with the first motif plotted against the expression of some top TFs
-associated with it. We can see that the experiment
-group (LGG samples) has a lower average methylation level of sites with
+associated with it. We can see that the GBM samples has a lower average methylation level of sites with
 the motif plotted and a higher average expression of the TFs.
 
 ```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
 png("TF.png",width = 800, height = 400)
-scatter.plot(mee, category="TN", save=FALSE, lm_line=TRUE,
-             byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent"],";"))[1:4], 
+scatter.plot(mae, 
+             category = group.col, 
+             save = FALSE, 
+             lm_line = TRUE,
+             byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent_TFs"],";"))[1:4], 
                        probe=enriched.motif[[TF$motif[1]]]))
 dev.off()
 ```
