@@ -1455,12 +1455,11 @@ met <- GDCprepare(query, save = FALSE)
 
 # We will use only chr9 to make the example faster
 met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
-# This data is avaliable in the package
-save(met, file = "met20SamplesGBMLGGchr9.rda")
+# This data is avaliable in the package (object elmerExample)
 ```
 
 ```{r echo=TRUE, message=FALSE,warning=FALSE}
-data(met20SamplesGBMLGGchr9)
+data(elmerExample)
 #----------------------------
 # Mean methylation
 #----------------------------
