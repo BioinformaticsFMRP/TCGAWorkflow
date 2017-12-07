@@ -2172,7 +2172,7 @@ LGG group compared to the GBM group) is found in the Figure
 below. 
 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=20}
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8}
 motif.enrichment.plot(motif.enrichment = motif.enrichment, 
                       save = FALSE,
                       significant = list(lowerOR = 1.3)) # Filter motifs in the plot lowerOR > 1.3
