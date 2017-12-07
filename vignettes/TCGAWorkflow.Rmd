@@ -2,7 +2,7 @@
 title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor
   packages'
 author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
-  Bontempi Michele Ceccarelli, and Houtan Noushmehr
+  Bontempi, Michele Ceccarelli, and Houtan Noushmehr
 date: "`r Sys.Date()`"
 output: 
     BiocStyle::html_document:
