@@ -1550,7 +1550,7 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
-status.col <- "status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma"
+status.col <- "status.TCGA.GBM.TCGA.LGG"
 sig.met <- met[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),]
 
 
@@ -1567,7 +1567,7 @@ ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status",
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
 ra = rowAnnotation(df = values(sig.met)[status.col],
-                   col = list("status.Glioblastoma.Multiforme.Brain.Lower.Grade.Glioma" = 
+                   col = list("status.TCGA.GBM.TCGA.LGG" = 
                                 c("Hypomethylated" = "orange",
                                   "Hypermethylated" = "darkgreen")),
                    width = unit(1, "cm"))
