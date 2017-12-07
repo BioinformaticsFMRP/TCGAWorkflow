@@ -31,6 +31,6 @@
 #' @importFrom rGADEM GADEM nOccurrences getPWM consensus nMotifs
 #' @importFrom MotIV viewAlignments motifMatch 
 #' @importFrom AnnotationHub query AnnotationHub
-#' @importFrom clusterProfiler bitr
+#' @importFrom clusterProfiler bitr pander
 #' @import DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox
 NULL
