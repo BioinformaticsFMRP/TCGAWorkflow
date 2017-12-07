@@ -24,7 +24,7 @@
 #' @docType package
 #' @name TCGAWorkflow
 #' @import ELMER  downloader SummarizedExperiment  TCGAWorkflowData knitr
-#' @import gaia ChIPseeker ComplexHeatmap
+#' @import gaia ChIPseeker ComplexHeatmap maftools
 #' @import minet c3net biomaRt pathview
 #' @import  motifStack TCGAbiolinks graphics pander
 #' @import circlize pbapply GenomeInfoDb ggplot2 ggthemes parallel
