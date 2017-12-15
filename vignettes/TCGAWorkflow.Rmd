@@ -2,7 +2,7 @@
 title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor
   packages'
 author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
-  Bontempi Michele Ceccarelli, and Houtan Noushmehr
+  Bontempi, Michele Ceccarelli, and Houtan Noushmehr
 date: "`r Sys.Date()`"
 output: 
     BiocStyle::html_document:
@@ -1177,14 +1177,34 @@ In order to understand the underlying biological process of DEGs we
 performed an enrichment analysis using *TCGAanalyze\_EA\_complete*
 function.
 
-```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
 #-------------------  4.2 EA: enrichment analysis             --------------------
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         filename = NULL,
                         GOBPTab = ansEA$ResBP, 
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
+```
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         GOCCTab = ansEA$ResCC,
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
+```
+
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         GOMFTab = ansEA$ResMF, 
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
+```
+
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         PathTab = ansEA$ResPat,
                         nRGTab = rownames(dataDEGs),
                         nBar = 20)
@@ -1907,7 +1927,7 @@ To plot the enrichment heatmap use the function `tagHeatmap`
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
-```{r results='asis',eval=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
@@ -2073,8 +2093,8 @@ mae <- createMAE(exp = exp,
 ## ELMER analysis
 After preparing the data into a mee object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for both the hypo
-(distal enhancer probes hypomethylated in the LGG group) and hyper
-(distal enhancer probes hypermethylated in the LGG group) direction. The
+(distal enhancer probes hypomethylated in the GBM group) and hyper
+(distal enhancer probes hypermethylated in the GBM group) direction. The
 code is shown below. A description of how these distal enhacer probes
 are identified is found in the
 [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf)
@@ -2088,7 +2108,7 @@ group2 <-  "TCGA-LGG"
 
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
-direction <- c("hyper")
+direction <- c("hypo")
 dir.out <- paste0("elmer/",direction)
 dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
 #--------------------------------------
@@ -2102,8 +2122,8 @@ Sig.probes <- get.diff.meth(data = mae,
                             group1 = group1,
                             group2 =  group2,
                             minSubgroupFrac = 1.0,
-                            sig.dif = 0.3,
-                            diff.dir = "hypo", # Search for hypomethylated probes in group 1
+                            sig.dif = 0.2, # defualt is 0.3
+                            diff.dir = direction, # Search for hypomethylated probes in group 1
                             cores = 1, 
                             dir.out ="result", 
                             pvalue = 0.1)
@@ -2128,7 +2148,7 @@ pair <- get.pair(data = mae,
                  minSubgroupFrac = 1, # % of samples to use in to create groups U/M
                  permu.dir = paste0(dir.out,"/permu"),
                  permu.size = 5, # Please set to 100000 to get significant results
-                 raw.pvalue = 0.05,   
+                 raw.pvalue = 0.1,   # defualt is 0.001
                  Pe = 0.5, # Please set to 0.001 to get significant results
                  filter.probes = TRUE, # See preAssociationProbeFiltering function
                  filter.percentage = 0.05,
@@ -2180,6 +2200,21 @@ if(length(pair$Probe) > 0 ){
   }
 }
 ```
+
+The pairs idenfied by ELMER can be visualized through a heatmap using the function heatmapPairs.
+The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
+levels of the target genes. The last heatmap shows the distance between the probe and the gene TSS.
+
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8}
+heatmapPairs(data = mae, 
+             group.col = group.col,
+             group1 = group1, 
+             group2 = group2, 
+             annotation.col = c("gender"),
+             pairs = pair,
+             filename =  NULL)
+```
+
 
 When ELMER Identifies the enriched motifs for the distal enhancer probes
 which are significantly differentially methylated and linked to putative
