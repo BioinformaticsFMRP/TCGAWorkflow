@@ -2093,8 +2093,8 @@ mae <- createMAE(exp = exp,
 ## ELMER analysis
 After preparing the data into a mee object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for both the hypo
-(distal enhancer probes hypomethylated in the LGG group) and hyper
-(distal enhancer probes hypermethylated in the LGG group) direction. The
+(distal enhancer probes hypomethylated in the GBM group) and hyper
+(distal enhancer probes hypermethylated in the GBM group) direction. The
 code is shown below. A description of how these distal enhacer probes
 are identified is found in the
 [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf)
@@ -2108,7 +2108,7 @@ group2 <-  "TCGA-LGG"
 
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
-direction <- c("hyper")
+direction <- c("hypo")
 dir.out <- paste0("elmer/",direction)
 dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
 #--------------------------------------
@@ -2122,8 +2122,8 @@ Sig.probes <- get.diff.meth(data = mae,
                             group1 = group1,
                             group2 =  group2,
                             minSubgroupFrac = 1.0,
-                            sig.dif = 0.3,
-                            diff.dir = "hypo", # Search for hypomethylated probes in group 1
+                            sig.dif = 0.2, # defualt is 0.3
+                            diff.dir = direction, # Search for hypomethylated probes in group 1
                             cores = 1, 
                             dir.out ="result", 
                             pvalue = 0.1)
@@ -2148,7 +2148,7 @@ pair <- get.pair(data = mae,
                  minSubgroupFrac = 1, # % of samples to use in to create groups U/M
                  permu.dir = paste0(dir.out,"/permu"),
                  permu.size = 5, # Please set to 100000 to get significant results
-                 raw.pvalue = 0.05,   
+                 raw.pvalue = 0.1,   # defualt is 0.001
                  Pe = 0.5, # Please set to 0.001 to get significant results
                  filter.probes = TRUE, # See preAssociationProbeFiltering function
                  filter.percentage = 0.05,
