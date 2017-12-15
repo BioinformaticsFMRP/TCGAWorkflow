@@ -2181,6 +2181,21 @@ if(length(pair$Probe) > 0 ){
 }
 ```
 
+The pairs idenfied by ELMER can be visualized through a heatmap using the function heatmapPairs.
+The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
+levels of the target genes. The last heatmap shows the distance between the probe and the gene TSS.
+
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8}
+heatmapPairs(data = mae, 
+             group.col = group.col,
+             group1 = group1, 
+             group2 = group2, 
+             annotation.col = c("gender"),
+             pairs = pair,
+             filename =  NULL)
+```
+
+
 When ELMER Identifies the enriched motifs for the distal enhancer probes
 which are significantly differentially methylated and linked to putative
 target gene, it will plot the Odds Ratio (x axis) for the each motifs
