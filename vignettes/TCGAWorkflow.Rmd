@@ -1177,14 +1177,34 @@ In order to understand the underlying biological process of DEGs we
 performed an enrichment analysis using *TCGAanalyze\_EA\_complete*
 function.
 
-```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
 #-------------------  4.2 EA: enrichment analysis             --------------------
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes LGG Vs GBM", RegulonList = rownames(dataDEGs))
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         filename = NULL,
                         GOBPTab = ansEA$ResBP, 
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
+```
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         GOCCTab = ansEA$ResCC,
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
+```
+
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         GOMFTab = ansEA$ResMF, 
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
+```
+
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        filename = NULL,
                         PathTab = ansEA$ResPat,
                         nRGTab = rownames(dataDEGs),
                         nBar = 20)
