@@ -1927,7 +1927,7 @@ To plot the enrichment heatmap use the function `tagHeatmap`
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
-```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
+```{r results='asis', echo=FALSE, eval=F, message=FALSE,warning=FALSE}
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
