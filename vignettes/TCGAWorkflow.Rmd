@@ -55,7 +55,7 @@ To be able to execute all the steps of this workflow please install it with the 
 ```{R, eval=FALSE, include=TRUE}
 source("https://bioconductor.org/biocLite.R")
 deps <- c("pathview","clusterProfiler","ELMER", "DO.db","GO.db", 
-          "ComplexHeatmap","EDASeq", "TCGAbiolinks","AnnotationHub",
+          "ComplexHeatmap","maftools","EDASeq", "TCGAbiolinks","AnnotationHub",
           "gaia","ChIPseeker","minet","BSgenome.Hsapiens.UCSC.hg19",
           "MotifDb","MotIV", "rGADEM", "motifStack","RTCGAToolbox")
 for(pkg in deps)  if (!pkg %in% installed.packages()) biocLite(pkg, dependencies = TRUE)
@@ -2226,7 +2226,7 @@ LGG group compared to the GBM group) is found in the Figure
 below. 
 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8}
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8,fig.width=15}
 motif.enrichment.plot(motif.enrichment = motif.enrichment, 
                       save = FALSE,
                       significant = list(lowerOR = 1.3)) # Filter motifs in the plot lowerOR > 1.3
