@@ -893,12 +893,12 @@ oncoplot(maf = maf)
 ```
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-mafSurvival(maf = maf,
-           genes = "IDH1",
-           fn = NULL,
-           time = 'time',
-           Status = 'Overall_Survival_Status',
-           isTCGA = TRUE)
+plot <- mafSurvival(maf = maf,
+                   genes = "IDH1",
+                   fn = NULL,
+                   time = 'time',
+                   Status = 'Overall_Survival_Status',
+                   isTCGA = TRUE)
 ```
                                           
 Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
