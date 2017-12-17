@@ -1553,7 +1553,7 @@ met <- TCGAanalyze_DMR(met,
                        save = FALSE,
                        legend = "State",
                        plot.filename = "LGG_GBM_metvolcano.png",
-                       cores =  parallel::detectCores()/2 # if set to 1 there will be a progress bar
+                       cores = 1 # if set to 1 there will be a progress bar
 )
 ```
 
@@ -2124,7 +2124,7 @@ Sig.probes <- get.diff.meth(data = mae,
                             minSubgroupFrac = 1.0,
                             sig.dif = 0.2, # defualt is 0.3
                             diff.dir = direction, # Search for hypomethylated probes in group 1
-                            cores = 1, 
+                            cores = cores, 
                             dir.out ="result", 
                             pvalue = 0.1)
 
@@ -2155,7 +2155,7 @@ pair <- get.pair(data = mae,
                  filter.portion = 0.3,
                  dir.out = dir.out,
                  diff.dir = direction,
-                 cores = 1,
+                 cores = cores,
                  label = direction)
 
 #-------------------------------------------------------------
