@@ -856,6 +856,9 @@ mut <- plyr::rbind.fill(LGGmut, GBMmut)
 save(maf,file ="mafMutect2LGGGBM.rda", compress = "xz")
 ```
 
+The function read.maf is used to prepare the MAF data to be used with maftools.
+We also added clinical information that will be used in survival plots.
+
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(maftools)
 # recovering data from TCGAWorkflowData package.
@@ -876,21 +879,32 @@ clinical$Overall_Survival_Status[which(clinical$vital_status != "dead")] <- 0
 clinical$time <- clinical$days_to_death
 clinical$time[is.na(clinical$days_to_death)] <- clinical$days_to_last_follow_up[is.na(clinical$days_to_death)]
 
-# Create object to use un maftools
+# Create object to use in maftools
 maf <- read.maf(maf = mut, clinicalData = clinical, isTCGA = T)
 ```
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+We can plot a maf summary.
+```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=10}
 plotmafSummary(maf = maf,
                rmOutlier = TRUE,
                addStat = 'median',
                dashboard = TRUE)
 ```
 
+We can draw oncoplot with the top 20 most mutated genes and add metadata information such as molecular subtypes information.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-oncoplot(maf = maf)
+```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=10}
+gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
+lgg.subtypes <- TCGAquery_subtype(tumor = "lgg")
+subtype.info <- plyr::rbind.fill( lgg.subtypes, gbm.subtypes)
+colnames(subtype.info)[1] <- "Tumor_Sample_Barcode" # required
+oncoplot(maf = maf,
+         top = 20,
+         clinicalFeatures = c("Supervised.DNA.Methylation.Cluster","Original.Subtype"), # which columns should be plotted
+         annotationDat = subtype.info) # data frame with metadata
 ```
+
+We can also perform survival analysis by grouping samples from maf based on mutation status of given gene(s).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 plot <- mafSurvival(maf = maf,
@@ -900,11 +914,7 @@ plot <- mafSurvival(maf = maf,
                    Status = 'Overall_Survival_Status',
                    isTCGA = TRUE)
 ```
-                                          
-Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
-The upper barplot shows the number of these genetic mutation for each patient,
-while the right barplot shows the number of genetic mutations for each gene. The bottom bar shows the group of each sample.
-
+        
 **Overview of genomic alterations by circos plot**
 
 Genomic alterations
