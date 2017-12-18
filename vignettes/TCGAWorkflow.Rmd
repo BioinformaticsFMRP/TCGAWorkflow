@@ -55,7 +55,7 @@ To be able to execute all the steps of this workflow please install it with the 
 ```{R, eval=FALSE, include=TRUE}
 source("https://bioconductor.org/biocLite.R")
 deps <- c("pathview","clusterProfiler","ELMER", "DO.db","GO.db", 
-          "ComplexHeatmap","EDASeq", "TCGAbiolinks","AnnotationHub",
+          "ComplexHeatmap","maftools","EDASeq", "TCGAbiolinks","AnnotationHub",
           "gaia","ChIPseeker","minet","BSgenome.Hsapiens.UCSC.hg19",
           "MotifDb","MotIV", "rGADEM", "motifStack","RTCGAToolbox")
 for(pkg in deps)  if (!pkg %in% installed.packages()) biocLite(pkg, dependencies = TRUE)
@@ -856,6 +856,9 @@ mut <- plyr::rbind.fill(LGGmut, GBMmut)
 save(maf,file ="mafMutect2LGGGBM.rda", compress = "xz")
 ```
 
+The function read.maf is used to prepare the MAF data to be used with maftools.
+We also added clinical information that will be used in survival plots.
+
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 library(maftools)
 # recovering data from TCGAWorkflowData package.
@@ -876,21 +879,32 @@ clinical$Overall_Survival_Status[which(clinical$vital_status != "dead")] <- 0
 clinical$time <- clinical$days_to_death
 clinical$time[is.na(clinical$days_to_death)] <- clinical$days_to_last_follow_up[is.na(clinical$days_to_death)]
 
-# Create object to use un maftools
+# Create object to use in maftools
 maf <- read.maf(maf = mut, clinicalData = clinical, isTCGA = T)
 ```
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+We can plot a maf summary.
+```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=10}
 plotmafSummary(maf = maf,
                rmOutlier = TRUE,
                addStat = 'median',
                dashboard = TRUE)
 ```
 
+We can draw oncoplot with the top 20 most mutated genes and add metadata information such as molecular subtypes information.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-oncoplot(maf = maf)
+```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=18}
+gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
+lgg.subtypes <- TCGAquery_subtype(tumor = "lgg")
+subtype.info <- plyr::rbind.fill( lgg.subtypes, gbm.subtypes)
+colnames(subtype.info)[1] <- "Tumor_Sample_Barcode" # required
+oncoplot(maf = maf,
+         top = 20,
+         clinicalFeatures = c("Supervised.DNA.Methylation.Cluster","Original.Subtype"), # which columns should be plotted
+         annotationDat = subtype.info) # data frame with metadata
 ```
+
+We can also perform survival analysis by grouping samples from maf based on mutation status of given gene(s).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 plot <- mafSurvival(maf = maf,
@@ -900,11 +914,7 @@ plot <- mafSurvival(maf = maf,
                    Status = 'Overall_Survival_Status',
                    isTCGA = TRUE)
 ```
-                                          
-Oncoprint for LGG samples. Blue defines SNP, green defines insertions and red defines deletions.
-The upper barplot shows the number of these genetic mutation for each patient,
-while the right barplot shows the number of genetic mutations for each gene. The bottom bar shows the group of each sample.
-
+        
 **Overview of genomic alterations by circos plot**
 
 Genomic alterations
@@ -1202,7 +1212,7 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
-```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=10}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=15}
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         filename = NULL,
                         PathTab = ansEA$ResPat,
@@ -1497,7 +1507,7 @@ met <- subset(met,subset = as.character(seqnames(met)) %in% c("chr9"))
 # This data is avaliable in the package (object elmerExample)
 ```
 
-```{r echo=TRUE, message=FALSE,warning=FALSE}
+```{r echo=TRUE, message=FALSE,warning=FALSE, fig.height=8,fig.width=8}
 data(elmerExample)
 #----------------------------
 # Mean methylation
@@ -1553,7 +1563,7 @@ met <- TCGAanalyze_DMR(met,
                        save = FALSE,
                        legend = "State",
                        plot.filename = "LGG_GBM_metvolcano.png",
-                       cores =  parallel::detectCores()/2 # if set to 1 there will be a progress bar
+                       cores = 1 # if set to 1 there will be a progress bar
 )
 ```
 
@@ -2124,7 +2134,7 @@ Sig.probes <- get.diff.meth(data = mae,
                             minSubgroupFrac = 1.0,
                             sig.dif = 0.2, # defualt is 0.3
                             diff.dir = direction, # Search for hypomethylated probes in group 1
-                            cores = 1, 
+                            cores = cores, 
                             dir.out ="result", 
                             pvalue = 0.1)
 
@@ -2155,7 +2165,7 @@ pair <- get.pair(data = mae,
                  filter.portion = 0.3,
                  dir.out = dir.out,
                  diff.dir = direction,
-                 cores = 1,
+                 cores = cores,
                  label = direction)
 
 #-------------------------------------------------------------
@@ -2205,7 +2215,7 @@ The pairs idenfied by ELMER can be visualized through a heatmap using the functi
 The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
 levels of the target genes. The last heatmap shows the distance between the probe and the gene TSS.
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8}
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8, fig.width=10}
 heatmapPairs(data = mae, 
              group.col = group.col,
              group1 = group1, 
@@ -2226,7 +2236,7 @@ LGG group compared to the GBM group) is found in the Figure
 below. 
 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8}
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8,fig.width=15}
 motif.enrichment.plot(motif.enrichment = motif.enrichment, 
                       save = FALSE,
                       significant = list(lowerOR = 1.3)) # Filter motifs in the plot lowerOR > 1.3
