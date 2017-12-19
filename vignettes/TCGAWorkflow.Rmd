@@ -893,13 +893,14 @@ plotmafSummary(maf = maf,
 
 We can draw oncoplot with the top 20 most mutated genes and add metadata information such as molecular subtypes information.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=18}
+```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=10}
 gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
 lgg.subtypes <- TCGAquery_subtype(tumor = "lgg")
 subtype.info <- plyr::rbind.fill( lgg.subtypes, gbm.subtypes)
 colnames(subtype.info)[1] <- "Tumor_Sample_Barcode" # required
 oncoplot(maf = maf,
          top = 20,
+         legendFontSize = 8,
          clinicalFeatures = c("Supervised.DNA.Methylation.Cluster","Original.Subtype"), # which columns should be plotted
          annotationDat = subtype.info) # data frame with metadata
 ```
@@ -1212,7 +1213,7 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
-```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=15}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=12, fig.width=15}
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         filename = NULL,
                         PathTab = ansEA$ResPat,
