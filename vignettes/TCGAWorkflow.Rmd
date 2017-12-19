@@ -1212,7 +1212,7 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nBar = 20)
 ```
 
-```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=10, fig.width=15}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE,fig.height=12, fig.width=15}
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         filename = NULL,
                         PathTab = ansEA$ResPat,
