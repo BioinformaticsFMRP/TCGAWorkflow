@@ -2126,7 +2126,7 @@ Sig.probes <- get.diff.meth(data = mae,
                             cores = cores, 
                             dir.out = dir.out, 
                             pvalue = 0.1)
-getMethdiff <- read_csv(paste0(dir.out,"getMethdiff.",direction,".probes.significant.csv")  )
+getMethdiff <- readr::read_csv(paste0(dir.out,"getMethdiff.",direction,".probes.significant.csv")  )
 ```
 ```{r, warning=FALSE} 
 datatable(getMethdiff[1:10,], 
