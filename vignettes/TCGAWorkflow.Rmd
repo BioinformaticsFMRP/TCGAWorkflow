@@ -46,28 +46,21 @@ suppressPackageStartupMessages({
 # About
   
 This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
-Due to time and space contraints we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
+Due to time and space limitations,  we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
   
 ## Installation
   
 To be able to execute all the steps of this workflow please install it with the following code:
   
 ```{R, eval=FALSE, include=TRUE}
-source("https://bioconductor.org/biocLite.R")
-deps <- c("pathview","clusterProfiler","ELMER", "DO.db","GO.db", 
-          "ComplexHeatmap","maftools","EDASeq", "TCGAbiolinks","AnnotationHub",
-          "gaia","ChIPseeker","minet","BSgenome.Hsapiens.UCSC.hg19",
-          "MotifDb","MotIV", "rGADEM", "motifStack","RTCGAToolbox")
-for(pkg in deps)  if (!pkg %in% installed.packages()) biocLite(pkg, dependencies = TRUE)
-deps <- c("devtools","DT","pbapply","readr","circlize")
-for(pkg in deps)  if (!pkg %in% installed.packages())  install.packages(pkg,dependencies = TRUE)
-devtools::install_github("BioinformaticsFMRP/TCGAWorkflowData")
-devtools::install_github("BioinformaticsFMRP/TCGAWorkflow", dependencies = TRUE)
+source("http://bioconductor.org/workflows.R")
+workflowInstall("TCGAWorkflow")
 ```
 
 ## Loading packages
 
-At the beginning of each section, the packages required to execute the code will be loaded. However the following packages are required for all sections.
+At the beginning of each section, the packages required to execute the code will be loaded. However, 
+the following packages are required for all sections.
 
 - TCGAWorkflowData: this package contains the data necessary to execute each of the analysis
 steps. This is a subset of the downloaded to make the example faster. For a real analysis, please
@@ -125,20 +118,20 @@ activation of epigenetic and transcriptional signatures and networks.
 The effects of these events take place at different spatial and temporal
 scales with interlayer communications and feedback mechanisms creating a
 highly complex dynamic system. To gain insight into the biology of
-tumours most of the research in cancer genomics is aimed at the
+tumors most of the research in cancer genomics is aimed at the
 integration of the observations at multiple molecular scales and the
 analysis of their interplay. Even if many tumors share similar recurrent
 genomic events, their relationships with the observed phenotype are
 often not understood. For example, although we know that the majority of
-the most aggressive form of brain tumours such as glioma harbour the
+the most aggressive form of brain tumors such as glioma harbor the
 mutation of a single gene (IDH), the mechanistic explanation of the
 activation of its characteristic epigenetic and transcriptional
 signatures are still far to be well characterized. Moreover,
 network-based strategies have recently emerged as an effective framework
 for the discovery functional disease drivers that act as main regulators
-of cancer phenotypes. Here we describe a comprehensice workflow that
+of cancer phenotypes. Here we describe a comprehensive workflow that
 integrates many Bioconductor packages in order to analyze and integrate
-the molteplicity of molecular observation layers in large scale cancer
+the multiplicity of molecular observation layers in large-scale cancer
 dataset.
 
 Indeed, recent technological developments allowed the deposition of
@@ -156,7 +149,7 @@ National Institute of Health (NIH) initiative, makes publicly
 available molecular and clinical information for more than 30 types
 of human cancers including exome (variant analysis), single
 nucleotide polymorphism (SNP), DNA methylation, transcriptome
-(mRNA), microRNA (miRNA) and proteome . Sample types available at
+(mRNA), microRNA (miRNA) and proteome. Sample types available at
 TCGA are: primary solid tumors, recurrent solid tumors, blood
 derived normal and tumor, metastatic, and solid tissue normal
 [@weinstein2013cancer].
@@ -165,7 +158,7 @@ derived normal and tumor, metastatic, and solid tissue normal
 National Human Genome Research Institute (NHGRI), the project aims
 to build a comprehensive list of functional elements that have an
 active role in the genome, including regulatory elements that govern
-gene expression. Biosamples includes immortalized cell lines,
+gene expression. Biosamples include immortalized cell lines,
 tissues, primary cells and stem cells [@encode2011user].
 
 -   **The NIH Roadmap Epigenomics Mapping Consortium:** This was
@@ -175,10 +168,10 @@ research. Roadmap maps DNA methylation, histone modifications,
 chromatin accessibility, and small RNA transcripts in stem cells and
 primary ex vivo tissues [@Fingerman; @Bernstein].
 
-Briefly, these three consortia provide large scale epigenomic data onto
+Briefly, these three consortia provide large-scale epigenomic data onto
 a variety of microarrays and next-generation sequencing (NGS) platforms.
 Each consortium encompasses specific types of biological information on
-specific type of tissue or cell and when analyzed together, it provides
+a specific type of tissue or cell and when analyzed together, it provides
 an invaluable opportunity for research laboratories to better understand
 the developmental progression of normal cells to cancer state at the
 molecular level and importantly, correlate these phenotypes with tissue
@@ -186,9 +179,9 @@ of origins.
 
 Although there exists a wealth of possibilities [@kannan2015public] in
 accessing cancer associated data,
-[Bioconductor](http://www.bioconductor.org/) represent the most
+[Bioconductor](http://www.bioconductor.org/) represents the most
 comprehensive set of open source, updated and integrated professional
-tools for the statistical analysis of large scale genomic data. Thus, we
+tools for the statistical analysis of large-scale genomic data. Thus, we
 propose our workflow within Bioconductor to describe how to download,
 process, analyze and integrate cancer data to understand specific
 cancer-related specific questions. However, there is no tool that solves
@@ -203,7 +196,7 @@ to work with genomic and epigenomics data.
 # Methods
 ## Access to the data
 
-TCGA data is accessible via the the NCI Genomic Data Commons (GDC) [data
+TCGA data is accessible via the NCI Genomic Data Commons (GDC) [data
 portal](https://gdc-portal.nci.nih.gov/), [GDC Legacy
 Archive](https://gdc-portal.nci.nih.gov/legacy-archive/search/f) and the
 [Broad Institute’s GDAC Firehose](gdac.broadinstitute.org). The GDC Data
@@ -230,16 +223,16 @@ interest and open access data. While the TCGA data portal provided level
 different levels can be found at [TCGA
 Wiki](https://wiki.nci.nih.gov/display/TCGA/Data+level). However, the
 GDC data portal no longer uses this based classification model in
-levels. Instead a new data model was created, its documentation can be
+levels. Instead, a new data model was created, its documentation can be
 found in [GDC
 documentation](https://gdc.nci.nih.gov/developers/gdc-data-model/gdc-data-model-components).
 In this new model, data can be open or controlled access. While the GDC
 open access data does not require authentication or authorization to
-access it and generally includes high level genomic data that is not
+access it and generally includes high-level genomic data that is not
 individually identifiable, as well as most clinical and all biospecimen
 data elements, the GDC controlled access data requires dbGaP
 authorization and eRA Commons authentication and generally includes
-individually identifiable data such as low level genomic sequencing
+individually identifiable data such as low-level genomic sequencing
 data, germline variants, SNP6 genotype data, and certain clinical data
 elements. The process to obtain access to controlled data is found in
 [GDC web
@@ -253,7 +246,7 @@ accessed using Bioconductor package
 the data provided by Firehose can be accessed by Bioconductor package
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/).
 
-The next steps describes how one could use
+The next steps describe how one could use
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) &
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) to
 download clinical, genomics, transcriptomics, epigenomics data, as well
@@ -274,7 +267,7 @@ download and load the data as an R object.
 API](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api)
 to search the data for a given project and data category and filters the
 results by samples, sample type, file type and others features if
-requested by the user. This function returns a object with a summary
+requested by the user. This function returns an object with a summary
 table with the results found (samples, files and other useful
 information) and the arguments used in the query. The most important
 *GDCquery* arguments are *project* which receives a GDC project
@@ -289,7 +282,7 @@ to use the legacy database or the harmonized database, *file.type*,
 which receives a file type for the searches in the legacy database
 (hg18.seg, hg19.seg, nocnv\_,hg18.seg, nocnv\_hg19.seg,
 rsem.genes.results, rsem.genes.normalized\_results, etc) and *platform*,
-which receives a the platform for the searches in the legacy database
+which receives a platform for the searches in the legacy database
 (HumanMethylation27, Genome\_Wide\_SNP\_6, IlluminaHiSeq\_RNASeqV2,
 etc). A complete list of possible entries for arguments can be found in
 the [TCGAbiolinks
@@ -432,7 +425,7 @@ weight, height, alcohol history) information. This indexed clinical data
 can be obtained using the function *GDCquery\_clinical* which can be
 used as described in listing below. This function has two
 arguments *project* ("TCGA-GBM","TARGET-AML",etc) and *type* ("Clinical"
-or "Biospecimen"). The second method will download the xml files with
+or "Biospecimen"). The second method will download the XML files with
 all clinical data for the patient and retrieve the desired information
 from it. This will give access to all clinical data available which
 includes patient (tumor tissue site, histological type, gender, vital
@@ -443,7 +436,7 @@ end, radiation type, radiation dosage ), new tumor event (days to new
 tumor event after initial treatment, new neoplasm event type, additional
 pharmaceutical therapy), follow up (primary therapy outcome success,
 follow up treatment success, vital status, days to last follow up, date
-of form completion), stage event (pathologic stage, tnm categories),
+of form completion), stage event (pathologic stage),
 admin (batch number, project code, disease code, Biospecimen Core
 Resource).
 
@@ -544,11 +537,11 @@ datatable(gbm.subtypes[1:10,], options = list(scrollX = TRUE, keys = TRUE), rown
 The Bioconductor package
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
 [@samur2014rtcgatoolbox] provides access to Firehose Level 3 and 4 data
-through the function *getFirehoseData*. The following arguments allows
+through the function *getFirehoseData*. The following arguments allow
 users to select the version and tumor type of interest:
 
 -   dataset - Tumor to download. A complete list of possibilities can be
-viewed with *getFirehoseDatasets* function.
+view with *getFirehoseDatasets* function.
 
 -   runDate - Stddata run dates. Dates can be viewed with
 *getFirehoseRunningDates* function.
@@ -565,9 +558,9 @@ By default,
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/) allows
 users to download up to 500 MB worth of data. To increase the size of
 the download, users are encouraged to use *fileSizeLimit* argument. An
-example is found in listingbelow. The *getData* function
-allow users to access the downloaded data (see lines 22-24 of listing
-below as a S4Vector object.
+example is found in listing below. The *getData* function
+allows users to access the downloaded data (see lines 22-24 of listing
+below as an S4Vector object.
 
 ```{R, eval=FALSE, include=TRUE}
 library(RTCGAToolbox)
@@ -588,15 +581,15 @@ gbm.mut <- getData(gbm.data,"Mutations")
 gbm.clin <- getData(gbm.data,"Clinical")
 ```
 
-Finnaly, [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
+Finally, [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
 can access level 4 data, which can be handy when the user requires
 GISTIC results. GISTIC is used to identify genes targeted by somatic
 copy-number alterations (SCNAs) [@mermel2011gistic2].
 
 ```{R, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 # Download GISTIC results
-lastAnalyseDate <- getFirehoseAnalyzeDates(1)
-gistic <- getFirehoseData("GBM",gistic2_Date = lastAnalyseDate)
+lastanalyzedate <- getFirehoseAnalyzeDates(1)
+gistic <- getFirehoseData("GBM",gistic2_Date = lastanalyzedate)
 
 # get GISTIC results
 gistic.allbygene <- getData(gistic,type = "GISTIC", CN = "All")
@@ -621,18 +614,18 @@ datatable(gistic.thresholedbygene,
 Copy number variations (CNVs) have a critical role in cancer development
 and progression. A chromosomal segment can be deleted or amplified as a
 result of genomic rearrangements, such as deletions, duplications,
-insertions and translocations. CNVs are genomic regions greater than 1
+insertions, and translocations. CNVs are genomic regions greater than 1
 kb with an alteration of copy number between two conditions (e.g., Tumor
 *versus* Normal).
 
 TCGA collects copy number data and allows the CNV profiling of cancer.
-Tumor and paired-normal DNA samples were analysed for CNV detection
+Tumor and paired-normal DNA samples were analyzed for CNV detection
 using microarray- and sequencing-based technologies. Level 3 processed
-data are the aberrant regions along the genome resulting from CNV
+data are the aberrant regions of the genome resulting from CNV
 segmentation, and they are available for all copy number technologies.
 
 In this section, we will show how to analyze CNV level 3 data from TCGA
-to identify recurrent alterations in cancer genome. We analyzed GBM 
+to identify recurrent alterations in the cancer genome. We analyzed GBM 
 segmented CNV from SNP array (Affymetrix Genome-Wide Human SNP Array
 6.0).
 
@@ -642,7 +635,7 @@ The only CNV platform available for GBM in TCGA is
 "Affymetrix Genome-Wide Human SNP Array 6.0". Using TCGAbiolinks, we
 queried for CNV SNP6 level 3 data for 20 primary solid tumor samples in the
 legacy database. Data for selected samples were downloaded and prepared
-in a rse objects (RangedSummarizedExperiment).
+in an rse objects (RangedSummarizedExperiment).
 
 ```{r results='hide', eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(TCGAbiolinks)
@@ -665,7 +658,7 @@ gbm.nocnv <- GDCprepare(query.gbm.nocnv, save = TRUE, save.filename = "GBMnocnvh
 
 
 ### Identification of recurrent CNV in cancer
-Cancer related CNV have to be present in many of the analyzed genomes.
+Cancer-related CNV has to be present in many of the analyzed genomes.
 The most significant recurrent CNV were identified using
 [GAIA](http://bioconductor.org/packages/gaia/) [@morganellagaia], an
 iterative procedure where a statistical hypothesis framework is extended
@@ -678,7 +671,7 @@ markers.
 Segmented data retrieved from TCGA were used to generate a matrix
 including all needed information about the observed aberrant regions.
 Furthermore, GAIA requires genomic probes metadata (specific for each
-CNV technology), that can be downloaded from broadinstitute website.
+CNV technology), that can be downloaded from the broadinstitute website.
 
 ```{r results='hide', eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-==--=--==---=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-==--=--==--
@@ -776,7 +769,7 @@ represented in chromosomal overview plots by a statistical score
 corrected p-value* for deletions). Genomic regions identified as
 significantly altered in copy number (*corrected p-value* &lt;
 $10^{-4}$) were then annotated to report amplified and deleted genes
-potentially related with cancer.
+potentially related to cancer.
 
 ### Gene annotation of recurrent CNV
 The aberrant recurrent genomic regions in cancer, as identified by GAIA,
@@ -838,12 +831,11 @@ knitr::kable(head(AmpDel_genes), caption = "Chromosome 9 recurrent deleted genes
 
 ### Visualizing multiple genomic alteration events
 
-In order to visualize multiple genomic alteration events we recommend
+In order to visualize multiple genomic alteration events, we recommend
 using maftools plot which is provided by Bioconductor package
 [maftools](http://bioconductor.org/packages/maftools/)
 [@mayakonda2016maftools]. The listing below shows how to download
-mutation data using *GDCquery\_maf* (line 4) and prepare it to use with 
-maftools.
+mutation data using *GDCquery\_maf* (line 4) and prepare it to use with maftools.
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
 library(maftools)
@@ -883,7 +875,7 @@ clinical$time[is.na(clinical$days_to_death)] <- clinical$days_to_last_follow_up[
 maf <- read.maf(maf = mut, clinicalData = clinical, isTCGA = T)
 ```
 
-We can plot a maf summary.
+We can plot a MAF summary.
 ```{r echo=TRUE, message=FALSE, warning=FALSE,fig.width=10}
 plotmafSummary(maf = maf,
                rmOutlier = TRUE,
@@ -905,7 +897,7 @@ oncoplot(maf = maf,
          annotationDat = subtype.info) # data frame with metadata
 ```
 
-We can also perform survival analysis by grouping samples from maf based on mutation status of given gene(s).
+We can also perform survival analysis by grouping samples from MAF based on mutation status of given gene(s).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 plot <- mafSurvival(maf = maf,
@@ -1082,8 +1074,8 @@ data used for following transcriptomic analysis were downloaded using
 TCGAbiolinks. We downloaded only primary solid tumor (TP) samples, which
 resulted in 516 LGG samples and 156 GBM samples, then prepared it in two
 separate rse objects (*RangedSummarizedExperiment*) saving them as an R
-object with a filename including both the name of the cancer and the
-name of the plaftorm used for gene expression data (see listing
+object with a filename including both the cancer name and the
+name of the platform used for gene expression data (see listing
 below).
 
 
@@ -1122,7 +1114,7 @@ lgg.exp <- GDCprepare(query,
 To pre-process the data, first, we searched for possible outliers using
 the *TCGAanalyze\_Preprocessing* function, which performs an Array Array
 Intensity correlation AAIC (lines 14-17 and 26-29 of listing
-below). In this way we defined a square symmetric matrix of
+below). In this way, we defined a square symmetric matrix of
 pearson correlation among all samples in each cancer type (LGG or GBM).
 This matrix found 0 samples with low correlation (cor.cut = 0.6) that
 can be identified as possible outliers.
@@ -1225,7 +1217,7 @@ The plot shows canonical pathways significantly overrepresented (enriched)
 by the DEGs (differentially expressed genes)  with the number of genes for the main categories of
 three ontologies (GO:biological process, GO:cellular component, and GO:molecular function, respectively).
 The most statistically significant canonical pathways identified in DEGs list are listed according
-to their p value corrected FDR (-Log) (colored bars) and the ratio of list genes found in each
+to their p-value corrected FDR (-Log) (colored bars) and the ratio of list genes found in each
 pathway over the total number of genes in that pathway (ratio, red line).]
 
 *TCGAanalyze\_EAbarplot* outputs a bar chart as shown in figure
@@ -1248,7 +1240,7 @@ Bioconductor package
 [pathview](http://bioconductor.org/packages/pathview/)
 [@luo2013pathview] can be used. Listing below shows an
 example how to use it. It can receive, for example, a named vector of
-gene with the expression level, the pathway.id which can be found in
+genes with their expression level, the pathway.id which can be found in
 [KEGG database](http://www.genome.jp/kegg/pathway.html), the species
 (’hsa’ for Homo sapiens) and the limits for the gene expression.
 
@@ -1296,17 +1288,17 @@ hsa05214 <- pathview::pathview(gene.data  = genelistDEGs,
 The red genes are up-regulated and the green genes are down-regulated in
 the LGG samples compared to GBM.
 
-![\label{gliomapathview} Pathways enrichment analysis : glioma pathway. Red defines genes that are up-regulated and green defines genes that are down-regulated.](hsa05214.pathview.png)
+![\label{gliomapathview} Pathways enrichment analysis: glioma pathway. Red defines genes that are up-regulated and green defines genes that are down-regulated.](hsa05214.pathview.png)
 
 ### Inference of gene regulatory networks
 
 
 Starting with the set of differentially expressed genes, we infer gene
-regulatory networks using the following state-of-the art inference
+regulatory networks using the following state-of-the-art inference
 algorithms: ARACNE [@margolin2006aracne], CLR [@faith2007large], MRNET
 [@meyer2007information] and C3NET [@altay2010inferring]. These methods
 are based on mutual inference and use different heuristics to infer the
-edges in the network. These methods have been made available via
+edges of the network. These methods have been made available via
 Bioconductor/CRAN packages
 ([MINET](http://bioconductor.org/packages/minet/) [@Meyer2008] and
 [c3net](https://cran.r-project.org/web/packages/c3net/index.html),
@@ -1417,7 +1409,7 @@ legend("bottomright", legend=paste(c("aracne","mrnet","clr","c3net"), signif(res
 BioGrid interactions\label{fig::roc_GBM}](roc_biogrid_GBM.png)
 
 In Figure above, the obtained ROC curve and the
-corresponding area under curve (AUC) are presented. It can be observed
+corresponding area under the curve (AUC) are presented. It can be observed
 that CLR and MRNET perform best when comparing the inferred network with
 known interactions from the BioGrid database.
 
@@ -1542,8 +1534,8 @@ methylated).
 
 To find these differentially methylated CpG sites, first, the function
 calculates the difference between the mean DNA methylation (mean of the
-beta-values) of each group for each probe. Second, it test for
-differential expression between two groups using the wilcoxon test
+beta-values) of each group for each probe. Second, it tests for
+differential expression between two groups using the Wilcoxon test
 adjusting by the Benjamini-Hochberg method. Arguments of
 TCGAanalyze\_DMR was set to require a minimum absolute beta-values
 difference of 0.15 and an adjusted p-value of less than $0.05$.
@@ -1568,7 +1560,7 @@ met <- TCGAanalyze_DMR(met,
 )
 ```
 
-Figure below shows the
+The figure below shows the
 volcano plot produced by listing below. This plot aids the
 user in selecting relevant thresholds, as we search for candidate
 biological DMRs.
@@ -1579,7 +1571,7 @@ statistical
 significance)](LGG_GBM_metvolcano.png)
 
 To visualize the level of DNA methylation of these probes across all
-samples, we use heatmaps that can be generate by the Bioconductor
+samples, we use heatmaps that can be generated by the Bioconductor
 package
 [complexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)
 [@ComplexHeatmap]. To create a heatmap using the
@@ -1658,7 +1650,7 @@ accumulation or absence of DNA methylation. For this analysis we use a
 sequence of 100 bases before and after the probe location (See lines 6-8
 in the listing below). An object will be returned which
 contains all relevant information about your motif analysis (i.e.,
-sequence consensus, pwm, chromosome, p-value, etc).
+sequence consensus, PWM, chromosome, p-value, etc).
 
 Using Bioconductor package
 [motifStack](http://bioconductor.org/packages/motifStack/)
@@ -1681,7 +1673,7 @@ gadem <- GADEM(sequence, verbose = FALSE, genome = Hsapiens)
 # How many motifs were found?
 nMotifs(gadem)
 
-# get the number of occurences
+# get the number of occurrences
 nOccurrences(gadem)
 
 # view all sequences consensus
@@ -1711,7 +1703,7 @@ summary(analysis.jaspar)
 plot(analysis.jaspar, ncol=2, top=5, rev=FALSE, main="", bysim=TRUE, cex=0.4)
 
 #  visualize the quality of the results looking into the alignments
-# E-value give an estimation of the match.
+# E-value gives an estimation of the match.
 alignment <- viewAlignments(analysis.jaspar)
 print(alignment[[1]])
 ```
@@ -1721,7 +1713,7 @@ print(alignment[[1]])
 
 Recent studies have shown that providing a deep integrative analysis can
 aid researchers in identifying and extracting biological insight from
-high through put data
+high throughput data
 [@phillips2008role; @shi2014integrative; @rhodes2005integrative]. In
 this section, we will introduce a Bioconductor package called
 [ELMER](http://bioconductor.org/packages/ELMER/) to identify regulatory
@@ -1744,14 +1736,14 @@ gene expression and DNA methylation data are from the same samples, the
 starburst plot can be applied as a meta-analysis tool, combining data
 from different samples [@siegmund2011statistical]. We used the
 *TCGAvisualize\_starburst* function to create a starburst plot. The
-$log_{10}$ (FDR-corrected P value) for DNA methylation is plotted on the
-x axis, and for gene expression on the y axis, for each gene. The
-horizontal black dashed line shows the FDR-adjusted P value of $10^{-2}$
+$log_{10}$ (FDR-corrected p-value) for DNA methylation is plotted on the
+x-axis, and for gene expression on the y-axis, for each gene. The
+horizontal black dashed line shows the FDR-adjusted p-value of $10^{-2}$
 for the expression data and the vertical ones shows the FDR-adjusted P
 value of $10^{-2}$ for the DNA methylation data. While the
-argument met.p.cut and exp.p.cut controls the black dashed lines, the
+argument met.p.cut and exp.p.cut control the black dashed lines, the
 arguments diffmean.cut and logFC.cut will be used to highlight the genes
-that respects these parameters (circled genes in Figure below).
+that respect these parameters (circled genes in Figure below).
 For the example below we set higher p.cuts trying to get the most
 significant list of pair gene/probes. But for the next sections we will
 use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
@@ -1794,8 +1786,8 @@ starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
 ![](starburst.png)
 
 Due to the time constraints, with the reduced number of samples, genes and probes,
-the result showed previously might not be very descriptive. A results with a 
-large data set can be found in [TCGAbiolinks vignette](https://bioconductor.org/packages/release/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html#tcgavisualize_starburst:_integration_of_gene_expression_and_dna_methylation_data).
+the result showed previously might not be very descriptive. A result with a 
+large dataset can be found in [TCGAbiolinks vignette](https://bioconductor.org/packages/release/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html#tcgavisualize_starburst:_integration_of_gene_expression_and_dna_methylation_data).
 
 ### ChIP-seq analysis
 
@@ -1827,7 +1819,7 @@ cat(tabl)
 Besides, ChIP-seq data exists in the ROADMAP database and can be obtained through the
 [AnnotationHub](http://bioconductor.org/packages/AnnotationHub/) package [@annotationHub]
 or from [Roadmap web portal](http://egg2.wustl.edu/roadmap/webportal/processed_data.html).
-The table below shows the description for all the roadmap files that are available through AnnotationHub.
+The table below shows the description of all the roadmap files that are available through AnnotationHub.
 
 ```{r table5, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "  
@@ -1856,13 +1848,13 @@ regions with the regions identified in the starburst plot. The
 narrowPeak files are the ones selected for this step. For a complete
 pipeline with Chip-seq data, Bioconductor provides excellent tutorials
 to work with ChIP-seq and we encourage our readers to review the
-following article [@ChIP-seqbioc]. The first step shown in listing
+following article [@ChIP-seqbioc]. The first step is shown in listing
 below is to download the chip-seq data. The function
 *query* received as argument the annotationHub database (ah) and a list
 of keywords to be used for searching the data, *EpigenomeRoadmap* is
 selecting the roadmap database, *consolidated* is selecting only the
 consolidate epigenomes, *brain* is selecting the brain samples, E068 is
-one of the epigenomes for brain (keywords can be seen in the [summary
+one of the epigenomes for the brain (keywords can be seen in the [summary
 table](https://docs.google.com/spreadsheets/d/1yikGx4MsO9Ei36b64yOy9Vb6oPC5IBGlFbYEt-N6gOM/edit#gid=15))
 and narrowPeak is selecting the type of file. The data downloaded is a
 processed data from an integrative Analysis of 111 reference human
@@ -1892,7 +1884,7 @@ names(histone.marks) <- names(bpChipEpi_brain)
 
 
 The [Chipseeker](http://bioconductor.org/packages/ChIPseeker/) package
-[@yu2015chipseeker] implements functions that uses Chip-seq data to
+[@yu2015chipseeker] implements functions that use Chip-seq data to
 retrieve the nearest genes around the peak, to annotate genomic region
 of the peak, among others. Also, it provides several visualization
 functions to summarize the coverage of the peak, average profile and
@@ -1906,7 +1898,7 @@ understand better the regions found. Listing below
 shows an example of code to plot the average profile. 
 
 To help the user better understand the regions found in the DMR
-analysis, we downloaded histone marks specific for brain tissue using
+analysis, we downloaded histone marks specific to brain tissue using
 the AnnotationHub package that can access the Roadmap database. 
 Next, the Chipseeker was used to visualize how
 histone modifications are enriched onto hypomethylated and
@@ -1922,13 +1914,13 @@ probes <- keepStandardChromosomes(rowRanges(met)[values(met)[,status.col] %in% c
 ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start(ranges(probes)) + 3000))
 
 ### Profile of ChIP peaks binding to TSS regions
-# First of all, for calculate the profile of ChIP peaks binding to TSS regions, we should
+# First of all, to calculate the profile of ChIP peaks binding to TSS regions, we should
 # prepare the TSS regions, which are defined as the flanking sequence of the TSS sites.
-# Then align the peaks that are mapping to these regions, and generate the tagMatrix.
+# Then align the peaks that are mapping to these regions and generate the tagMatrix.
 tagMatrixList <- pbapply::pblapply(histone.marks, function(x) {
   getTagMatrix(keepStandardChromosomes(x), windows = probes, weightCol = "score")
 })
-# change nanmes retrieved with the following command: basename(bpChipEpi_brain$title)
+# change names retrieved with the following command: basename(bpChipEpi_brain$title)
 names(tagMatrixList) <- c("H3K4me1","H3K4me3", "H3K9ac", "H3K9me3", "H3K27ac",  "H3K27me3", "H3K36me3")
 ```
 
@@ -1965,10 +1957,10 @@ if (requireNamespace("ggthemes", quietly = TRUE))
 ```
 
 The hypomethylated and hypermethylated regions are enriched for H3K4me3,
-H3K9ac, H3K27ac and H3K4me1 which indicates regions of enhancers,
+H3K9ac, H3K27ac, and H3K4me1 which indicates regions of enhancers,
 promoters and increased activation of genomic elements. However, these
 regions are associated neither with transcribed regions nor Polycomb
-repression as the H3K36me3 and H3K27me3 heatmaps does not show an
+repression as the H3K36me3 and H3K27me3 heatmaps do not show an
 enrichment nearby the position 0, and the average profile also does not
 show a peak at position 0.
 
@@ -1976,7 +1968,7 @@ show a peak at position 0.
 
 Recently, many studies suggest that enhancers play a major role as
 regulators of cell-specific phenotypes leading to alteration in
-transcriptomes realated to diseases
+transcriptomes related to diseases
 [@giorgio2015large; @groschel2014single; @sur2012mice; @yao2015demystifying].
 In order to investigate regulatory enhancers that can be located at long
 distances upstream or downstream of target genes Bioconductor offer the
@@ -1985,45 +1977,31 @@ distances upstream or downstream of target genes Bioconductor offer the
 is designed to combine DNA methylation and gene expression data from
 human tissues to infer multi-level cis-regulatory networks. It uses DNA
 methylation to identify enhancers and correlates their state with
-expression of nearby genes to identify one or more transcriptional
+the expression of nearby genes to identify one or more transcriptional
 targets. Transcription factor (TF) binding site analysis of enhancers is
 coupled with expression analysis of all TFs to infer upstream
 regulators. This package can be easily applied to TCGA public available
-cancer data sets and custom DNA methylation and gene expression data
+cancer datasets and custom DNA methylation and gene expression data
 sets [@yao2015inferring].
 
 [ELMER](http://bioconductor.org/packages/ELMER/) analysis have 5 main
 steps:
 
-1.  Identify distal probes on HM450K.
+1. Identify distal probes on HM450K.
 
-2.  Identify distal probes with significantly different DNA
-methyaltion level in control group and experiment group.
+2. Identification of distal probes with significant differential DNA methylation (i.e. DMCs) in tumor vs. normal samples.
 
-3.  Identify putative target genes for differentially methylated distal
- probes.
+3. Identification of putative target gene(s) for differentially methylated distal probes.
 
-4.  Identify enriched motifs for the distal  probes which are
-significantly differentially methylated and linked to putative
-target gene.
+4. Identification of enriched motifs within a set of probes in significant probe-gene pairs.
 
-5.  Identify regulatory TFs whose expression associate with DNA
-methylation at motifs.
+5. Identification of master regulator Transcription Factors (TF) for each enriched motif.
 
 This section shows how to use ELMER to analyze TCGA data using as
 example LGG and GBM samples.
 
 ### Preparing the data for ELMER package {#preparing-the-data-for-elmer-package .unnumbered}
 
-After downloading the data with TCGAbiolinks package, some steps are
-still required to use TCGA data with
-[ELMER](http://bioconductor.org/packages/ELMER/). These steps can be
-done with the function *TCGAprepare\_elmer*. This function for the DNA
-methylation data will remove probes with NA values in more than 20%
-samples and remove the annotation data, for RNA expression data it will
-take the log2(expression + 1) of the expression matrix in order to
-linearize the relation between DNA methylation and expression. Also, it
-will prepare the row names of the matrix as required by the package.
 
 The listing below shows how to use
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/)
@@ -2031,7 +2009,13 @@ The listing below shows how to use
 [ELMER](http://bioconductor.org/packages/ELMER/) package. Due to time
 and memory constraints, we will use in this example only data from 10
 LGG patients and 10 GBM patients that have both DNA methylation and gene
-expression data. This samples are the same used in the previous steps.
+expression data. These samples are the same used in the previous steps.
+
+
+To perform ELMER analyses, we need to populate a **MultiAssayExperiment** with a DNA methylation matrix or **SummarizedExperiment** object from HM450K or EPIC platform; a gene expression matrix or SummarizedExperiment object for the same samples; a matrix mapping DNA methylation samples to gene expression samples; and a matrix with sample metadata (i.e. clinical data, molecular subtype, etc.). If TCGA data are used, the last two matrices will be automatically generated.
+If using non-TCGA data,  the matrix with sample metadata should be provided with at least a column with a patient identifier and another one identifying its group which will be used for analysis, if samples in the methylation and expression matrices are not ordered and with same names, a matrix mapping for each patient identifier their DNA methylation samples and their gene expression samples should be provided to the *createMAE* function.
+Based on the genome of reference selected, metadata for the DNA methylation probes, such as genomic coordinates, will be added from http://zwdzwd.github.io/InfiniumAnnotation [@zhou2016comprehensive]; 
+and metadata for gene expression and annotation is added from Ensembl database [@yates2015ensembl] using [biomaRt](http://bioconductor.org/packages/biomaRt/) [@durinck2009mapping]. 
 
 ```{R, eval=FALSE, include=TRUE}
 #----------- 8.3 Identification of Regulatory Enhancers   -------
@@ -2068,22 +2052,15 @@ exp <- GDCprepare(query.exp, save = FALSE)
 save(exp, met, gbm.samples, lgg.samples, file = "elmer.example.rda", compress = "xz")
 ```
 
-Finally, the [ELMER](http://bioconductor.org/packages/ELMER/) input is a
-mee object that contains a DNA methylation matrix, an gene expression
-matrix, a probe information GRanges, the gene information GRanges and a
-data frame summarizing the data. It should be highlighted that samples
-without both the gene expression and DNA methylation data will be
-removed from the mee object.
+Probes from HumanMethylationEPIC (EPIC) array and Infinium HumanMethylation450 (HM450) array are removed from the analysis if they have either internal SNPs close to the $3'$ end of the probe; non-unique mapping to the bisulfite-converted genome; or off-target hybridization due to partial overlap with non-unique elements [@doi:10.1093/nar/gkw967]. This probe metadata information is
+included in [ELMER.data](https://github.com/tiagochst/ELMER.data) package, populated from the source file at http://zwdzwd.github.io/InfiniumAnnotation [@doi:10.1093/nar/gkw967].
+To limit ELMER to the analysis of distal elements, probes located in regions of $\pm2 kb$ around transcription start sites (TSSs) were removed. The distal elements are retrieved using the *get.feature.probe* function.
 
-By default the function *fetch.mee* that is used to create the mee
-object will separate the samples into two groups, the control group
-(normal samples) and the experiment group (tumor samples), but the user
-can relabel the samples to compare different groups. For the next
-sections, we will work with both the experimental group (LGG) and
-control group (GBM).
 
 ```{r, message=FALSE,warning=FALSE}
 library(ELMER)
+library(MultiAssayExperiment)
+library(GenomicRanges)
 distal.probes <- get.feature.probe(genome = "hg19", 
                                    met.platform = "450K")
 
@@ -2102,26 +2079,36 @@ mae <- createMAE(exp = exp,
 ```
 
 ## ELMER analysis
-After preparing the data into a mee object, we executed the five
+
+After preparing the data into an MAE object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for both the hypo
-(distal enhancer probes hypomethylated in the GBM group) and hyper
-(distal enhancer probes hypermethylated in the GBM group) direction. The
-code is shown below. A description of how these distal enhacer probes
-are identified is found in the
-[ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf)
-vignette.
+ direction, which means where are searching for distal enhancer probes hypomethylated in the GBM group. The
+code is shown below. A description of how these distal enhancer probes
+are identified is found in the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette. As the number of samples is small we loosened some of the cut-off values.
+
 
 ```{r, warning=FALSE, results="hide"} 
 cores <- 1 # you can use more cores if you want
 group.col <- "project_id"
 group1 <- "TCGA-GBM"
-group2 <-  "TCGA-LGG"
+group2 <- "TCGA-LGG"
 
 # Available directions are hypo and hyper, we will use only hypo
 # due to speed constraint
-direction <- c("hypo")
+direction <- "hypo"
 dir.out <- paste0("elmer/",direction)
 dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
+```
+
+
+### Identification of differentially methylated CpGs (DMCs)
+
+For each distal probe, samples of each group (group 1 and group 2) are ranked by their DNA methylation beta values, those samples in the lower quintile (20\% samples with the lowest methylation levels) of each group are used to identify if the probe is hypomethylated in group 1 compared to group 2, using an unpaired one-tailed t-test. The 20\% is a parameter to the *diff.meth* function called *minSubgroupFrac*. For the (ungrouped) cancer case, this is set to 20\% as in [@yao2015inferring], because we typically wanted to be able to detect a specific molecular subtype among the tumor samples; these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power (high enough sample numbers to yield t-test p-values that could overcome multiple hypothesis corrections, yet low enough to be able to capture changes in individual molecular subtypes occurring in 20\% or more of the cases.) This number can be set arbitrarily as an input to the *diff.meth* function and should be tuned based on sample sizes in individual studies. 
+
+As we are dealing with a low number of samples, and we are comparing two cancer types the *minSubgroupFrac* parameter is set to 100\% to use all samples in this analysis. 
+
+
+```{r, warning=FALSE, results="hide"} 
 #--------------------------------------
 # STEP 3: Analysis                     |
 #--------------------------------------
@@ -2132,21 +2119,67 @@ Sig.probes <- get.diff.meth(data = mae,
                             group.col = group.col,
                             group1 = group1,
                             group2 =  group2,
-                            minSubgroupFrac = 1.0,
+                            minSubgroupFrac = 1.0, # Use all samples
                             sig.dif = 0.2, # defualt is 0.3
                             diff.dir = direction, # Search for hypomethylated probes in group 1
                             cores = cores, 
-                            dir.out ="result", 
+                            dir.out = dir.out, 
                             pvalue = 0.1)
 
 
+```
+
+### Identification of putative target gene(s) for differentially methylated distal probes
+
+For each differentially methylated distal probe (DMC), the closest 10 upstream 
+genes and the closest 10 downstream genes are tested for inverse correlation between 
+methylation of the probe and expression of the gene (the number 10 can be changed using the *numFlankingGenes* parameter). To select these genes, the probe-gene distance is defined as the distance from the probe to the transcription 
+start site specified by the ENSEMBL gene level annotations [@yates2015ensembl] accessed via
+the R/Bioconductor package [biomaRt](http://bioconductor.org/packages/biomaRt/) [@durinck2009mapping,@durinck2005biomart]. By choosing a constant number of genes to test for each probe, our goal is to avoid systematic false positives for probes in gene-rich regions. This is especially important given the highly non-uniform gene density of mammalian genomes.
+Thus, exactly 20 statistical tests were performed for each probe, as follows. 
+
+For each probe-gene pair, the samples (all samples from both groups) are divided into two 
+groups: the M group, which consisted of the upper methylation quintile (the 20\%
+of samples with the highest methylation at the enhancer probe), and the U group, 
+which consists of the lowest methylation quintile (the 20\% of samples with the 
+lowest methylation.) The 20\% ile cutoff is a configurable parameter *minSubgroupFrac* in the *get.pair* function.
+As with its usage in the *diff.meth* function, the default value of 20\% is a balance, allowing for the identification of changes in a  molecular subtype making up a minority (i.e. 20\%) of cases, while also yielding 
+enough statistical power to make strong predictions. For larger sample sizes or other experimental designs, this could be set even lower.
+
+For each candidate probe-gene pair, 
+the Mann-Whitney U test is used to test the null hypothesis that overall gene 
+expression in group M is greater than or equal than that in group U. 
+This non-parametric test was used in order to minimize the effects 
+of expression outliers, which can  occur across a very wide dynamic range. 
+For each probe-gene pair tested, the raw p-value $P_r$ is corrected for multiple 
+hypothesis using a permutation approach as follows.
+The gene in the pair is held constant, and *x* random methylation probes are 
+chosen to perform the same one-tailed U test, generating a set of *x* permutation
+p-values $P_p$. We chose the x random probes only from among those that were 
+"distal" (farther than $2kb$ from an annotated transcription start site), in order 
+to draw these null-model probes from the same set as the probe being tested [@sham2014statistical]. 
+An empirical p-value $P_e$ value was calculated using the following formula 
+(which introduces a pseudo-count of 1):
+
+\begin{equation}
+P_e = \frac{num(P_p \leq P_r)+ 1}{x+1}
+\end{equation}
+
+Notice that in the *Supervised* mode, no additional filtering is necessary to ensure that the M and U group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
+ 
+In our example, we will reduce the number of closest genes evaluated to 5 (the 2 closest upstream 
+genes and the closest 2 downstream genes). The *mode* is set to "supervised" which will set group 1 (GBM samples)
+as the U group, and the group 2 (LGG samples) as M group.
+Also, to make the example faster, the number of permutation is reduced to 5 (*permu.size* = 5), the raw p-value cut-off is loosened to 0.1 and the empirical p-value to 0.5, but it is recommended in a real analysis to use the default values.
+
+```{r, warning=FALSE, results="hide"} 
 #-------------------------------------------------------------
 # Step 3.2: Identify significant probe-gene pairs            |
 #-------------------------------------------------------------
 # Collect nearby 20 genes for Sig.probes
 message("Get nearby genes")
 nearGenes <- GetNearGenes(data = mae,
-                          numFlankingGenes = 4,
+                          numFlankingGenes = 4, # default is 20 genes
                           probes = Sig.probes$probe)
 
 message("Get anti correlated probes-genes")
@@ -2168,51 +2201,90 @@ pair <- get.pair(data = mae,
                  diff.dir = direction,
                  cores = cores,
                  label = direction)
+```
 
+### Motif enrichment analysis
+In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco] . Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads (using the HOMER specific format with threshold score levels corresponding to p-value 
+$>1^{-4}$). 
+
+For each probe set tested (i.e. the set of all probes occurring in significant probe-gene pairs), a motif enrichment Odds Ratio and a 95\% confidence interval are calculated using following formulas:
+\begin{subequations}
+\begin{align}
+p = \frac{a}{a + b} \\
+P = \frac{c}{c + d} \\
+Odds Ratio = \frac{\frac{p}{(1-p)}}{\frac{P}{1-P}}= \frac{p(1-P)}{P(1-p)}=\frac{ad}{bc} \\
+SD = \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}
+\end{align}
+\end{subequations}
+
+where $a$ is the number of probes within the selected probe set that contains one 
+or more motif occurrences; $b$ is the number of probes within the selected probe 
+set that does not contain a motif occurrence; $c$ and $d$ are the same counts within 
+the entire array probe set (drawn from the same set of distal-only probes using the same definition as the primary analysis). A probe set was considered significantly enriched 
+for a particular motif if the 95\% confidence interval of the Odds Ratio was 
+greater than $1.1$ (specified by option *lower.OR*, $1.1$ is default), and the motif 
+occurred at least 10 times (specified by option *min.incidence*, $10$ is default) in 
+the probe set. 
+
+```{r, warning=FALSE, results="hide"} 
 #-------------------------------------------------------------
 # Step 3.3: Motif enrichment analysis on the selected probes |
 #-------------------------------------------------------------
-if(length(pair$Probe) > 0 ){
-  #-------------------------------------------------------------
-  # Step 3.3: Motif enrichment analysis on the selected probes |
-  #-------------------------------------------------------------
-  enriched.motif <- get.enriched.motif(data = mae,
-                                       probes = pair$Probe, 
-                                       dir.out = dir.out, 
-                                       label = direction,
-                                       min.incidence = 10,
-                                       lower.OR = 1.1)
-  # One of the output from the  previous function is a file with the motif, OR and Number of probes
-  # It will be used for plotting purposes
-  motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",direction, ".motif.enrichment.csv"))
-  
-  if(length(enriched.motif) > 0){
-    #-------------------------------------------------------------
-    # Step 3.4: Identifying regulatory TFs                        |
-    #-------------------------------------------------------------
-    message("get.TFs")
-    
-    TF <- get.TFs(data = mae, 
-                  group.col = group.col,
-                  group1 = group1,
-                  group2 =  group2,
-                  mode = "supervised",
-                  enriched.motif = enriched.motif,
-                  dir.out = dir.out, 
-                  cores = cores, 
-                  diff.dir = direction,
-                  label = direction)
-    
-    # One of the output from the previous function is a file with the raking of TF,
-    # for each motif. It will be used for plotting purposes
-    TF.meth.cor <- get(load(
-      paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pvalue.rda")
-    ))
-  }
-}
+enriched.motif <- get.enriched.motif(data = mae,
+                                     probes = pair$Probe, 
+                                     dir.out = dir.out, 
+                                     label = direction,
+                                     min.incidence = 10,
+                                     lower.OR = 1.1)
+# One of the output from the  previous function is a file with the motif, OR and Number of probes
+# It will be used for plotting purposes
+motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",direction, ".motif.enrichment.csv"))
 ```
 
-The pairs idenfied by ELMER can be visualized through a heatmap using the function heatmapPairs.
+### Identification of master regulator TFs
+
+When a group of enhancers is coordinately altered in a specific sample subset, this is often the result of an altered upstream *master regulator* transcription factor in the gene regulatory network. *ELMER* tries to identify such transcription factors corresponding to each of the TF binding motifs enriched from the previous analysis step.
+For each enriched motif, *ELMER* takes the average DNA methylation of all distal probes (in significant probe-gene pairs) that contain that motif occurrence (within a $\pm 250bp$ region) and compares this average DNA methylation to the expression of each gene annotated as a human TF.
+
+A statistical test is performed for each motif-TF pair, as follows. All samples 
+are divided into two groups: the M group, which consists 
+of the 20\% of samples with the highest average methylation at all motif-adjacent
+probes, and the U group, which consisted of the 20\%  of samples with the lowest 
+methylation. This step is performed by the *get.TFs* function, which takes *minSubgroupFrac* as an input parameter, 
+again with a default of 20\%.
+For each candidate motif-TF pair, the Mann-Whitney U test is used to test 
+the null hypothesis that overall gene expression in group M is greater or equal 
+than that in group U. This non-parametric test was used in order to minimize the 
+effects of expression outliers, which can occur across a very wide dynamic range. 
+For each motif tested, this results in a raw p-value ($P_r$) for each of the human TFs.
+All TFs are ranked by their $-log_{10}(Pr)$ values, and those falling within the top 5\% of 
+this ranking were considered candidate upstream regulators. The best upstream 
+TFs which are known to recognize to specific binding motif are automatically extracted as putative 
+regulatory TFs, and rank ordered plots are created to visually inspect these relationships, as shown in the example below. Because the same motif can be recognized by many transcription factors of the same binding domain family, we define these relationships at both the family and subfamily classification level using the 
+classifications from TFClass database [@wingender2013tfclass]. 
+
+```{r, warning=FALSE, results="hide"} 
+#-------------------------------------------------------------
+# Step 3.4: Identifying regulatory TFs                        |
+#-------------------------------------------------------------
+TF <- get.TFs(data = mae, 
+              group.col = group.col,
+              group1 = group1,
+              group2 =  group2,
+              mode = "supervised",
+              enriched.motif = enriched.motif,
+              dir.out = dir.out, 
+              cores = cores, 
+              diff.dir = direction,
+              label = direction)
+    
+# One of the output from the previous function is a file with the raking of TF,
+# for each motif. It will be used for plotting purposes
+TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pvalue.rda")))
+```
+
+### ELMER visualization functions
+The pairs identified by ELMER can be visualized through a heatmap using the function heatmapPairs.
 The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
 levels of the target genes. The last heatmap shows the distance between the probe and the gene TSS.
 
@@ -2229,8 +2301,7 @@ heatmapPairs(data = mae,
 
 When ELMER Identifies the enriched motifs for the distal enhancer probes
 which are significantly differentially methylated and linked to putative
-target gene, it will plot the Odds Ratio (x axis) for the each motifs
-found.
+target gene, it will plot the Odds Ratio (x-axis) for the each motif found.
 
 The list of motifs for the hyper direction (probes hypermethylated in
 LGG group compared to the GBM group) is found in the Figure
@@ -2260,7 +2331,7 @@ transcription factors (TFs) whose expression is associated with DNA
 methylation at motifs. [ELMER](http://bioconductor.org/packages/ELMER/)
 automatically creates a TF ranking plot for each enriched motif. This
 plot shows the TF ranking plots based on the association score
-$(-log(P value))$ between TF expression and DNA methylation of the
+$(-log(p-value))$ between TF expression and DNA methylation of the
 motif. We can see in Figure below that the top three TFs that are
 associated with a motif found.
 
@@ -2274,7 +2345,7 @@ grid::grid.draw(gg[[1]])
 
 The output of this step is a data frame with the following columns:
 
-1.  motif: the names of motif.
+1.  motif: the motif names.
 
 2.  top.potential.TF: the highest ranking upstream TFs which are known
 recognized the motif.
@@ -2283,10 +2354,10 @@ recognized the motif.
 recognized the motif. top5percent: all TFs which are within top 5%
 list considered candidate upstream regulators
 
-Also, for each motif we can take a look at the three most relevant TFs.
+Also, for each motif, we can take a look at the three most relevant TFs.
 For example, Figure below shows the average DNA methylation level
 of sites with the first motif plotted against the expression of some top TFs
-associated with it. We can see that the GBM samples has a lower average methylation level of sites with
+associated with it. We can see that the GBM samples have a lower average methylation level of sites with
 the motif plotted and a higher average expression of the TFs.
 
 ```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
@@ -2347,8 +2418,8 @@ developed and tested the section "Inference of gene regulatory
 networks". FDA developed and tested section "Genomic analysis". TCS, AC,
 CO, and FDA prepared the first draft of the manuscript. All authors were
 involved in the revision of the draft manuscript and have agreed to the
-final content. Also, AC, TS, CO, MC, GB and HN are authors of the
-TCGAbiolinks package and MC is author of the GAIA package.
+final content. Also, AC, TS, CO, MC, GB, and HN are authors of the
+TCGAbiolinks package and MC is the author of the GAIA package.
 
 # Competing interests {#competing-interests .unnumbered}
 
