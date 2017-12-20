@@ -2076,6 +2076,7 @@ mae <- createMAE(exp = exp,
                  met.platform = "450K",
                  genome = "hg19",
                  TCGA = TRUE)
+mae
 ```
 
 ## ELMER analysis
@@ -2125,10 +2126,13 @@ Sig.probes <- get.diff.meth(data = mae,
                             cores = cores, 
                             dir.out = dir.out, 
                             pvalue = 0.1)
-
-
+getMethdiff <- read_csv(paste0(dir.out,"getMethdiff.",direction,".probes.significant.csv")  )
 ```
-
+```{r, warning=FALSE} 
+datatable(getMethdiff[1:10,], 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = TRUE)
+```
 ### Identification of putative target gene(s) for differentially methylated distal probes
 
 For each differentially methylated distal probe (DMC), the closest 10 upstream 
@@ -2202,7 +2206,12 @@ pair <- get.pair(data = mae,
                  cores = cores,
                  label = direction)
 ```
-
+```{r, warning=FALSE} 
+nearGenes[[1]]
+datatable(pair[1:10,], 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = TRUE)
+```
 ### Motif enrichment analysis
 In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco] . Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads (using the HOMER specific format with threshold score levels corresponding to p-value 
 $>1^{-4}$). 
@@ -2239,6 +2248,12 @@ enriched.motif <- get.enriched.motif(data = mae,
 # One of the output from the  previous function is a file with the motif, OR and Number of probes
 # It will be used for plotting purposes
 motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",direction, ".motif.enrichment.csv"))
+```
+```{r, warning=FALSE} 
+head(enriched.motif[names(enriched.motif)[1]]) ## probes in the given set that have the first motif.
+datatable(motif.enrichment[1:10,], 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = TRUE)
 ```
 
 ### Identification of master regulator TFs
@@ -2283,6 +2298,14 @@ TF <- get.TFs(data = mae,
 TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pvalue.rda")))
 ```
 
+```{r, warning=FALSE} 
+datatable(TF[1:10,], 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = TRUE)
+datatable(TF.meth.cor[1:10,1:10], 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = TRUE)
+```
 ### ELMER visualization functions
 The pairs identified by ELMER can be visualized through a heatmap using the function heatmapPairs.
 The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
