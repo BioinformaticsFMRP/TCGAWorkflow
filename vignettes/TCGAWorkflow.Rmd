@@ -2385,7 +2385,8 @@ by functional roles in gene regulation. We introduced
 [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
 Bioconductor packages in order to illustrate how one can acquire TCGA
 specific data, followed by key steps for genomics analysis using
-[GAIA](http://bioconductor.org/packages/gaia/) package, for
+[GAIA](http://bioconductor.org/packages/gaia/) package and
+[maftools](http://bioconductor.org/packages/maftools/), for
 transcriptomic analysis using
 [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/), 
 [pathview](http://bioconductor.org/packages/pathview/) packages and for
