@@ -53,6 +53,8 @@ Due to time and space limitations,  we downloaded only a subset of the data, for
 To be able to execute all the steps of this workflow please install it with the following code:
   
 ```{R, eval=FALSE, include=TRUE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("TCGAWorkflowData")
 source("http://bioconductor.org/workflows.R")
 workflowInstall("TCGAWorkflow")
 ```
