@@ -2101,7 +2101,7 @@ dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
 ```
 
 
-### Identification of distal probes with significant
+### Identification of differentially methylated CpGs (DMCs)
 
 For each distal probe, samples of each group (group 1 and group 2) are ranked by their DNA methylation beta values, those samples in the lower quintile (20\% samples with the lowest methylation levels) of each group are used to identify if the probe is hypomethylated in group 1 compared to group 2, using an unpaired one-tailed t-test. The 20\% is a parameter to the *diff.meth* function called *minSubgroupFrac*. For the (ungrouped) cancer case, this is set to 20\% as in [@yao2015inferring], because we typically wanted to be able to detect a specific molecular subtype among the tumor samples; these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power (high enough sample numbers to yield t-test p-values that could overcome multiple hypothesis corrections, yet low enough to be able to capture changes in individual molecular subtypes occurring in 20\% or more of the cases.) This number can be set arbitrarily as an input to the *diff.meth* function and should be tuned based on sample sizes in individual studies. 
 
@@ -2204,7 +2204,8 @@ pair <- get.pair(data = mae,
 ```
 
 ### Motif enrichment analysis
-In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco] . Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads (using the HOMER specific format with threshold score levels corresponding to p-value $ \leq 1^{-4}$). 
+In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco] . Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads (using the HOMER specific format with threshold score levels corresponding to p-value 
+$>1^{-4}$). 
 
 For each probe set tested (i.e. the set of all probes occurring in significant probe-gene pairs), a motif enrichment Odds Ratio and a 95\% confidence interval are calculated using following formulas:
 \begin{subequations}
