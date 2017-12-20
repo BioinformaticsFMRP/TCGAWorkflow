@@ -1,6 +1,6 @@
 #'  Biotechnological advances in sequencing have led to an explosion of
-#'  publicly available data via large international consortia such as The
-#'  Cancer Genome Atlas (TCGA), The
+#'  publicly available data via large international consortia such as  
+#'  the NCI Genomic Data Commons (GDC), The
 #'  Encyclopedia of DNA Elements (ENCODE),
 #'  and The NIH Roadmap Epigenomics Mapping Consortium
 #'  (Roadmap). These projects have provided unprecedented opportunities to interrogate the epigenome of
@@ -23,7 +23,7 @@
 #'  low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM). 
 #' @docType package
 #' @name TCGAWorkflow
-#' @import ELMER  downloader SummarizedExperiment  TCGAWorkflowData knitr
+#' @import ELMER  downloader SummarizedExperiment TCGAWorkflowData knitr
 #' @import gaia ChIPseeker ComplexHeatmap maftools
 #' @import minet c3net biomaRt pathview
 #' @import  motifStack TCGAbiolinks graphics pander
