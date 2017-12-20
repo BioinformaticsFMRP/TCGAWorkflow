@@ -1993,7 +1993,7 @@ steps:
 
 3. Identification of putative target gene(s) for differentially methylated distal probes.
 
-4. Identification of enriched motifs within set of probes in significant probe-gene pairs.
+4. Identification of enriched motifs within a set of probes in significant probe-gene pairs.
 
 5. Identification of master regulator Transcription Factors (TF) for each enriched motif.
 
@@ -2080,11 +2080,11 @@ mae <- createMAE(exp = exp,
 
 ## ELMER analysis
 
-After preparing the data into a MAE object, we executed the five
+After preparing the data into an MAE object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for both the hypo
  direction, which means where are searching for distal enhancer probes hypomethylated in the GBM group. The
 code is shown below. A description of how these distal enhancer probes
-are identified is found in the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette. As the numer of samples are small we loosened some of the cut-off values.
+are identified is found in the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette. As the number of samples is small we loosened some of the cut-off values.
 
 
 ```{r, warning=FALSE, results="hide"} 
@@ -2135,7 +2135,7 @@ For each differentially methylated distal probe (DMC), the closest 10 upstream
 genes and the closest 10 downstream genes are tested for inverse correlation between 
 methylation of the probe and expression of the gene (the number 10 can be changed using the *numFlankingGenes* parameter). To select these genes, the probe-gene distance is defined as the distance from the probe to the transcription 
 start site specified by the ENSEMBL gene level annotations [@yates2015ensembl] accessed via
-the R/Bioconductor package [biomaRt](http://bioconductor.org/packages/biomaRt/) [@durinck2009mapping,@durinck2005biomart]. By choosing a constant number of genes to test for each probe, our goal is to avoid systematic false positives for probes in gene rich regions. This is especially important given the highly non-uniform gene density of mammalian genomes.
+the R/Bioconductor package [biomaRt](http://bioconductor.org/packages/biomaRt/) [@durinck2009mapping,@durinck2005biomart]. By choosing a constant number of genes to test for each probe, our goal is to avoid systematic false positives for probes in gene-rich regions. This is especially important given the highly non-uniform gene density of mammalian genomes.
 Thus, exactly 20 statistical tests were performed for each probe, as follows. 
 
 For each probe-gene pair, the samples (all samples from both groups) are divided into two 
@@ -2168,9 +2168,9 @@ P_e = \frac{num(P_p \leq P_r)+ 1}{x+1}
 Notice that in the *Supervised* mode, no additional filtering is necessary to ensure that the M and U group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
  
 In our example, we will reduce the number of closest genes evaluated to 5 (the 2 closest upstream 
-genes and the closest 2 downstream genes). The *mode* is set to supervised which will set group 1 (GBM samples)
+genes and the closest 2 downstream genes). The *mode* is set to "supervised" which will set group 1 (GBM samples)
 as the U group, and the group 2 (LGG samples) as M group.
-Also, to make the example faster, the numner of permutation is reduced to 5 (*permu.size* = 5), the raw p-value cut-off is loosened to 0.1 and the empirical p-value to 0.5, but it is recommended in a real analysis to use the default values.
+Also, to make the example faster, the number of permutation is reduced to 5 (*permu.size* = 5), the raw p-value cut-off is loosened to 0.1 and the empirical p-value to 0.5, but it is recommended in a real analysis to use the default values.
 
 ```{r, warning=FALSE, results="hide"} 
 #-------------------------------------------------------------
@@ -2219,7 +2219,7 @@ SD = \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}
 
 where $a$ is the number of probes within the selected probe set that contains one 
 or more motif occurrences; $b$ is the number of probes within the selected probe 
-set that do not contain a motif occurrence; $c$ and $d$ are the same counts within 
+set that does not contain a motif occurrence; $c$ and $d$ are the same counts within 
 the entire array probe set (drawn from the same set of distal-only probes using the same definition as the primary analysis). A probe set was considered significantly enriched 
 for a particular motif if the 95\% confidence interval of the Odds Ratio was 
 greater than $1.1$ (specified by option *lower.OR*, $1.1$ is default), and the motif 
@@ -2301,8 +2301,7 @@ heatmapPairs(data = mae,
 
 When ELMER Identifies the enriched motifs for the distal enhancer probes
 which are significantly differentially methylated and linked to putative
-target gene, it will plot the Odds Ratio (x-axis) for the each motifs
-found.
+target gene, it will plot the Odds Ratio (x-axis) for the each motif found.
 
 The list of motifs for the hyper direction (probes hypermethylated in
 LGG group compared to the GBM group) is found in the Figure
@@ -2346,7 +2345,7 @@ grid::grid.draw(gg[[1]])
 
 The output of this step is a data frame with the following columns:
 
-1.  motif: the names of motif.
+1.  motif: the motif names.
 
 2.  top.potential.TF: the highest ranking upstream TFs which are known
 recognized the motif.
