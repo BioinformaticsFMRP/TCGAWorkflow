@@ -2126,13 +2126,14 @@ Sig.probes <- get.diff.meth(data = mae,
                             cores = cores, 
                             dir.out = dir.out, 
                             pvalue = 0.1)
-getMethdiff <- readr::read_csv(paste0(dir.out,"/getMethdiff.",direction,".probes.significant.csv")  )
+getMethdiff <- reasdr::read_csv(paste0(dir.out,"/getMethdiff.",direction,".probes.significant.csv")  )
 ```
 ```{r, warning=FALSE} 
 datatable(getMethdiff[1:10,], 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 ```
+
 ### Identification of putative target gene(s) for differentially methylated distal probes
 
 For each differentially methylated distal probe (DMC), the closest 10 upstream 
@@ -2212,6 +2213,7 @@ datatable(pair[1:10,],
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 ```
+
 ### Motif enrichment analysis
 In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco] . Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads (using the HOMER specific format with threshold score levels corresponding to p-value 
 $>1^{-4}$). 
