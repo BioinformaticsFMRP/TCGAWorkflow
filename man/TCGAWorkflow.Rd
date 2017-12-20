@@ -5,8 +5,8 @@
 \alias{TCGAWorkflow}
 \alias{TCGAWorkflow-package}
 \title{Biotechnological advances in sequencing have led to an explosion of
- publicly available data via large international consortia such as The
- Cancer Genome Atlas (TCGA), The
+ publicly available data via large international consortia such as  
+ the NCI Genomic Data Commons (GDC), The
  Encyclopedia of DNA Elements (ENCODE),
  and The NIH Roadmap Epigenomics Mapping Consortium
  (Roadmap). These projects have provided unprecedented opportunities to interrogate the epigenome of
@@ -29,8 +29,8 @@
  low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM).}
 \description{
 Biotechnological advances in sequencing have led to an explosion of
- publicly available data via large international consortia such as The
- Cancer Genome Atlas (TCGA), The
+ publicly available data via large international consortia such as  
+ the NCI Genomic Data Commons (GDC), The
  Encyclopedia of DNA Elements (ENCODE),
  and The NIH Roadmap Epigenomics Mapping Consortium
  (Roadmap). These projects have provided unprecedented opportunities to interrogate the epigenome of
