@@ -1987,7 +1987,7 @@ sets [@yao2015inferring].
 [ELMER](http://bioconductor.org/packages/ELMER/) analysis have 5 main
 steps:
 
-1. Identify distal probes on HM450K.
+1. Identify distal probes on HM450K or EPIC.
 
 2. Identification of distal probes with significant differential DNA methylation (i.e. DMCs) in tumor vs. normal samples.
 
@@ -2314,7 +2314,7 @@ The output of this step is a data frame with the following columns:
 ```{r, warning=FALSE} 
 datatable(TF, 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+          rownames = FALSE)
 datatable(TF.meth.cor[1:10,1:10], 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
