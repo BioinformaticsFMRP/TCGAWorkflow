@@ -2301,6 +2301,16 @@ TF <- get.TFs(data = mae,
 TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pvalue.rda")))
 ```
 
+
+The output of this step is a data frame with the following columns:
+
+- *motif*:  enriched motif name.
+- *top_5percent_TFs*: the top 5\% TFs ranked
+- *potential.TFs.family*: TF from the "top_5percent_TFs"  that belongs to the same family as the TF of the motif,  
+- *top.potential.TFs.family* is the highest ranked TF belonging to the same family as the TF of the motif (same as the first TF from *potential.TFs.family* column). 
+- *potential.TFs.subfamily* and *top.potential.TFs.subfamily* are the same as *potential.TFs.family* and *top.potential.TFs.family*  but considering the subfamily classification instead (you can check the classification at http://hocomoco11.autosome.ru/human/mono?full=true). 
+
+
 ```{r, warning=FALSE} 
 datatable(TF, 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
@@ -2360,17 +2370,6 @@ grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
 gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
 grid::grid.draw(gg[[1]])
 ```	
-
-The output of this step is a data frame with the following columns:
-
-1.  motif: the motif names.
-
-2.  top.potential.TF: the highest ranking upstream TFs which are known
-recognized the motif.
-
-3.  potential.TFs: TFs which are within top 5% list and are known
-recognized the motif. top5percent: all TFs which are within top 5%
-list considered candidate upstream regulators
 
 Also, for each motif, we can take a look at the three most relevant TFs.
 For example, Figure below shows the average DNA methylation level
