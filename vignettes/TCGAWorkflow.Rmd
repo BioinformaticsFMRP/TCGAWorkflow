@@ -2308,6 +2308,7 @@ datatable(TF.meth.cor[1:10,1:10],
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 ```
+
 ### ELMER visualization functions
 The pairs identified by ELMER can be visualized through a heatmap using the function heatmapPairs.
 The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
