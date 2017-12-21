@@ -2253,8 +2253,9 @@ motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",direction, ".motif.enri
 ```
 ```{r, warning=FALSE} 
 head(enriched.motif[names(enriched.motif)[1]]) ## probes in the given set that have the first motif.
-datatable(motif.enrichment[1:10,], 
+datatable(motif.enrichment, 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          filter = 'top',
           rownames = TRUE)
 ```
 
@@ -2301,7 +2302,7 @@ TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pval
 ```
 
 ```{r, warning=FALSE} 
-datatable(TF[1:10,], 
+datatable(TF, 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 datatable(TF.meth.cor[1:10,1:10], 
@@ -2310,6 +2311,7 @@ datatable(TF.meth.cor[1:10,1:10],
 ```
 
 ### ELMER visualization functions
+
 The pairs identified by ELMER can be visualized through a heatmap using the function heatmapPairs.
 The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
 levels of the target genes. The last heatmap shows the distance between the probe and the gene TSS.
@@ -2329,27 +2331,16 @@ When ELMER Identifies the enriched motifs for the distal enhancer probes
 which are significantly differentially methylated and linked to putative
 target gene, it will plot the Odds Ratio (x-axis) for the each motif found.
 
-The list of motifs for the hyper direction (probes hypermethylated in
-LGG group compared to the GBM group) is found in the Figure
+The list of enriched motifs for the hypo direction (probes hypomethylated in
+GBM group compared to the LGG group) with lower OR >= 1.3 is found in the Figure
 below. 
 
 
 ```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=8,fig.width=15}
 motif.enrichment.plot(motif.enrichment = motif.enrichment, 
                       save = FALSE,
-                      significant = list(lowerOR = 1.3)) # Filter motifs in the plot lowerOR > 1.3
+                      significant = list(lowerOR = 1.1)) # Filter motifs in the plot lowerOR > 1.3
 ```
-We selected motifs that had a minimum incidence of 10
-in the given probes set and the smallest lower boundary of 95%
-confidence interval for Odds Ratio of 1.1. These both values are the
-default from the ELMER package.
-
-```{r tableTF, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-datatable(as.data.frame(TF), 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
-```
-
 
 After finding the enriched motifs,
 [ELMER](http://bioconductor.org/packages/ELMER/) identifies regulatory
@@ -2358,11 +2349,12 @@ methylation at motifs. [ELMER](http://bioconductor.org/packages/ELMER/)
 automatically creates a TF ranking plot for each enriched motif. This
 plot shows the TF ranking plots based on the association score
 $(-log(p-value))$ between TF expression and DNA methylation of the
-motif. We can see in Figure below that the top three TFs that are
-associated with a motif found.
+motif. This plot represents the rank of p-values of all TF, the top 3, 
+the TF classified in the same family and sub-family according to TFClass database
+are highlighted. The dashed line represents the top 5% of all TF.
 
 ```{R, eval=FALSE, include=TRUE}
-grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif="AP1", save=FALSE)
+grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
 ```	
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,  fig.align='center',fig.height=8,fig.width=8}
 gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
