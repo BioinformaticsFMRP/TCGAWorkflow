@@ -2256,7 +2256,7 @@ head(enriched.motif[names(enriched.motif)[1]]) ## probes in the given set that h
 datatable(motif.enrichment, 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           filter = 'top',
-          rownames = TRUE)
+          rownames = FALSE)
 ```
 
 ### Identification of master regulator TFs
