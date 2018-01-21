@@ -2244,6 +2244,7 @@ the probe set.
 enriched.motif <- get.enriched.motif(data = mae,
                                      probes = pair$Probe, 
                                      dir.out = dir.out, 
+                                     pvalue = 0.7, # default is 0.05
                                      label = direction,
                                      min.incidence = 10,
                                      lower.OR = 1.1)
