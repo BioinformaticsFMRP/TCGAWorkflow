@@ -2245,6 +2245,7 @@ enriched.motif <- get.enriched.motif(data = mae,
                                      probes = pair$Probe, 
                                      dir.out = dir.out, 
                                      label = direction,
+                                     pvalue = 0.7, # default is FDR < 0.05
                                      min.incidence = 10,
                                      lower.OR = 1.1)
 # One of the output from the  previous function is a file with the motif, OR and Number of probes
