@@ -87,7 +87,7 @@ Due to time and space limitations,  we downloaded only a subset of the data, for
 
 **Bioconductor version**: `r BiocInstaller::biocVersion()`
   
-**Package**: `r packageVersion("TCGAWorkflow)`
+**Package**: `r packageVersion("TCGAWorkflow")`
   
 ## Installation
   
