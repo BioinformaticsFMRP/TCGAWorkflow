@@ -1,9 +1,39 @@
 ---
 title: 'TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor
   packages'
-author: Tiago C. Silva, Antonio Colaprico, Catharina Olsen, Fulvio D’Angelo, Gianluca
-  Bontempi, Michele Ceccarelli, and Houtan Noushmehr
 date: "`r Sys.Date()`"
+author:
+- name: Tiago Chedraoui Silva
+  affiliation: 
+  - &id Department of Genetics, Ribeirao Preto Medical School, University of Sao Paulo, Ribeirao Preto, Brazil
+- name: Antonio Colaprico
+  affiliation:  
+  - &id2 Interuniversity Institute of Bioinformatics in Brussels , Brussels, Belgium
+  - &id3 Machine Learning Group (MLG), University Libre de Bruxelles, Brussels, Belgium
+  email: antonio.colaprico@gmail.com
+- name: Catharina Olsen
+  affiliation: 
+  - *id2
+  - *id3
+  email: colsen@ulb.ac.be
+- name: Fulvio D’Angelo
+  affiliation: 
+  - Department of Science and Technology, University of Sannio, Benevento, Italy
+  - Biogem, Istituto di Ricerche Genetiche Gaetano Salvatore, Avellino, Italy
+  email: fulvio.dan13@gmail.com
+- name: Gianluca Bontempi
+  affiliation: *id3
+  email: gbonte@ulb.ac.be
+- name: Michele Ceccarelli
+  affiliation: 
+  - Department of Science and Technology, University of Sannio, Benevento, Italy.
+  - BIOGEM Istituto di Ricerche Genetiche "G. Salvatore", Ariano Irpino, Italy.
+  email: ceccarelli@unisannio.it
+- name: Houtan Noushmehr
+  affiliation: 
+  - Department of Neurosurgery, Henry Ford Hospital, Detroit, Detroit, MI, USA
+  - *id
+  email: houtana@gmail.com
 output: 
     BiocStyle::html_document:
         toc: true
@@ -20,6 +50,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+  
+  
   
 ```{r setup, include=FALSE, echo=F, warning= F, message=F}
 knitr::opts_chunk$set(message = FALSE, 
@@ -47,14 +79,23 @@ suppressPackageStartupMessages({
   
 This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
 Due to time and space limitations,  we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
+
+
+# Environment
+
+**R version**: `r R.version.string`
+
+**Bioconductor version**: `r BiocInstaller::biocVersion()`
+  
+**Package**: `r packageVersion("TCGAWorkflow)`
   
 ## Installation
   
 To be able to execute all the steps of this workflow please install it with the following code:
   
 ```{R, eval=FALSE, include=TRUE}
-source("http://bioconductor.org/workflows.R")
-workflowInstall("TCGAWorkflow")
+source("https://bioconductor.org/biocLite.R")
+biocLite("TCGAWorkflow")
 ```
 
 ## Loading packages
@@ -572,13 +613,16 @@ lastRunDate <- getFirehoseRunningDates()[1]
 
 # get DNA methylation data, RNAseq2 and clinical data for GBM
 gbm.data <- getFirehoseData(dataset = "GBM",
-                            runDate = lastRunDate, gistic2_Date = getFirehoseAnalyzeDates(1),
-                            Methylation = FALSE, Clinic = TRUE, 
-                            RNAseq2_Gene_Norm = FALSE, Mutation = TRUE,
+                            runDate = lastRunDate, 
+                            gistic2Date = getFirehoseAnalyzeDates(1),
+                            Methylation = FALSE,  
+                            clinical = TRUE,
+                            RNASeq2GeneNorm  = FALSE, 
+                            Mutation = TRUE,
                             fileSizeLimit = 10000)
 
-gbm.mut <- getData(gbm.data,"Mutations")
-gbm.clin <- getData(gbm.data,"Clinical")
+gbm.mut <- getData(gbm.data,"Mutation")
+gbm.clin <- getData(gbm.data,"clinical")
 ```
 
 Finally, [RTCGAToolbox](http://bioconductor.org/packages/RTCGAToolbox/)
@@ -589,11 +633,11 @@ copy-number alterations (SCNAs) [@mermel2011gistic2].
 ```{R, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 # Download GISTIC results
 lastanalyzedate <- getFirehoseAnalyzeDates(1)
-gistic <- getFirehoseData("GBM",gistic2_Date = lastanalyzedate)
+gistic <- getFirehoseData("GBM",gistic2Date = lastanalyzedate)
 
 # get GISTIC results
-gistic.allbygene <- getData(gistic,type = "GISTIC", CN = "All")
-gistic.thresholedbygene <- getData(gistic,type = "GISTIC", CN = "Thresholed")
+gistic.allbygene <- getData(gistic, type = "GISTIC", platform = "AllByGene")
+gistic.thresholedbygene <- getData(gistic, type = "GISTIC", platform = "ThresholdedByGene")
 ```
 
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
