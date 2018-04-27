@@ -933,7 +933,7 @@ plotmafSummary(maf = maf,
 
 We can draw oncoplot with the top 20 most mutated genes and add metadata information such as molecular subtypes information.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE,fig.height=10,fig.width=10}
+```{r echo=TRUE, message=FALSE, warning=FALSE,fig.height=10,fig.width=15}
 gbm.subtypes <- TCGAquery_subtype(tumor = "gbm")
 lgg.subtypes <- TCGAquery_subtype(tumor = "lgg")
 subtype.info <- plyr::rbind.fill( lgg.subtypes, gbm.subtypes)
