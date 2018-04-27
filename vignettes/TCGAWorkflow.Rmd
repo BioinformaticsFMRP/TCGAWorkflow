@@ -6,6 +6,7 @@ author:
 - name: Tiago Chedraoui Silva
   affiliation: 
   - &id Department of Genetics, Ribeirao Preto Medical School, University of Sao Paulo, Ribeirao Preto, Brazil
+  email: tiagochst@gmail.com
 - name: Antonio Colaprico
   affiliation:  
   - &id2 Interuniversity Institute of Bioinformatics in Brussels , Brussels, Belgium
