@@ -19,9 +19,9 @@ author:
   email: colsen@ulb.ac.be
 - name: Fulvio D’Angelo
   affiliation: 
-  - Department of Science and Technology, University of Sannio, Benevento, Italy
-  - Biogem, Istituto di Ricerche Genetiche Gaetano Salvatore, Avellino, Italy
-  email: fulvio.dan13@gmail.com
+  - Institute for Cancer Genetics, Columbia University Medical Center, New York, New York 10032, USA.
+  - BIOGEM Istituto di Ricerche Genetiche ‘G. Salvatore’, Campo Reale, 83031 Ariano Irpino, Italy. 
+  email: fulvio.dangelo@biogem.it
 - name: Gianluca Bontempi
   affiliation: *id3
   email: gbonte@ulb.ac.be
