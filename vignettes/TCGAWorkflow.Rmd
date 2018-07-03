@@ -461,6 +461,7 @@ datatable(clinical[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames
 # if barcode is not set, it will consider all samples.
 # We only set it to make the example faster
 query <- GDCquery(project = "TCGA-GBM",
+                  file.type = "xml",
                   data.category = "Clinical",
                   barcode = c("TCGA-08-0516","TCGA-02-0317")) 
 GDCdownload(query)
