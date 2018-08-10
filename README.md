@@ -41,12 +41,12 @@ All the  package landing pages used in this workflow can be found through the [b
 To be able to execute all the steps of this workflow please install it with the following code:
 
 ```R
-source("https://bioconductor.org/biocLite.R")
+library(BiocManager)
 deps <- c("pathview","clusterProfiler","ELMER", "DO.db","GO.db", 
           "ComplexHeatmap","EDASeq", "TCGAbiolinks","AnnotationHub",
           "gaia","ChIPseeker","minet","BSgenome.Hsapiens.UCSC.hg19",
           "MotifDb","MotIV", "rGADEM", "motifStack","RTCGAToolbox")
-for(pkg in deps)  if (!pkg %in% installed.packages()) biocLite(pkg, dependencies = TRUE)
+for(pkg in deps)  if (!pkg %in% installed.packages()) install(pkg, dependencies = TRUE)
 deps <- c("devtools","DT","pbapply","readr","circlize")
 for(pkg in deps)  if (!pkg %in% installed.packages())  install.packages(pkg,dependencies = TRUE)
 devtools::install_github("BioinformaticsFMRP/TCGAWorkflowData")

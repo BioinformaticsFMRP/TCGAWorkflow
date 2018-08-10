@@ -82,7 +82,7 @@ suppressPackageStartupMessages({
 
 **R version**: `r R.version.string`
 
-**Bioconductor version**: `r BiocInstaller::biocVersion()`
+**Bioconductor version**: `r BiocManager::version()`
   
 **Package**: `r packageVersion("TCGAWorkflow")`
     
@@ -98,8 +98,9 @@ Due to time and space limitations,  we downloaded only a subset of the data, for
 To be able to execute all the steps of this workflow please install it with the following code:
   
 ```{R, eval=FALSE, include=TRUE}
-source("https://bioconductor.org/biocLite.R")
-biocLite("TCGAWorkflow")
+if (!"BiocManager" %in% rownames(installed.packages()))
+     install.packages("BiocManager")
+BiocManager::install("TCGAWorkflow")
 ```
 
 ## Loading packages
