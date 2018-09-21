@@ -509,7 +509,6 @@ datatable(clinical[1:10,], options = list(scrollX = TRUE, keys = TRUE), rownames
 query <- GDCquery(project = "TCGA-GBM",
                   file.type = "xml",
                   data.category = "Clinical",
-                  file.type = "xml", 
                   barcode = c("TCGA-08-0516","TCGA-02-0317")) 
 GDCdownload(query)
 clinical <- GDCprepare_clinic(query, clinical.info = "patient")
