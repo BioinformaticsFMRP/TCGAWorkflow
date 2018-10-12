@@ -2349,7 +2349,8 @@ TF <- get.TFs(data = mae,
               mode = "supervised",
               enriched.motif = enriched.motif,
               dir.out = dir.out, 
-              cores = cores, 
+              cores = cores,
+              save.plots = FALSE,
               diff.dir = direction,
               label = direction)
     
