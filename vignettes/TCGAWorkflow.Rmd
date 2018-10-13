@@ -2266,7 +2266,7 @@ pair <- get.pair(data = mae,
                  label = direction)
 ```
 ```{r, warning=FALSE} 
-nearGenes[[1]]
+head(nearGenes)
 datatable(pair[1:10,], 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
@@ -2384,7 +2384,7 @@ The pairs identified by ELMER can be visualized through a heatmap using the func
 The first heatmap shows the DNA methylation levels, while the second heatmap shows the gene expression
 levels of the target genes. The last heatmap shows the distance between the probe and the gene TSS.
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=6, fig.width=10}
+```{r, echo=TRUE, message=FALSE,eval = FALSE, warnings=FALSE, results='asis',fig.height=6, fig.width=10}
 heatmapPairs(data = mae, 
              group.col = group.col,
              group1 = group1, 
