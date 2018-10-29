@@ -2032,7 +2032,7 @@ targets. Transcription factor (TF) binding site analysis of enhancers is
 coupled with expression analysis of all TFs to infer upstream
 regulators. This package can be easily applied to TCGA public available
 cancer datasets and custom DNA methylation and gene expression data
-sets [@yao2015inferring].
+sets [@yao2015inferring,@ChedraouiSilva148726].
 
 [ELMER](http://bioconductor.org/packages/ELMER/) analysis have 5 main
 steps:
