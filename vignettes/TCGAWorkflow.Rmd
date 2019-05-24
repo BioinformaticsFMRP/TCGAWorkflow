@@ -772,9 +772,10 @@ markersMatrix <- markersMatrix[!duplicated(markerID),]
 # Filter markersMatrix for common CNV
 markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 
-file <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/CNV.hg19.bypos.111213.txt"
-if(!file.exists(basename(file))) downloader::download(file, basename(file))
-commonCNV <- readr::read_tsv(basename(file), progress = FALSE)
+# file <- "ftp://ftp.broadinstitute.org/pub/GISTIC2.0/hg19_support/CNV.hg19.bypos.111213.txt"
+# if(!file.exists(basename(file))) downloader::download(file, basename(file))
+# commonCNV <- readr::read_tsv(basename(file), progress = FALSE)
+data(CNV.hg19.bypos.111213)
 commonID <- paste(commonCNV$Chromosome,commonCNV$Start, sep = ":")
 markersMatrix_fil <- markersMatrix[!markerID %in% commonID,]
 
