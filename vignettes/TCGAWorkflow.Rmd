@@ -2090,7 +2090,7 @@ ELMER is designed to identify differences between two sets of samples within a g
 
  In original version  [@yao2015inferring], the first step - identification of differentially methylated CpG probes (DMCs) - was hard-coded to identify DMCs between non-cancer vs. cancer samples, and the subsequent step was unsupervised, identifying changes within any subset of tumors. In ELMER 2.0, we generalize these strategies so that they are applicable to any paired dataset, including disease vs. healthy tissue for any disease type. 
  
-In the Unsupervised mode, as in ELMER 1.0, it is assumed that at least one of our groups is heterogenous (i.e Breast Invasive Carcinoma primary solid tumors samples might belong to basal,Luminal A, Her2 molecular subtypes), for that reason  for each comparison samples from two most extreme quintiles based on DNA methylation levels were used, generating both the $M$ (methylated) and the $U$ (unmethylated) groups. In the Supervised mode, it is assumed that our groups are homogenous, for that reason the $U$ and $M$ groups are defined strictly by sample group labels, and all samples in each group are used [@ChedraouiSilva148726].
+In the Unsupervised mode, as in ELMER 1.0, it is assumed that at least one of our groups is heterogenous (i.e Breast Invasive Carcinoma primary solid tumors samples might belong to basal,Luminal A, Her2 molecular subtypes), for that reason  for each comparison samples from two most extreme quintiles based on DNA methylation levels were used, generating both the $M$ (methylated) and the $U$ (unmethylated) groups. In the Supervised mode, it is assumed that our groups are homogenous, for that reason the $U$ and $M$ groups are defined strictly by sample group labels, and all samples in each group are used [@ChedraouiSilva148726].
 
 The next steps we will perform ELMER analysis using the supervised mode, which will use all samples from GBM and compare to all LGG samples in all analysis.
 
@@ -2454,3 +2454,5 @@ which was necessary in order to update the TCGAbiolinks package to use
 GDC API.
 
 # References
+
+
