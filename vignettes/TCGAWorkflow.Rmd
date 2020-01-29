@@ -1640,26 +1640,34 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
 status.col <- "status"
-sig.met <- met[rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)],]
+probes <- rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)]
+sig.met <- met[probes,]
 
 
 # top annotation, which sampples are LGG and GBM
 # We will add clinical data as annotation of the samples
 # we will sort the clinical data to have the same order of the DNA methylation matrix
 clinical.order <- clinical[match(substr(colnames(sig.met),1,12),clinical$bcr_patient_barcode),]
-ta = HeatmapAnnotation(df = clinical.order[,c("disease","gender","vital_status","race")],
-                       col = list(disease = c("LGG" = "grey", "GBM" = "black"),
-                                  gender = c("male" = "blue","female" = "pink")))
+
+ta = HeatmapAnnotation(df = clinical.order[, c("disease", "gender", "vital_status", "race")],
+                       col = list(
+                         disease = c("LGG" = "grey", "GBM" = "black"),
+                         gender = c("male" = "blue", "female" = "pink")
+                       ))
 
 # row annotation: add the status for LGG in relation to GBM
 # For exmaple: status.gbm.lgg Hypomethyated means that the
 # mean DNA methylation of probes for lgg are hypomethylated
 # compared to GBM ones.
-ra = rowAnnotation(df = values(sig.met)[status.col],
-                   col = list("status.TCGA.GBM.TCGA.LGG" = 
-                                c("Hypomethylated" = "orange",
-                                  "Hypermethylated" = "darkgreen")),
-                   width = unit(1, "cm"))
+ra = rowAnnotation(
+  df = dmc[probes, status.col],
+  col = list(
+    "status.TCGA.GBM.TCGA.LGG" =
+      c("Hypomethylated" = "orange",
+        "Hypermethylated" = "darkgreen")
+  ),
+  width = unit(1, "cm")
+)
 
 heatmap  <- Heatmap(assay(sig.met),
                     name = "DNA methylation",
@@ -1708,13 +1716,14 @@ library(rGADEM)
 library(BSgenome.Hsapiens.UCSC.hg19)
 library(motifStack)
 library(SummarizedExperiment)
+library(dplyr)
 
 probes <- rowRanges(met)[rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)],]
 # Get hypo/hyper methylated probes and make a 200bp window 
 # surrounding each probe.
 sequence <- RangedData(space = as.character(seqnames(probes)),
-                       IRanges(start = ranges(probes) %>% as.data.frame() %>% pull("start") - 100,
-                               end = ranges(probes) %>% as.data.frame() %>% pull("end") + 100), strand = "*")
+                       IRanges(start = ranges(probes) %>% as.data.frame() %>% dplyr::pull("start") - 100,
+                               end = ranges(probes) %>% as.data.frame() %>% dplyr::pull("end") + 100), strand = "*")
 #look for motifs
 gadem <- GADEM(sequence, verbose = FALSE, genome = Hsapiens)
 
