@@ -737,7 +737,7 @@ markersMatrix <-  readr::read_tsv(basename(file), col_names = FALSE, col_types =
 save(markersMatrix, file = "markersMatrix.rda", compress = "xz")
 ```
 
-```{r, echo=TRUE, message=FALSE,warning=FALSE, include=TRUE}
+```{r gaia, echo=TRUE, message=FALSE,warning=FALSE, include=TRUE}
 cancer <- "GBM"
 message(paste0("Starting ", cancer))
 
@@ -1573,7 +1573,7 @@ difference between the groups of tumors.
 ### Searching for differentially methylated CpG sites
 
 The next step is to define differentially methylated CpG sites between
-the two groups. This can be done using the *TCGAanalyze\_DMR* function
+the two groups. This can be done using the *TCGAanalyze\_DMC* function
 (see listing below). The DNA methylation data (level 3) is
 presented in the form of beta-values that uses a scale ranging from 0.0
 (probes completely unmethylated ) up to 1.0 (probes completely
@@ -1594,7 +1594,7 @@ with the results in the rowRanges.
 
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 #------- Searching for differentially methylated CpG sites     ----------
-met <- TCGAanalyze_DMR(met,
+dmc <- TCGAanalyze_DMC(met,
                        groupCol = "project_id", # a column in the colData matrix
                        group1 = "TCGA-GBM", # a type of the disease type column
                        group2 = "TCGA-LGG", # a type of the disease column
@@ -1639,8 +1639,8 @@ clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 
 # get the probes that are Hypermethylated or Hypomethylated
 # met is the same object of the section 'DNA methylation analysis'
-status.col <- "status.TCGA.GBM.TCGA.LGG"
-sig.met <- met[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),]
+status.col <- "status"
+sig.met <- met[rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)],]
 
 
 # top annotation, which sampples are LGG and GBM
@@ -1707,13 +1707,14 @@ of multiple motifs with different similarity scores.
 library(rGADEM)
 library(BSgenome.Hsapiens.UCSC.hg19)
 library(motifStack)
+library(SummarizedExperiment)
 
-probes <- rowRanges(met)[values(met)[,status.col] %in% c("Hypermethylated" ,"Hypomethylated") ,]
+probes <- rowRanges(met)[rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)],]
 # Get hypo/hyper methylated probes and make a 200bp window 
 # surrounding each probe.
 sequence <- RangedData(space = as.character(seqnames(probes)),
-                       IRanges(start = start(ranges(probes)) - 100,
-                               end = start(ranges(probes)) + 100), strand = "*")
+                       IRanges(start = ranges(probes) %>% as.data.frame() %>% pull("start") - 100,
+                               end = ranges(probes) %>% as.data.frame() %>% pull("end") + 100), strand = "*")
 #look for motifs
 gadem <- GADEM(sequence, verbose = FALSE, genome = Hsapiens)
 
@@ -1769,72 +1770,6 @@ In addition, we show how to integrate the results from the previous
 sections with important epigenomic data derived from both the
 [ENCODE](http://www.encodeproject.org/) and
 [Roadmap](http://www.roadmapepigenomics.org/).
-
-### Integration of DNA methylation & gene expression data 
-
-After finding differentially methylated CpG sites, one might ask whether
-nearby genes also undergo a change in expression either an increase or a
-decrease. DNA methylation at promoters of genes has been shown to be
-associated with silencing of the respective gene. The starburst plot is
-proposed to combine information from two volcano plots and is applicable
-for studies of DNA methylation and gene expression
-[@noushmehr2010identification]. Even though, being desirable that both
-gene expression and DNA methylation data are from the same samples, the
-starburst plot can be applied as a meta-analysis tool, combining data
-from different samples [@siegmund2011statistical]. We used the
-*TCGAvisualize\_starburst* function to create a starburst plot. The
-$log_{10}$ (FDR-corrected p-value) for DNA methylation is plotted on the
-x-axis, and for gene expression on the y-axis, for each gene. The
-horizontal black dashed line shows the FDR-adjusted p-value of $10^{-2}$
-for the expression data and the vertical ones shows the FDR-adjusted P
-value of $10^{-2}$ for the DNA methylation data. While the
-argument met.p.cut and exp.p.cut control the black dashed lines, the
-arguments diffmean.cut and logFC.cut will be used to highlight the genes
-that respect these parameters (circled genes in Figure below).
-For the example below we set higher p.cuts trying to get the most
-significant list of pair gene/probes. But for the next sections we will
-use exp.p.cut = 0.01 and logFC.cut = 1 as the previous sections.
-
-
-```{R, eval=FALSE, include=TRUE}
-#------------------- Starburst plot ------------------------------
-starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
-                                     dataDEGs,    # DEG results
-                                     group1 = "Glioblastoma Multiforme", 
-                                     group2 = "Brain Lower Grade Glioma", 
-                                     filename = "starburst.png",
-                                     genome = "hg19",
-                                     met.platform = "450K",
-                                     met.p.cut = 0.05,
-                                     exp.p.cut = 10^-2,
-                                     diffmean.cut = 0.15,
-                                     logFC.cut = 1,
-                                     width = 15,height = 10,
-                                     names = TRUE)
-```
-
-```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE}
-#------------------- Starburst plot ------------------------------
-starburst <- TCGAvisualize_starburst(met,    # DNA methylation with results
-                                     dataDEGs,    # DEG results
-                                     group1 = "TCGA-GBM", 
-                                     group2 = "TCGA-LGG", 
-                                     filename = "starburst.png",
-                                     genome = "hg19",
-                                     met.platform = "450K",
-                                     met.p.cut = 0.05,
-                                     exp.p.cut = 10^-2,
-                                     diffmean.cut = 0.15,
-                                     logFC.cut = 1,
-                                     width = 15,height = 10,
-                                     names = TRUE)
-```
-
-![](starburst.png)
-
-Due to the time constraints, with the reduced number of samples, genes and probes,
-the result showed previously might not be very descriptive. A result with a 
-large dataset can be found in [TCGAbiolinks vignette](https://bioconductor.org/packages/release/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html#tcgavisualize_starburst:_integration_of_gene_expression_and_dna_methylation_data).
 
 ### ChIP-seq analysis
 
