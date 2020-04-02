@@ -1721,7 +1721,7 @@ library(dplyr)
 probes <- rowRanges(met)[rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)],]
 # Get hypo/hyper methylated probes and make a 200bp window 
 # surrounding each probe.
-sequence <- RangedData(space = as.character(seqnames(probes)),
+sequence <- GRanges(seqnames = as.character(seqnames(probes)),
                        IRanges(start = ranges(probes) %>% as.data.frame() %>% dplyr::pull("start") - 100,
                                end = ranges(probes) %>% as.data.frame() %>% dplyr::pull("end") + 100), strand = "*")
 #look for motifs
