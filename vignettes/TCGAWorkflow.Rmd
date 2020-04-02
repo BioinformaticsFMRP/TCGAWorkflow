@@ -639,7 +639,7 @@ copy-number alterations (SCNAs) [@mermel2011gistic2].
 ```{R, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 # Download GISTIC results
 lastanalyzedate <- getFirehoseAnalyzeDates(1)
-gistic <- getFirehoseData("GBM",gistic2Date = lastanalyzedate)
+gistic <- getFirehoseData("GBM",GISTIC = TRUE, gistic2Date = lastanalyzedate)
 
 # get GISTIC results
 gistic.allbygene <- getData(gistic, type = "GISTIC", platform = "AllByGene")
@@ -1900,7 +1900,7 @@ regions.
 ```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 data(histoneMarks)
 # Create a GR object based on the hypo/hypermethylated probes.
-probes <- keepStandardChromosomes(rowRanges(met)[values(met)[,status.col] %in% c("Hypermethylated","Hypomethylated"),])
+probes <- keepStandardChromosomes(rowRanges(met)[rownames(dmc)[dmc$status %in% c("Hypermethylated in TCGA-GBM", "Hypomethylated in TCGA-GBM")],])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
 ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start(ranges(probes)) + 3000))
 
