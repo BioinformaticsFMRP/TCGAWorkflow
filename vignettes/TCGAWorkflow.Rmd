@@ -763,8 +763,8 @@ cnvMatrix$Chromosome <- as.integer(cnvMatrix$Chromosome)
 # Recurrent CNV identification with GAIA
 colnames(markersMatrix) <- c("Probe.Name", "Chromosome", "Start")
 unique(markersMatrix$Chromosome)
-markersMatrix[markersMatrix$Chromosome == "X","Chromosome"] <- 23
-markersMatrix[markersMatrix$Chromosome == "Y","Chromosome"] <- 24
+markersMatrix[markersMatrix$Chromosome == "X","Chromosome"] <- "23"
+markersMatrix[markersMatrix$Chromosome == "Y","Chromosome"] <- "24"
 markersMatrix$Chromosome <- as.integer(markersMatrix$Chromosome)
 markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 # Removed duplicates
