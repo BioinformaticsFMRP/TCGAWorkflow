@@ -46,6 +46,7 @@ Imports:
     c3net,
     ChIPseeker,
     ComplexHeatmap,
+    ggpubr,
     clusterProfiler,
     downloader (>= 0.4),
     gaia,
@@ -74,4 +75,4 @@ biocViews: Workflow, ResourceQueryingWorkflow
 NeedsCompilation: no
 URL: https://f1000research.com/articles/5-1542/v2
 BugReports: https://github.com/BioinformaticsFMRP/TCGAWorkflow/issues
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0

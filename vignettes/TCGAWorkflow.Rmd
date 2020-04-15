@@ -1556,13 +1556,17 @@ data(elmerExample)
 # summarizedExperiment object
 
 # remove probes with NA (similar to na.omit)
-met <- subset(met,subset = (rowSums(is.na(assay(met))) == 0))
+met <- met[rowSums(is.na(assay(met))) == 0,]
 
-TCGAvisualize_meanMethylation(met,
-                              groupCol = "project_id",
-                              group.legend  = "Groups",
-                              filename = NULL,
-                              print.pvalue = TRUE)
+library(ggpubr)
+ggpubr::ggboxplot(df,
+                   y = "Sample.mean",
+                   x = "groups",
+                   color = "groups",
+                   add = "jitter",
+                   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
+                   xlab = "") + 
+     stat_compare_means() 
 ```
 
 The figure above illustrates a mean DNA methylation plot for each

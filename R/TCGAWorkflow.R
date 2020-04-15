@@ -32,5 +32,5 @@
 #' @importFrom MotIV viewAlignments motifMatch 
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom clusterProfiler bitr
-#' @import DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox
+#' @import DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox ggpubr
 NULL
