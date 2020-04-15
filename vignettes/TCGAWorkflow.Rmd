@@ -56,17 +56,19 @@ vignette: >
   
   
 ```{r setup, include=FALSE, echo=F, warning= F, message=F}
-knitr::opts_chunk$set(message = FALSE, 
-                      warning = FALSE, 
-                      error = FALSE, 
-                      tidy = FALSE,
-                      fig.align="center", 
-                      dpi = 150, 
-                      cache = FALSE,
-                      progress=FALSE, 
-                      quite = TRUE)
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  error = FALSE, 
+  tidy = FALSE,
+  fig.align = "center", 
+  dpi = 150, 
+  cache = FALSE,
+  progress = FALSE, 
+  quite = TRUE
+)
 ```
-  
+
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
 suppressPackageStartupMessages({
   if("TCGAWorkflow" %in% installed.packages()[,1]) {
@@ -83,23 +85,23 @@ suppressPackageStartupMessages({
 **R version**: `r R.version.string`
 
 **Bioconductor version**: `r BiocManager::version()`
-  
+
 **Package**: `r packageVersion("TCGAWorkflow")`
-    
-  
+
+
 # About
-  
+
 This workflow is based on the article: [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](https://f1000research.com/articles/5-1542/v2) [@10.12688/f1000research.8923.2].
 Due to time and space limitations,  we downloaded only a subset of the data, for a real analysis please use all data available. The data used in the examples are available in the package `r Biocpkg("TCGAWorkflowData")`. 
 
 
 ## Installation
-  
+
 To be able to execute all the steps of this workflow please install it with the following code:
-  
+
 ```{R, eval=FALSE, include=TRUE}
 if (!"BiocManager" %in% rownames(installed.packages()))
-     install.packages("BiocManager")
+  install.packages("BiocManager")
 BiocManager::install("TCGAWorkflow")
 ```
 
@@ -941,20 +943,20 @@ oncoplot(maf = maf,
          top = 20,
          legendFontSize = 8,
          clinicalFeatures = c("tissue_or_organ_of_origin")
-         )
+)
 ```
 
 We can also perform survival analysis by grouping samples from MAF based on mutation status of given gene(s).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 plot <- mafSurvival(maf = maf,
-                   genes = "IDH1",
-                   fn = NULL,
-                   time = 'time',
-                   Status = 'Overall_Survival_Status',
-                   isTCGA = TRUE)
+                    genes = "IDH1",
+                    fn = NULL,
+                    time = 'time',
+                    Status = 'Overall_Survival_Status',
+                    isTCGA = TRUE)
 ```
-        
+
 **Overview of genomic alterations by circos plot**
 
 Genomic alterations
@@ -1558,15 +1560,20 @@ data(elmerExample)
 # remove probes with NA (similar to na.omit)
 met <- met[rowSums(is.na(assay(met))) == 0,]
 
+df <- data.frame(
+  "Sample.mean" = colMeans(assay(met), na.rm = TRUE),
+  "groups" = met$project_id
+)
+
 library(ggpubr)
 ggpubr::ggboxplot(df,
-                   y = "Sample.mean",
-                   x = "groups",
-                   color = "groups",
-                   add = "jitter",
-                   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
-                   xlab = "") + 
-     stat_compare_means() 
+                  y = "Sample.mean",
+                  x = "groups",
+                  color = "groups",
+                  add = "jitter",
+                  ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
+                  xlab = "") + 
+  stat_compare_means() 
 ```
 
 The figure above illustrates a mean DNA methylation plot for each
@@ -1726,8 +1733,8 @@ probes <- rowRanges(met)[rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case 
 # Get hypo/hyper methylated probes and make a 200bp window 
 # surrounding each probe.
 sequence <- GRanges(seqnames = as.character(seqnames(probes)),
-                       IRanges(start = ranges(probes) %>% as.data.frame() %>% dplyr::pull("start") - 100,
-                               end = ranges(probes) %>% as.data.frame() %>% dplyr::pull("end") + 100), strand = "*")
+                    IRanges(start = ranges(probes) %>% as.data.frame() %>% dplyr::pull("start") - 100,
+                            end = ranges(probes) %>% as.data.frame() %>% dplyr::pull("end") + 100), strand = "*")
 #look for motifs
 gadem <- GADEM(sequence, verbose = FALSE, genome = Hsapiens)
 
@@ -2078,7 +2085,7 @@ mae
 
 After preparing the data into an MAE object, we executed the five
 [ELMER](http://bioconductor.org/packages/ELMER/) steps for the hypo
- direction, which means where are searching for distal enhancer probes hypomethylated in the GBM group compared to the LGG group. The
+direction, which means where are searching for distal enhancer probes hypomethylated in the GBM group compared to the LGG group. The
 code is shown below. A description of how these distal enhancer probes
 are identified is found in the [ELMER.data](https://bioconductor.org/packages/release/data/experiment/vignettes/ELMER.data/inst/doc/vignettes.pdf) vignette. As the number of samples is small we loosened some of the cut-off values.
 
@@ -2101,8 +2108,8 @@ dir.create(dir.out, showWarnings = FALSE, recursive = TRUE)
 
 ELMER is designed to identify differences between two sets of samples within a given dataset. But, before we start our analysis, it is better to understand the two analysis mode available in ELMER 2.0 (supervised and unsupervised mode) which affects how the samples are selected for each comparison.
 
- In original version  [@yao2015inferring], the first step - identification of differentially methylated CpG probes (DMCs) - was hard-coded to identify DMCs between non-cancer vs. cancer samples, and the subsequent step was unsupervised, identifying changes within any subset of tumors. In ELMER 2.0, we generalize these strategies so that they are applicable to any paired dataset, including disease vs. healthy tissue for any disease type. 
- 
+In original version  [@yao2015inferring], the first step - identification of differentially methylated CpG probes (DMCs) - was hard-coded to identify DMCs between non-cancer vs. cancer samples, and the subsequent step was unsupervised, identifying changes within any subset of tumors. In ELMER 2.0, we generalize these strategies so that they are applicable to any paired dataset, including disease vs. healthy tissue for any disease type. 
+
 In the Unsupervised mode, as in ELMER 1.0, it is assumed that at least one of our groups is heterogenous (i.e Breast Invasive Carcinoma primary solid tumors samples might belong to basal,Luminal A, Her2 molecular subtypes), for that reason  for each comparison samples from two most extreme quintiles based on DNA methylation levels were used, generating both the $M$ (methylated) and the $U$ (unmethylated) groups. In the Supervised mode, it is assumed that our groups are homogenous, for that reason the $U$ and $M$ groups are defined strictly by sample group labels, and all samples in each group are used [@ChedraouiSilva148726].
 
 The next steps we will perform ELMER analysis using the supervised mode, which will use all samples from GBM and compare to all LGG samples in all analysis.
@@ -2175,7 +2182,7 @@ P_e = \frac{num(P_p \leq P_r)+ 1}{x+1}
 \end{equation}
 
 Notice that in the *Supervised* mode, no additional filtering is necessary to ensure that the M and U group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
- 
+
 In our example, we will reduce the number of closest genes evaluated to 5 (the 2 closest upstream 
 genes and the closest 2 downstream genes). The *mode* is set to "supervised" which will set group 1 (GBM samples) as the $U$ group, and the group 2 (LGG samples) as $M$ group.
 Also, to make the example faster, the number of permutation is reduced to 5 (*permu.size* = 5), the raw p-value cut-off is loosened to 0.1 and the empirical p-value to 0.5, but it is recommended in a real analysis to use the default values.
@@ -2219,13 +2226,13 @@ datatable(pair[1:10,],
 
 ### Motif enrichment analysis
 
- To identify enriched motifs and potential upstream regulatory TFs,
+To identify enriched motifs and potential upstream regulatory TFs,
 HOCOMOCO v11 [@kulakovskiy2016hocomoco] TF binding models were used as input for HOMER [@heinz2010simple] to find motif occurrences in a $\pm 250bp$ region around each probe from EPIC and HM450 arrays. Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads (using the HOMER specific format with threshold score levels corresponding to p-value 
 $>1^{-4}$). 
 
 A motif enrichment analysis using Fisher's exact test and Benjamini-Hochberg multiple hypothesis testing correction is performed using as correction background all distal probes.
 
- A probe set was considered significantly enriched 
+A probe set was considered significantly enriched 
 for a particular motif if the 95\% confidence interval of the Odds Ratio was 
 greater than $1.1$ (specified by option *lower.OR*, $1.1$ is default), and the motif 
 occurred at least 10 times (specified by option *min.incidence*, $10$ is default) in 
@@ -2298,7 +2305,7 @@ TF <- get.TFs(data = mae,
               save.plots = FALSE,
               diff.dir = direction,
               label = direction)
-    
+
 # One of the output from the previous function is a file with the raking of TF,
 # for each motif. It will be used for plotting purposes
 TF.meth.cor <- get(load(paste0(dir.out,"/getTF.",direction,".TFs.with.motif.pvalue.rda")))
