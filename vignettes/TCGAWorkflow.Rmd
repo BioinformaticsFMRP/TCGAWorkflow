@@ -2059,7 +2059,7 @@ included in [ELMER.data](https://github.com/tiagochst/ELMER.data) package, popul
 To limit ELMER to the analysis of distal elements, probes located in regions of $\pm2 kb$ around transcription start sites (TSSs) were removed. The distal elements are retrieved using the *get.feature.probe* function.
 
 
-```{r, message=FALSE,warning=FALSE}
+```{r, message = FALSE,warning = FALSE}
 library(ELMER)
 library(MultiAssayExperiment)
 library(GenomicRanges)
@@ -2196,7 +2196,15 @@ message("Get nearby genes")
 nearGenes <- GetNearGenes(data = mae,
                           numFlankingGenes = 4, # default is 20 genes
                           probes = Sig.probes$probe)
+```
 
+```{R}
+length(Sig.probes$probe)
+dim(nearGenes)
+head(nearGenes)
+```
+
+```{r, warning=FALSE, results="hide"} 
 message("Get anti correlated probes-genes")
 pair <- get.pair(data = mae,
                  group.col = group.col,
@@ -2205,8 +2213,6 @@ pair <- get.pair(data = mae,
                  nearGenes = nearGenes,
                  mode = "supervised",
                  minSubgroupFrac = 1, # % of samples to use in to create groups U/M
-                 permu.dir = paste0(dir.out,"/permu"),
-                 permu.size = 5, # Please set to 100000 to get significant results
                  raw.pvalue = 0.1,   # defualt is 0.001
                  Pe = 0.5, # Please set to 0.001 to get significant results
                  filter.probes = TRUE, # See preAssociationProbeFiltering function
@@ -2217,8 +2223,8 @@ pair <- get.pair(data = mae,
                  cores = cores,
                  label = direction)
 ```
+
 ```{r, warning=FALSE} 
-head(nearGenes)
 datatable(pair[1:10,], 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
