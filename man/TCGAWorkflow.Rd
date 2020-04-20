@@ -3,7 +3,9 @@
 \docType{package}
 \name{TCGAWorkflow}
 \alias{TCGAWorkflow}
-\title{Biotechnological advances in sequencing have led to an explosion of
+\title{TCGAWorkflow}
+\description{
+Biotechnological advances in sequencing have led to an explosion of
  publicly available data via large international consortia such as  
  the NCI Genomic Data Commons (GDC), The
  Encyclopedia of DNA Elements (ENCODE),
@@ -25,4 +27,5 @@
  biologically relevant functional epigenomic elements associated with
  cancer. 
  To illustrate our workflow, we analyzed two types of brain tumors: 
- low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM).}
+ low-grade glioma (LGG) versus high-grade glioma (glioblastoma multiform or GBM).
+}

@@ -1,3 +1,5 @@
+#' @title TCGAWorkflow
+#' @description 
 #'  Biotechnological advances in sequencing have led to an explosion of
 #'  publicly available data via large international consortia such as  
 #'  the NCI Genomic Data Commons (GDC), The
