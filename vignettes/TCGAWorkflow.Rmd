@@ -2069,7 +2069,7 @@ distal.probes <- get.feature.probe(genome = "hg19",
 # Recover the data created in the last step
 data(elmerExample)
 rownames(exp) <- values(exp)$ensembl_gene_id
-mae <- createMAE(exp = exp, 
+mae <- createMAE(exp = assay(exp), 
                  met = met,
                  save = TRUE,
                  linearize.exp = TRUE,
@@ -2217,6 +2217,7 @@ pair <- get.pair(data = mae,
                  Pe = 0.5, # Please set to 0.001 to get significant results
                  filter.probes = TRUE, # See preAssociationProbeFiltering function
                  filter.percentage = 0.05,
+                 save = FALSE, # Create CVS file
                  filter.portion = 0.3,
                  dir.out = dir.out,
                  diff.dir = direction,
