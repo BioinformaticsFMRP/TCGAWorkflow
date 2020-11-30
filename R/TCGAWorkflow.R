@@ -31,7 +31,6 @@
 #' @import  motifStack TCGAbiolinks graphics pander
 #' @import circlize pbapply GenomeInfoDb ggplot2 ggthemes parallel
 #' @importFrom rGADEM GADEM nOccurrences getPWM consensus nMotifs
-#' @importFrom MotIV viewAlignments motifMatch 
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom clusterProfiler bitr
 #' @import DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox ggpubr
