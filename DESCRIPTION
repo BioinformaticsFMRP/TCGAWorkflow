@@ -56,7 +56,6 @@ Imports:
     ggthemes,
     graphics,
     minet,
-    MotIV,
     motifStack,
     pathview,
     pbapply,
