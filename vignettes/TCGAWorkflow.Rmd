@@ -40,9 +40,9 @@ output:
         toc: true
         number_sections: false
         toc_depth: 2
-        theme: flatly
         toc_float: true
-        highlight: tango
+        highlight: breezedark
+        theme: lumen
         df_print: kable
         code_folding: hide
 bibliography: bibliography.bib
@@ -636,8 +636,7 @@ By default,
 users to download up to 500 MB worth of data. To increase the size of
 the download, users are encouraged to use *fileSizeLimit* argument. An
 example is found in listing below. The *getData* function
-allows users to access the downloaded data (see lines 22-24 of listing
-below as an S4Vector object.
+allows users to access the downloaded data.
 
 ```{R, eval=FALSE, include=TRUE}
 library(RTCGAToolbox)
@@ -1240,8 +1239,7 @@ TCGAbiolinks. We downloaded only primary solid tumor (TP) samples, which
 resulted in 516 LGG samples and 156 GBM samples, then prepared it in two
 separate rse objects (*RangedSummarizedExperiment*) saving them as an R
 object with a filename including both the cancer name and the
-name of the platform used for gene expression data (see listing
-below).
+name of the platform used for gene expression data.
 
 
 
@@ -1286,8 +1284,8 @@ lgg.exp <- GDCprepare(
 ```
 To pre-process the data, first, we searched for possible outliers using
 the *TCGAanalyze\_Preprocessing* function, which performs an Array Array
-Intensity correlation AAIC (lines 14-17 and 26-29 of listing
-below). In this way, we defined a square symmetric matrix of
+Intensity correlation AAIC.
+In this way, we defined a square symmetric matrix of
 pearson correlation among all samples in each cancer type (LGG or GBM).
 This matrix found 0 samples with low correlation (cor.cut = 0.6) that
 can be identified as possible outliers.
@@ -1652,9 +1650,8 @@ Bioconductor package
 [@TCGAbiolinks]. For this analysis, and due to the time required to
 perform it, we selected only 10 LGG samples and 10 GBM samples that have
 both DNA methylation data from Infinium HumanMethylation450 and gene
-expression from Illumina HiSeq 2000 RNA Sequencing Version 2 analysis
-(lines 1-56 of the listing below describes how to make the
-data acquisition). We started by checking the mean DNA methylation of
+expression from Illumina HiSeq 2000 RNA Sequencing Version 2 analysis.
+We started by checking the mean DNA methylation of
 different groups of samples, then performed a DMR in which we search for
 regions of possible biological significance, (e.g., regions that are
 methylated in one group and unmethylated in the other). After finding
@@ -1669,12 +1666,10 @@ The last type of probe can be used for sample identification and
 tracking and should be excluded for differential methylation analysis
 according to the [ilumina
 manual](https://support.illumina.com/content/dam/illumina-support/documents/myillumina/90666eaa-0c66-48b4-8199-3be99b2b3ef9/genomestudio_methylation_v1.8_user_guide_11319130_b.pdf).
-Therefore, the rs probes were removed (see listing below lines
-68). Also, probes in chromosomes X, Y were removed to eliminate
+Therefore, the rs probes were removed. Also, probes in chromosomes X, Y were removed to eliminate
 potential artifacts originating from the presence of a different
 proportion of males and females [@marabita2013evaluation]. The last
-pre-processing steps were to remove probes with at least one NA value
-(see listing below lines 65).
+pre-processing steps were to remove probes with at least one NA value.
 
 After this pre-processing step and using the function
 *TCGAvisualize\_meanMethylation* function, we can look at the mean DNA
@@ -1682,8 +1677,7 @@ methylation of each patient in each group. It receives as argument a
 *SummarizedExperiment* object with the DNA methylation data, and the
 arguments *groupCol* and *subgroupCol* which should be two columns from
 the sample information matrix of the *SummarizedExperiment* object
-(accessed by the *colData* function) (see listing below lines
-70-74).
+(accessed by the *colData* function).
 
 ```{R, eval=FALSE, include=TRUE}
 #----------------------------
@@ -1885,8 +1879,8 @@ The user may be interested in looking for unique signatures in the
 regions defined by ‘differentially methylated’ to identify candidate
 transcription factors that could bind to these elements affected by the
 accumulation or absence of DNA methylation. For this analysis we use a
-sequence of 100 bases before and after the probe location (See lines 6-8
-in the listing below). An object will be returned which
+sequence of 100 bases before and after the probe location.
+An object will be returned which
 contains all relevant information about your motif analysis (i.e.,
 sequence consensus, PWM, chromosome, p-value, etc).
 
@@ -2304,10 +2298,13 @@ Sig.probes <- get.diff.meth(
   pvalue = 0.1
 )
 ```
+
 ```{r, warning=FALSE} 
-datatable(Sig.probes[1:10,], 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+datatable(
+  data = Sig.probes[1:10,], 
+  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+  rownames = TRUE
+)
 ```
 
 ### Identification of putative target gene(s) for differentially methylated distal probes
@@ -2433,12 +2430,10 @@ enriched.motif <- get.enriched.motif(
 # It will be used for plotting purposes
 motif.enrichment <- read.csv(paste0(dir.out,"/getMotif.",direction, ".motif.enrichment.csv"))
 ```
+
 ```{r, warning=FALSE} 
 head(enriched.motif[names(enriched.motif)[1]]) ## probes in the given set that have the first motif.
-datatable(motif.enrichment, 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          filter = 'top',
-          rownames = FALSE)
+motif.enrichment %>% head %>% gt::gt()
 ```
 
 ### Identification of master regulator TFs
@@ -2540,10 +2535,12 @@ GBM group compared to the LGG group) with lower OR >= 1.1 is found in the Figure
 below. 
 
 
-```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=4,fig.width=15}
-motif.enrichment.plot(motif.enrichment = motif.enrichment, 
-                      save = FALSE,
-                      significant = list(lowerOR = 1.1)) # Filter motifs in the plot lowerOR > 1.3
+```{r, echo=TRUE, message=FALSE, warnings=FALSE, results='asis',fig.height=7,fig.width=15}
+motif.enrichment.plot(
+  motif.enrichment = motif.enrichment, 
+  save = FALSE,
+  significant = list(lowerOR = 1.1)
+) # Filter motifs in the plot lowerOR > 1.3
 ```
 
 After finding the enriched motifs,
@@ -2561,7 +2558,7 @@ are highlighted. The dashed line represents the top 5% of all TF.
 grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
 ```	
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,  fig.align='center',fig.height=8,fig.width=8}
-gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
+gg <- TF.rank.plot(motif.pvalue = TF.meth.cor, motif=TF$motif[1], save=FALSE)
 grid::grid.draw(gg[[1]])
 ```	
 
@@ -2573,15 +2570,20 @@ the motif plotted and a higher average expression of the TFs.
 
 ```{r results='asis', echo=TRUE, message=FALSE, warning=FALSE}
 png("TF.png",width = 800, height = 400)
-scatter.plot(mae, 
-             category = group.col, 
-             save = FALSE, 
-             lm_line = TRUE,
-             byTF=list(TF=unlist(stringr::str_split(TF[1,"top_5percent_TFs"],";"))[1:4], 
-                       probe=enriched.motif[[TF$motif[1]]]))
+scatter.plot(
+  data = mae, 
+  category = group.col, 
+  save = FALSE, 
+  lm_line = TRUE,
+  byTF = list(
+    TF = unlist(stringr::str_split(TF[1,"top_5percent_TFs"],";"))[1:4], 
+    probe = enriched.motif[[TF$motif[1]]]
+  )
+)
 dev.off()
 ```
-![](TF.png)
+
+![](TF.png){ width=100%}
 
 
 
