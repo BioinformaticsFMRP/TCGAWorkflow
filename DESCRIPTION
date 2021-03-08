@@ -67,7 +67,8 @@ Imports:
     SummarizedExperiment,
     TCGAbiolinks,
     TCGAWorkflowData (>= 1.9.0),
-    DT
+    DT,
+    gt
 License: Artistic-2.0
 VignetteBuilder: knitr
 biocViews: Workflow, ResourceQueryingWorkflow

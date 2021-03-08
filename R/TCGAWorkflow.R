@@ -33,5 +33,5 @@
 #' @importFrom rGADEM GADEM nOccurrences getPWM consensus nMotifs
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom clusterProfiler bitr
-#' @import DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox ggpubr
+#' @import gt DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox ggpubr
 NULL

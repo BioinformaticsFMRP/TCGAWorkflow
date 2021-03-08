@@ -44,7 +44,7 @@ output:
         toc_float: true
         highlight: tango
         df_print: kable
-        code_folding: show
+        code_folding: hide
 bibliography: bibliography.bib
 
 vignette: >
@@ -680,18 +680,8 @@ gistic.thresholedbygene <- getData(gistic, type = "GISTIC", platform = "Threshol
 
 ```{R, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 data(GBMGistic)
-datatable(
-  data = gistic.allbygene,
-  filter = 'top',
-  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-  rownames = FALSE
-)
-datatable(
-  data = gistic.thresholedbygene,
-  filter = 'top',
-  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-  rownames = FALSE
-)
+gistic.allbygene %>% head() %>% gt::gt()
+gistic.thresholedbygene %>% head() %>% gt::gt()
 ```
 
 ## Genomic analysis
@@ -1086,38 +1076,63 @@ circos.initializeWithIdeogram()
 # Add CNV results
 colors <- c("forestgreen","firebrick")
 names(colors)  <- c(0,1)
-circos.genomicTrackPlotRegion(s.cnv,  ylim = c(0,1.2),
-                              panel.fun = function(region, value, ...) {
-                                circos.genomicRect(region, value, ytop.column = 2, ybottom = 0,
-                                                   col = colors[value[[1]]], 
-                                                   border="white")
-                                cell.xlim = get.cell.meta.data("cell.xlim")
-                                circos.lines(cell.xlim, c(0, 0), lty = 2, col = "#00000040")
-                              })
+circos.genomicTrackPlotRegion(
+  s.cnv,  ylim = c(0,1.2),
+  panel.fun = function(region, value, ...) {
+    circos.genomicRect(region, value, ytop.column = 2, ybottom = 0,
+                       col = colors[value[[1]]], 
+                       border="white")
+    cell.xlim = get.cell.meta.data("cell.xlim")
+    circos.lines(cell.xlim, c(0, 0), lty = 2, col = "#00000040")
+  })
 # Add mutation results
 colors <- c("blue","green","red","gold")
 names(colors)  <- typeNames[1:4]
-circos.genomicTrackPlotRegion(s.mut, ylim = c(1.2,4.2),
-                              panel.fun = function(region, value, ...) {
-                                circos.genomicPoints(region, value, cex = 0.8, pch = 16, col = colors[value[[2]]], ...)
-                              })
+circos.genomicTrackPlotRegion(
+  s.mut, ylim = c(1.2,4.2),
+  panel.fun = function(region, value, ...) {
+    circos.genomicPoints(region, value, cex = 0.8, pch = 16, col = colors[value[[2]]], ...)
+  })
 
 circos.clear()
 
-legend(-0.2, 0.2, bty="n", y.intersp=1, c("Amp","Del"), pch=15, 
-       col=c("firebrick","forestgreen"), title="CNVs", text.font=1, cex=0.4, title.adj=0)
-legend(-0.2, 0, bty="n", y.intersp=1, names(colors), pch=16, 
-       col=colors, title="Mutations", text.font=1, cex=0.4, title.adj=0)
+legend(
+  -0.2,
+  0.2,
+  bty = "n",
+  y.intersp = 1,
+  c("Amp", "Del"),
+  pch = 15,
+  col = c("firebrick", "forestgreen"),
+  title = "CNVs",
+  text.font = 1,
+  cex = 0.4,
+  title.adj = 0
+)
+legend(
+  -0.2,
+  0,
+  bty = "n",
+  y.intersp = 1,
+  names(colors),
+  pch = 16,
+  col = colors,
+  title = "Mutations",
+  text.font = 1,
+  cex = 0.4,
+  title.adj = 0
+)
 ```
 
 ```{r results='asis', echo=TRUE, message=FALSE,warning=FALSE}
 par(mar=c(1,1,1,1),cex=1.5)
-circos.par("start.degree" = 90, 
-           canvas.xlim = c(0, 1), 
-           canvas.ylim = c(0, 1), 
-           gap.degree = 270,
-           cell.padding = c(0, 0, 0, 0), 
-           track.margin = c(0.005, 0.005)
+circos.par(
+  "start.degree" = 90, 
+  canvas.xlim = c(0, 1), 
+  canvas.ylim = c(0, 1), 
+  gap.degree = 270,
+  cell.padding = c(0, 0, 0, 0), 
+  track.margin = c(0.005, 0.005)
 )
 circos.initializeWithIdeogram(chromosome.index = "chr17")
 circos.par(cell.padding = c(0, 0, 0, 0))
@@ -1162,12 +1177,13 @@ i_track = get.cell.meta.data("track.index")
 circos.genomicTrackPlotRegion(
   data = s.mutt, ylim = c(0,1),
   panel.fun = function(region, value, ...) {
-    circos.genomicText(region, value, 
-                       y = 1, 
-                       labels.column = 3,
-                       col = colors[value[[2]]],
-                       facing = "clockwise", adj = c(1, 0.5),
-                       posTransform = posTransform.text, cex = 0.4, niceFacing = TRUE)
+    circos.genomicText(
+      region, value, 
+      y = 1, 
+      labels.column = 3,
+      col = colors[value[[2]]],
+      facing = "clockwise", adj = c(1, 0.5),
+      posTransform = posTransform.text, cex = 0.4, niceFacing = TRUE)
   }, track.height = 0.1, bg.border = NA
 )
 
@@ -2379,9 +2395,11 @@ pair <- get.pair(
 ```
 
 ```{r, warning=FALSE} 
-datatable(pair[1:10,], 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+datatable(
+  pair[1:10,], 
+  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+  rownames = TRUE
+)
 ```
 
 ### Motif enrichment analysis
