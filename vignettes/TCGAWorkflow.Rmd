@@ -44,7 +44,6 @@ output:
         highlight: breezedark
         theme: lumen
         df_print: kable
-        code_folding: hide
 bibliography: bibliography.bib
 
 vignette: >
