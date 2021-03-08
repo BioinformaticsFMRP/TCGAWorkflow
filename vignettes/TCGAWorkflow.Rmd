@@ -970,13 +970,19 @@ lgg_clin <- GDCquery_clinic(project = "TCGA-LGG", type = "Clinical")
 # we will will plyr rbind.fill, to have all columns from both files
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
 colnames(clinical)[1] <- "Tumor_Sample_Barcode"
-clinical$Overall_Survival_Status <- 1
-clinical$Overall_Survival_Status[which(clinical$vital_status != "dead")] <- 0
+
+# we need to create a binary variable 1 is dead 0 is not dead
+plyr::count(clinical$vital_status)
+clinical$Overall_Survival_Status <- 1 # dead
+clinical$Overall_Survival_Status[which(clinical$vital_status != "Dead")] <- 0
+
+# If patient is not dead we don't have days_to_death (NA)
+# we will set it as the last day we know the patient is still alive
 clinical$time <- clinical$days_to_death
 clinical$time[is.na(clinical$days_to_death)] <- clinical$days_to_last_follow_up[is.na(clinical$days_to_death)]
 
 # Create object to use in maftools
-maf <- read.maf(maf = mut, clinicalData = clinical, isTCGA = T)
+maf <- read.maf(maf = mut, clinicalData = clinical, isTCGA = TRUE)
 ```
 
 We can plot a MAF summary.
@@ -1005,8 +1011,7 @@ We can also perform survival analysis by grouping samples from MAF based on muta
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 plot <- mafSurvival(
   maf = maf,
-  genes = "IDH1",
-  fn = NULL,
+  genes = "TP53",
   time = 'time',
   Status = 'Overall_Survival_Status',
   isTCGA = TRUE
