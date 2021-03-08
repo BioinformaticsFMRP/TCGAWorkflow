@@ -783,27 +783,31 @@ message(paste0("Starting ", cancer))
 data(GBMnocnvhg19)
 data(markersMatrix)
 
-# Add label (0 for loss, 1 for gain)
-cnvMatrix <- cbind(cnvMatrix,Label=NA)
-cnvMatrix[cnvMatrix[,"Segment_Mean"] < -0.3,"Label"] <- 0
-cnvMatrix[cnvMatrix[,"Segment_Mean"] > 0.3,"Label"] <- 1
-cnvMatrix <- cnvMatrix[!is.na(cnvMatrix$Label),]
+head(cnvMatrix)
+head(markersMatrix)
 
+# Add label (0 for loss, 1 for gain)
+cnvMatrix <- cnvMatrix %>% dplyr::filter(abs(cnvMatrix$Segment_Mean) > 0.3)
+cnvMatrix$Aberration <- ifelse(cnvMatrix$Segment_Mean > 0.3, 1, 0)
 # Remove "Segment_Mean" and change col.names
-cnvMatrix <- cnvMatrix[,-6]
+cnvMatrix$Segment_Mean <- NULL
 colnames(cnvMatrix) <- c("Sample.Name", "Chromosome", "Start", "End", "Num.of.Markers", "Aberration")
 
 # Substitute Chromosomes "X" and "Y" with "23" and "24"
-cnvMatrix[cnvMatrix$Chromosome == "X","Chromosome"] <- 23
-cnvMatrix[cnvMatrix$Chromosome == "Y","Chromosome"] <- 24
+cnvMatrix$Chromosome[cnvMatrix$Chromosome == "X"] <- "23"
+cnvMatrix$Chromosome[cnvMatrix$Chromosome == "Y"] <- "24"
 cnvMatrix$Chromosome <- as.integer(cnvMatrix$Chromosome)
+cnvMatrix <- cnvMatrix %>% as.data.frame()
 
 # Recurrent CNV identification with GAIA
 colnames(markersMatrix) <- c("Probe.Name", "Chromosome", "Start")
 unique(markersMatrix$Chromosome)
-markersMatrix[markersMatrix$Chromosome == "X","Chromosome"] <- "23"
-markersMatrix[markersMatrix$Chromosome == "Y","Chromosome"] <- "24"
+
+markersMatrix$Chromosome[markersMatrix$Chromosome == "X"] <- "23"
+markersMatrix$Chromosome[markersMatrix$Chromosome == "Y"] <- "24"
 markersMatrix$Chromosome <- as.integer(markersMatrix$Chromosome)
+markersMatrix <- markersMatrix %>% as.data.frame()
+
 markerID <- paste(markersMatrix$Chromosome,markersMatrix$Start, sep = ":")
 # Removed duplicates
 markersMatrix <- markersMatrix[!duplicated(markerID),]
@@ -819,18 +823,27 @@ markersMatrix_fil <- markersMatrix[!markerID %in% commonID,]
 
 library(gaia)
 set.seed(200)
-markers_obj <- load_markers(as.data.frame(markersMatrix_fil))
-nbsamples <- length(unique(cnvMatrix$Sample))
-cnv_obj <- load_cnv(cnvMatrix, markers_obj, nbsamples)
+markers_obj <- load_markers(
+  marker_matrix = markersMatrix_fil %>% as.data.frame()
+)
+
+nbsamples <- length(unique(cnvMatrix$Sample.Name))
+cnv_obj <- load_cnv(
+  segmentation_matrix = cnvMatrix  %>% as.data.frame(), 
+  markers_list = markers_obj, 
+  num_of_samples = nbsamples
+)
+
 suppressWarnings({
-  results <- runGAIA(cnv_obj,
-                     markers_obj,
-                     output_file_name = paste0("GAIA_",cancer,"_flt.txt"),
-                     aberrations = -1,  # -1 to all aberrations
-                     chromosomes = 9, # -1 to all chromosomes
-                     approximation = TRUE, # Set to TRUE to speed up the time requirements
-                     num_iterations = 5000, # Reduced to speed up the time requirements
-                     threshold = 0.25)
+  results <- runGAIA(
+    cnv_obj = cnv_obj,
+    markers_obj = markers_obj,
+    output_file_name = paste0("GAIA_",cancer,"_flt.txt"),
+    aberrations = -1,  # -1 to all aberrations
+    chromosomes = 9, # -1 to all chromosomes
+    approximation = TRUE, # Set to TRUE to speed up the time requirements
+    num_iterations = 5000, # Reduced to speed up the time requirements
+    threshold = 0.25)
 })
 # Set q-value threshold
 # Use a smalled value for your analysis. We set this as high values
@@ -839,13 +852,16 @@ suppressWarnings({
 threshold <- 0.3
 
 # Plot the results
-RecCNV <- t(apply(results,1,as.numeric))
-colnames(RecCNV) <- colnames(results)
-RecCNV <- cbind(RecCNV, score = 0)
+mode(results) <- "numeric" # our results are character we need to transform to numeric
+RecCNV <- results %>% as.data.frame()
+RecCNV$score <- 0
+
+# replace 0 q-value to min non-zero
 minval <- format(min(RecCNV[RecCNV[,"q-value"] != 0,"q-value"]), scientific = FALSE)
-minval <- substring(minval,1, nchar(minval) - 1)
-RecCNV[RecCNV[,"q-value"] == 0,"q-value"] <- as.numeric(minval)
-RecCNV[,"score"] <- sapply(RecCNV[,"q-value"],function(x) -log10(as.numeric(x)))
+minval <- substring(minval,1, nchar(minval) - 1) %>% as.numeric
+RecCNV$`q-value`[RecCNV$`q-value` == 0] <- minval
+
+RecCNV$score <- -log10(RecCNV$`q-value`)
 RecCNV[RecCNV[,"q-value"] == as.numeric(minval),]
 
 gaiaCNVplot(RecCNV,threshold)
@@ -875,13 +891,13 @@ library(GenomicRanges)
 library(GenomicRanges)
 # Get gene information from GENCODE using biomart
 genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = "hg19") 
-genes <- genes[genes$external_gene_id != "" & genes$chromosome_name %in% c(1:22,"X","Y"),]
+genes <- genes[genes$external_gene_name != "" & genes$chromosome_name %in% c(1:22,"X","Y"),]
 genes[genes$chromosome_name == "X", "chromosome_name"] <- 23
 genes[genes$chromosome_name == "Y", "chromosome_name"] <- 24
 genes$chromosome_name <- sapply(genes$chromosome_name,as.integer)
 genes <- genes[order(genes$start_position),]
 genes <- genes[order(genes$chromosome_name),]
-genes <- genes[,c("external_gene_id", "chromosome_name", "start_position","end_position")]
+genes <- genes[,c("external_gene_name", "chromosome_name", "start_position","end_position")]
 colnames(genes) <- c("GeneSymbol","Chr","Start","End")
 genes_GR <- makeGRangesFromDataFrame(genes,keep.extra.columns = TRUE)
 save(genes_GR,genes,file = "genes_GR.rda", compress = "xz")
@@ -897,8 +913,7 @@ data(genes_GR) # downloaded in the previous step (available in TCGAWorkflowData)
 
 load(paste0(cancer,"_CNV_results.rda"))
 sCNV <- RecCNV[RecCNV[,"q-value"] <= threshold,c(1:4,6)]
-sCNV <- sCNV[order(sCNV[,3]),]
-sCNV <- sCNV[order(sCNV[,1]),]
+sCNV <- sCNV[order(sCNV$Chromosome,sCNV$`Region Start [bp]`),]
 colnames(sCNV) <- c("Chr","Aberration","Start","End","q-value")
 sCNV_GR <- makeGRangesFromDataFrame(sCNV,keep.extra.columns = TRUE)
 
@@ -1835,6 +1850,7 @@ dev.off()
 
 
 ### Motif analysis 
+
 Motif discovery is the attempt to extract small sequence signals hidden
 within largely non-functional intergenic sequences. These small sequence
 nucleotide signals (6-15 bp) might have a biological significance as
