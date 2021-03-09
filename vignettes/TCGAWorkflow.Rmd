@@ -52,8 +52,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
   
-  
-  
+<style> body { width: 100%; text-align: justify} </style>
+
 ```{r setup, include=FALSE, echo=F, warning= F, message=F}
 knitr::opts_chunk$set(
   message = FALSE, 
