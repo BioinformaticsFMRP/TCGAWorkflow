@@ -390,10 +390,15 @@ query.met.lgg <- GDCquery(
   barcode = c("TCGA-HT-7879-01A-11D-2399-05", "TCGA-HT-8113-01A-11D-2399-05")
 )
 GDCdownload(query.met.lgg)
-met.lgg.450 <- GDCprepare(query = query.met.lgg,
-                          save = TRUE, 
-                          save.filename = "lggDNAmet450k.rda",
-                          summarizedExperiment = TRUE)
+met.lgg.450 <- GDCprepare(
+  query = query.met.lgg,
+  save = TRUE, 
+  save.filename = "lggDNAmet450k.rda",
+  summarizedExperiment = TRUE
+)
+
+met.lgg.450$days_to_death <- NA
+met.lgg.450$year_of_death <- NA
 met.gbm.lgg <- SummarizedExperiment::cbind(met.lgg.450, met.gbm.450)
 
 
@@ -445,6 +450,7 @@ query <- GDCquery(
 GDCdownload(query)
 data <- GDCprepare(query)
 ```
+
 If a [SummarizedExperiment object](http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html) was chosen, the data can be accessed
 with three different accessors: *assay* for the data information,
 *rowRanges* to gets the range of values in each row and *colData* to get
