@@ -1667,7 +1667,7 @@ probes <- keepStandardChromosomes(rowRanges(met)[rownames(dmc)[dmc$status %in% c
 attributes(probes)$type <- "start_site"
 attributes(probes)$downstream <- 3000
 attributes(probes)$upstream <- 3000
-probes <- GenomicRanges::resize(probes,6000,fix = "center") 
+probes <- GenomicRanges::resize(probes,6001,fix = "center") 
 
 ### Profile of ChIP peaks binding to TSS regions
 # First of all, to calculate the profile of ChIP peaks binding to TSS regions, we should
