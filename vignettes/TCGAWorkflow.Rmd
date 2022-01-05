@@ -1658,7 +1658,7 @@ hypermethylated regions, (listing below). The
 enrichment heatmap and the average profile of peaks binding to those
 regions.
 
-```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE}
+```{r getTagMatrix, results='hide', echo=TRUE, message=FALSE,warning=FALSE}
 data(histoneMarks)
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- keepStandardChromosomes(rowRanges(met)[rownames(dmc)[dmc$status %in% c("Hypermethylated in TCGA-GBM", "Hypomethylated in TCGA-GBM")],])
@@ -1683,7 +1683,7 @@ names(tagMatrixList) <- c("H3K4me1","H3K4me3", "H3K9ac", "H3K9me3", "H3K27ac",  
 
 To plot the enrichment heatmap use the function `tagHeatmap`
 
-```{R, eval=FALSE, include=TRUE}
+```{R tagHeatmap, eval=FALSE, include=TRUE}
 tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
@@ -1692,7 +1692,7 @@ tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
 ```
 
 To plot the  average profile of peaks binding to those region use `plotAvgProf`:
-```{R, eval=FALSE, include=TRUE}
+```{R plotAvgProf, eval=FALSE, include=TRUE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
 p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
@@ -1818,7 +1818,7 @@ included in [ELMER.data](https://github.com/tiagochst/ELMER.data) package, popul
 To limit ELMER to the analysis of distal elements, probes located in regions of $\pm2 kb$ around transcription start sites (TSSs) were removed. The distal elements are retrieved using the *get.feature.probe* function.
 
 
-```{r, message = FALSE,warning = FALSE}
+```{r elmer, message = FALSE,warning = FALSE}
 library(ELMER)
 library(MultiAssayExperiment)
 library(GenomicRanges)
