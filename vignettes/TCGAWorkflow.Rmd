@@ -1663,12 +1663,11 @@ data(histoneMarks)
 # Create a GR object based on the hypo/hypermethylated probes.
 probes <- keepStandardChromosomes(rowRanges(met)[rownames(dmc)[dmc$status %in% c("Hypermethylated in TCGA-GBM", "Hypomethylated in TCGA-GBM")],])
 # Defining a window of 3kbp - 3kbp_probe_3kbp
-ranges(probes) <- IRanges(start = c(start(ranges(probes)) - 3000), end = c(start(ranges(probes)) + 3000))
 # to make it work with ChIPseeker package version "1.31.3.900"
 attributes(probes)$type <- "start_site"
 attributes(probes)$downstream <- 3000
 attributes(probes)$upstream <- 3000
-probes <- GenomicRanges::resize(probes,2) # increase Granges size to work with ChIPseeker package
+probes <- GenomicRanges::resize(probes,6000,fix = "center") 
 
 ### Profile of ChIP peaks binding to TSS regions
 # First of all, to calculate the profile of ChIP peaks binding to TSS regions, we should
