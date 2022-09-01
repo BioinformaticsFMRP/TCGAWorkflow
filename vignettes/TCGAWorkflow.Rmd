@@ -1419,13 +1419,13 @@ probes <- rownames(dmc)[grep("hypo|hyper",dmc$status,ignore.case = TRUE)]
 sig.met <- met[probes,]
 
 
-# top annotation, which sampples are LGG and GBM
+# top annotation, which samples are LGG and GBM
 # We will add clinical data as annotation of the samples
 # we will sort the clinical data to have the same order of the DNA methylation matrix
-clinical.order <- clinical[match(substr(colnames(sig.met),1,12),clinical$bcr_patient_barcode),]
+clinical.ordered <- clinical[match(substr(colnames(sig.met),1,12),clinical$bcr_patient_barcode),]
 
 ta <- HeatmapAnnotation(
-  df = clinical.order[, c("disease", "gender", "vital_status", "race")],
+  df = clinical.ordered[, c("primary_diagnosis", "gender", "vital_status", "race")],
   col = list(
     disease = c("LGG" = "grey", "GBM" = "black"),
     gender = c("male" = "blue", "female" = "pink")
