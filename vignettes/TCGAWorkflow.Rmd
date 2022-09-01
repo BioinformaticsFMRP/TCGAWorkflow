@@ -775,7 +775,7 @@ lgg_clin <- GDCquery_clinic(project = "TCGA-LGG", type = "Clinical")
 # Bind the results, as the columns might not be the same,
 # we will will plyr rbind.fill, to have all columns from both files
 clinical <- plyr::rbind.fill(gbm_clin,lgg_clin)
-colnames(clinical)[1] <- "Tumor_Sample_Barcode"
+colnames(clinical)[grep("submitter_id",colnames(clinical))] <- "Tumor_Sample_Barcode"
 
 # we need to create a binary variable 1 is dead 0 is not dead
 plyr::count(clinical$vital_status)
@@ -788,7 +788,11 @@ clinical$time <- clinical$days_to_death
 clinical$time[is.na(clinical$days_to_death)] <- clinical$days_to_last_follow_up[is.na(clinical$days_to_death)]
 
 # Create object to use in maftools
-maf <- read.maf(maf = mut, clinicalData = clinical, isTCGA = TRUE)
+maf <- read.maf(
+  maf = mut, 
+  clinicalData = clinical, 
+  isTCGA = TRUE
+)
 ```
 
 We can plot a MAF summary.
