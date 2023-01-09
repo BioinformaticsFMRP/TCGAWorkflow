@@ -1334,7 +1334,7 @@ ggpubr::ggboxplot(
   x = "groups",
   color = "groups",
   add = "jitter",
-  ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
+  ylab = "Mean DNA methylation (beta-values)",
   xlab = ""
 ) + stat_compare_means() 
 ```
