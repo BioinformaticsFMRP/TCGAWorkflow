@@ -366,32 +366,32 @@ vignette](https://www.bioconductor.org/packages/3.3/bioc/vignettes/TCGAbiolinks/
 ```{R, eval=FALSE, include=TRUE}
 library(TCGAbiolinks)
 # Obs: The data in the legacy database has been aligned to hg19
-query.met.gbm <- GDCquery(
+query_met.gbm <- GDCquery(
   project = "TCGA-GBM", 
   legacy = TRUE,
   data.category = "DNA methylation",
   platform = "Illumina Human Methylation 450", 
   barcode = c("TCGA-76-4926-01B-01D-1481-05", "TCGA-28-5211-01C-11D-1844-05")
 )
-GDCdownload(query.met.gbm)
+GDCdownload(query_met.gbm)
 
 met.gbm.450 <- GDCprepare(
-  query = query.met.gbm,
+  query = query_met.gbm,
   save = TRUE, 
   save.filename = "gbmDNAmet450k.rda",
   summarizedExperiment = TRUE
 )
 
-query.met.lgg <- GDCquery(
+query_met.lgg <- GDCquery(
   project = "TCGA-LGG", 
   legacy = TRUE,
   data.category = "DNA methylation",
   platform = "Illumina Human Methylation 450",
   barcode = c("TCGA-HT-7879-01A-11D-2399-05", "TCGA-HT-8113-01A-11D-2399-05")
 )
-GDCdownload(query.met.lgg)
+GDCdownload(query_met.lgg)
 met.lgg.450 <- GDCprepare(
-  query = query.met.lgg,
+  query = query_met.lgg,
   save = TRUE, 
   save.filename = "lggDNAmet450k.rda",
   summarizedExperiment = TRUE
@@ -402,7 +402,7 @@ met.lgg.450$year_of_death <- NA
 met.gbm.lgg <- SummarizedExperiment::cbind(met.lgg.450, met.gbm.450)
 
 
-query.exp.lgg <- GDCquery(
+query_exp.lgg <- GDCquery(
   project = "TCGA-LGG", 
   legacy = TRUE,
   data.category = "Gene expression",
@@ -411,10 +411,10 @@ query.exp.lgg <- GDCquery(
   file.type = "results",
   sample.type = "Primary solid Tumor"
 )
-GDCdownload(query.exp.lgg)
-exp.lgg <- GDCprepare(query = query.exp.lgg, save = TRUE, save.filename = "lggExp.rda")
+GDCdownload(query_exp.lgg)
+exp.lgg <- GDCprepare(query = query_exp.lgg, save = TRUE, save.filename = "lggExp.rda")
 
-query.exp.gbm <- GDCquery(
+query_exp.gbm <- GDCquery(
   project = "TCGA-GBM", 
   legacy = TRUE,
   data.category = "Gene expression",
@@ -423,8 +423,8 @@ query.exp.gbm <- GDCquery(
   file.type = "results",
   sample.type = "Primary solid Tumor"
 )
-GDCdownload(query.exp.gbm)
-exp.gbm <- GDCprepare(query = query.exp.gbm, save = TRUE, save.filename = "gbmExp.rda")
+GDCdownload(query_exp.gbm)
+exp.gbm <- GDCprepare(query = query_exp.gbm, save = TRUE, save.filename = "gbmExp.rda")
 exp.gbm.lgg <- SummarizedExperiment::cbind(exp.lgg, exp.gbm)
 ```
 
@@ -1687,33 +1687,42 @@ names(tagMatrixList) <- c("H3K4me1","H3K4me3", "H3K9ac", "H3K9me3", "H3K27ac",  
 To plot the enrichment heatmap use the function `tagHeatmap`
 
 ```{R tagHeatmap, eval=FALSE, include=TRUE}
-tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
+tagHeatmap(tagMatrixList)
 ```
 
-```{r results='asis', echo=FALSE, fig.width = 7, message=FALSE,warning=FALSE}
-tagHeatmap(tagMatrixList, xlim=c(-3000, 3000),color = NULL)
+```{r results='asis', echo=FALSE, fig.width = 20, message=FALSE,warning=FALSE}
+tagHeatmap(tagMatrixList)
 ```
 
 To plot the  average profile of peaks binding to those region use `plotAvgProf`:
 ```{R plotAvgProf, eval=FALSE, include=TRUE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
-p <- p + scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),labels=c(-3000,-1500,"CpG",1500,3000))
+p <- p + scale_x_continuous(
+  breaks = c(-3000,-1500,0,1500,3000),
+  labels = c(-3000,-1500,"CpG",1500,3000)
+)
+
 library(ggthemes)
-p + theme_few() + scale_colour_few(name="Histone marks") +  guides(colour = guide_legend(override.aes = list(size=4)))
+p + theme_few() + scale_colour_few(name = "Histone marks") +  guides(colour = guide_legend(override.aes = list(size=4)))
 ```
 
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE}
 p <- plotAvgProf(tagMatrixList, xlim = c(-3000,3000), xlab = "Genomic Region (5'->3', centered on CpG)")
 # We are centreing in the CpG instead of the TSS. So we'll change the labels manually
-if (requireNamespace("ggplot2", quietly = TRUE)) 
-  p <- p + ggplot2::scale_x_continuous(breaks=c(-3000,-1500,0,1500,3000),
-                                       labels=c(-3000,-1500,"CpG",1500,3000))
 
-if (requireNamespace("ggthemes", quietly = TRUE)) 
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  p <- p + ggplot2::scale_x_continuous(
+    breaks = c(-3000,-1500,0,1500,3000),
+    labels = c(-3000,-1500,"CpG",1500,3000)
+  )
+}
+
+if (requireNamespace("ggthemes", quietly = TRUE)){ 
   p + ggthemes::theme_few() + 
-  ggthemes::scale_colour_few(name="Histone marks") + 
-  ggplot2::guides(colour = guide_legend(override.aes = list(size=4)))
+    ggthemes::scale_colour_few(name="Histone marks") + 
+    ggplot2::guides(colour = guide_legend(override.aes = list(size=4)))
+}
 ```
 
 The hypomethylated and hypermethylated regions are enriched for H3K4me3,
@@ -1788,21 +1797,21 @@ samples <- c(lgg.samples,gbm.samples)
 #-----------------------------------
 # 1 - Methylation
 # ----------------------------------
-query.met <- GDCquery(
+query_met <- GDCquery(
   project = c("TCGA-LGG","TCGA-GBM"),
   data.category = "DNA methylation",
   platform = "Illumina Human Methylation 450",
   legacy = TRUE, 
   barcode = samples
 )
-GDCdownload(query.met)
-met <- GDCprepare(query.met, save = FALSE)
+GDCdownload(query_met)
+met <- GDCprepare(query_met, save = FALSE)
 met <- subset(met,subset = as.character(GenomicRanges::seqnames(met)) %in% c("chr9"))
 
 #-----------------------------------
 # 2 - Expression
 # ----------------------------------
-query.exp <- GDCquery(
+query_exp <- GDCquery(
   project = c("TCGA-LGG","TCGA-GBM"),
   data.category = "Gene expression",
   data.type = "Gene expression quantification",
@@ -1811,8 +1820,8 @@ query.exp <- GDCquery(
   legacy = TRUE, 
   barcode =  samples
 )
-GDCdownload(query.exp)
-exp <- GDCprepare(query.exp, save = FALSE)
+GDCdownload(query_exp)
+exp <- GDCprepare(query_exp, save = FALSE)
 save(exp, met, gbm.samples, lgg.samples, file = "elmer.example.rda", compress = "xz")
 ```
 
