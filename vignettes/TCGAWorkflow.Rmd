@@ -1449,7 +1449,7 @@ ra = rowAnnotation(
 heatmap  <- Heatmap(
   matrix = assay(sig.met),
   name = "DNA methylation",
-  col = matlab::jet.colors(200),
+  col = viridisLite::turbo(200),
   show_row_names = FALSE,
   cluster_rows = TRUE,
   cluster_columns = FALSE,
