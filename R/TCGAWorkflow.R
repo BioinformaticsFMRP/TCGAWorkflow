@@ -34,5 +34,5 @@
 #' @importFrom AnnotationHub query AnnotationHub
 #' @importFrom clusterProfiler bitr
 #' @import gt DT BSgenome.Hsapiens.UCSC.hg19 GenomicRanges RTCGAToolbox ggpubr
-#' @import MultiAssayExperiment dplyr stringr matlab
+#' @import MultiAssayExperiment dplyr stringr matlab plyr
 NULL
