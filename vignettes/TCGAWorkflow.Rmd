@@ -69,13 +69,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE,message=FALSE}
-suppressPackageStartupMessages({
-  if("TCGAWorkflow" %in% installed.packages()[,1]) {
-    library(TCGAWorkflow)
-  } else {
-    devtools::load_all(".")
-  }
-})
+library(TCGAWorkflow)
 ```
 
 
@@ -1470,8 +1464,10 @@ ra = rowAnnotation(
   df = dmc[probes, status.col],
   col = list(
     "status.TCGA.GBM.TCGA.LGG" =
-      c("Hypomethylated" = "orange",
-        "Hypermethylated" = "darkgreen")
+      c(
+        "Hypomethylated" = "orange",
+        "Hypermethylated" = "darkgreen"
+      )
   ),
   width = unit(1, "cm")
 )
@@ -2088,8 +2084,6 @@ motif.enrichment %>% head %>% gt::gt()
 
 ### Identification of master regulator TFs
 
-
-
 When a group of enhancers is coordinately altered in a specific sample subset, this is often the result of an altered upstream *master regulator* transcription factor in the gene regulatory network. *ELMER* tries to identify such transcription factors corresponding to each of the TF binding motifs enriched from the previous analysis step.
 For each enriched motif, *ELMER* takes the average DNA methylation of all distal probes (in significant probe-gene pairs) that contain that motif occurrence (within a $\pm 250bp$ region) and compares this average DNA methylation to the expression of each gene annotated as a human TF.
 
@@ -2149,12 +2143,16 @@ The output of this step is a data frame with the following columns:
 
 
 ```{r, warning=FALSE} 
-datatable(TF, 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
-datatable(TF.meth.cor[1:10,1:6], 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+datatable(
+  TF, 
+  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+  rownames = FALSE
+)
+datatable(
+  TF.meth.cor[1:10,1:6], 
+  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+  rownames = TRUE
+)
 ```
 
 ### ELMER visualization functions
@@ -2207,6 +2205,7 @@ are highlighted. The dashed line represents the top 5% of all TF.
 ```{R, eval=FALSE, include=TRUE}
 grid:TF.rank.plot(motif.pvalue=TF.meth.cor, motif=TF$motif[1], save=FALSE)
 ```	
+
 ```{r results='asis', echo=FALSE, message=FALSE,warning=FALSE,  fig.align='center',fig.height=8,fig.width=8}
 gg <- TF.rank.plot(motif.pvalue = TF.meth.cor, motif=TF$motif[1], save=FALSE)
 grid::grid.draw(gg[[1]])

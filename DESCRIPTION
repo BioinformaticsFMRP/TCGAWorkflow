@@ -1,7 +1,7 @@
 Package: TCGAWorkflow
 Title: TCGA Workflow Analyze cancer genomics and epigenomics data using
     Bioconductor packages
-Version: 1.25.1
+Version: 1.25.2
 Workflow: True
 Author: Tiago Chedraoui Silva  <tiagochst@gmail.com>,
     Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
@@ -45,7 +45,6 @@ Imports:
     circlize,
     c3net,
     ChIPseeker,
-    rmarkdown,
     ComplexHeatmap,
     ggpubr,
     clusterProfiler,
@@ -64,7 +63,11 @@ Imports:
     pander,
     maftools,
     RTCGAToolbox,
+    stringr,
     SummarizedExperiment,
+    dplyr,
+    matlab,
+    MultiAssayExperiment,
     TCGAbiolinks,
     TCGAWorkflowData (>= 1.25.3),
     DT,
