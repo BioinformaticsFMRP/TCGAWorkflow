@@ -66,6 +66,7 @@ Imports:
     stringr,
     SummarizedExperiment,
     dplyr,
+    plyr,
     matlab,
     MultiAssayExperiment,
     TCGAbiolinks,
@@ -78,4 +79,4 @@ biocViews: Workflow, ResourceQueryingWorkflow
 NeedsCompilation: no
 URL: https://f1000research.com/articles/5-1542/v2
 BugReports: https://github.com/BioinformaticsFMRP/TCGAWorkflow/issues
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
